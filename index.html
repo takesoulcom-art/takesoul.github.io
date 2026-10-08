@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Home</title>
+<title>takesoul</title>
 <style>
 :root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#999;--line:#bbb;--dot:#5b95e8;--sel:#cfe0fb;--logo:#a00014}
 @media(prefers-color-scheme:dark){:root{--bg:#141414;--ink:#ddd;--mid:#999;--lo:#666;--line:#444;--sel:#26456f}}
@@ -63,7 +63,7 @@ aside{order:2}
 <body>
 <div class="wrap">
 <header>
-  <div id="logo"><img src="logo.gif" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
+  <div id="logo"><img src="logo.png" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
@@ -82,7 +82,7 @@ aside{order:2}
 // ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
 const CFG={owner:'',repo:'',branch:'',pw:'janners'};
 const O=CFG.owner||location.hostname.split('.')[0];
-const R=CFG.repo||(location.pathname.split('/')[1]&&!location.pathname.split('/')[1].includes('.')?location.pathname.split('/')[1]:O+'.github.io');
+const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:sessionStorage.gk||'',admin:!!sessionStorage.gk,editTags:false,mOpen:false,cur:-1,playing:false,draft:null};
