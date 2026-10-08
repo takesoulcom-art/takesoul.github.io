@@ -63,7 +63,7 @@ aside{order:2}
 <body>
 <div class="wrap">
 <header>
-  <div id="logo"><img src="logo.png" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
+  <div id="logo"><img src="logo.gif" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
@@ -80,7 +80,7 @@ aside{order:2}
 <audio id="au"></audio>
 <script>
 // ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
-const CFG={owner:'',repo:'',branch:'',pw:'janners'};
+const CFG={owner:'takesoulcom-art',repo:'takesoul.github.io',branch:'',pw:'janners'};
 const O=CFG.owner||location.hostname.split('.')[0];
 const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
