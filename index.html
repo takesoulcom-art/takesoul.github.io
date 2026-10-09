@@ -10,11 +10,12 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 "Noto Sans KR",system-ui,sans-serif}
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
+input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
 input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
 .wrap{max-width:1100px;margin:24px auto;padding:0 20px}
 header{display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
 #logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
-#logo img{height:28px;display:block}
+#logo img{height:70px;display:block}
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
 #music button{color:var(--ink)}
 #menu{font-size:20px;color:var(--mid)}
@@ -224,7 +225,7 @@ document.addEventListener('click',async e=>{
   else if(a=='next')go(S.y,S.m+1);
   else if(a=='day'){pick({date:v});S.pid=null;render()}
   else if(a=='tag'){pick({tag:v});render()}
-  else if(a=='open'){S.pid=+v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date}renderArt();renderCal()}
+  else if(a=='open'){S.pid=+v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal()}
   else if(a=='new'){S.draft={date:new Date().toISOString().slice(0,10),title:'',body:'',tags:[],hidden:false};S.mode='edit';renderArt()}
   else if(a=='edit'){S.draft={...S.posts.find(x=>x.id==S.pid)};S.mode='edit';renderArt()}
   else if(a=='cancel'){S.mode='view';renderArt()}
