@@ -3,7 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>takesoul</title>
+<title>.& takesoul</title>
+<meta name="description" content="변재신(takesoul, janners)의 개인 홈페이지. 일상과 생각, 사진, 음악을 기록합니다.">
+<meta name="keywords" content="변재신, takesoul, janners">
+<meta name="author" content="변재신">
+<link rel="canonical" href="https://takesoulcom-art.github.io/takesoul.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="takesoul - 변재신">
+<meta property="og:description" content="변재신(takesoul, janners)의 개인 홈페이지.">
+<meta property="og:url" content="https://takesoulcom-art.github.io/takesoul.github.io/">
+<meta property="og:locale" content="ko_KR">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoulcom-art.github.io/takesoul.github.io/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
 <script>try{document.documentElement.dataset.tone=localStorage.tone||"white"}catch(e){}</script>
 <style>
 :root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#999;--line:#bbb;--dot:#5b95e8;--sel:#cfe0fb;--logo:#a00014}
@@ -26,8 +36,10 @@ input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
 .wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
 #logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
-#logo img{height:27px;display:block}
-#logo[data-t]::before{content:attr(data-t)}
+#logo img{height:70px;display:block}
+#logo a{display:block;color:inherit;text-decoration:none}
+#logo a[data-t]::before{content:attr(data-t)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
 #music button{color:var(--ink)}
 #menu{font-size:20px;color:var(--mid)}
@@ -79,8 +91,9 @@ aside{order:2}
 </head>
 <body>
 <div class="wrap">
+<h1 class="sr">takesoul · 변재신 · janners</h1>
 <header>
-  <div id="logo"><img id="logoimg" alt="LOGO"></div>
+  <div id="logo"><a href="./" data-a="home"><img id="logoimg" alt="LOGO"></a></div>
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
@@ -96,7 +109,7 @@ aside{order:2}
 <audio id="au"></audio>
 <script>
 // ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
-const CFG={owner:'',repo:'',branch:'',pw:'janners'};
+const CFG={owner:'',repo:'',branch:'',gate:'eb58deb26c6708ffd17ef704ea31045c177fccba638f133d70545847a708ac88'};
 const O=CFG.owner||location.hostname.split('.')[0];
 const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
@@ -269,6 +282,7 @@ document.addEventListener('click',async e=>{
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
   else if(a=='sy')go(+v,S.m);
   else if(a=='sm')go(S.y,+v);
+  else if(a=='home'){e.preventDefault();const v=vis()[0];Object.assign(S,{tag:null,pid:v?v.id:null,date:v?v.date:null,mode:'view',modal:null});const d=v?new Date(v.date+'T00:00'):new Date();S.y=d.getFullYear();S.m=d.getMonth();render();renderModal()}
   else if(a=='prev')go(S.y,S.m-1);
   else if(a=='next')go(S.y,S.m+1);
   else if(a=='day'){pick({date:v});S.pid=null;render()}
@@ -334,10 +348,11 @@ document.addEventListener('change',async e=>{
 });
 
 const msg=t=>{let m=$('#amsg');if(!m){m=document.createElement('span');m.id='amsg';m.style.color='var(--logo)';$('#mbox').appendChild(m)}m.textContent=t};
+const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 async function authStep(){
   const pw=$('#pw'),gk=$('#gk');
   if(pw){
-    if(pw.value.trim()!==CFG.pw){msg('코드가 맞지 않습니다.');return}
+    if(await sha(pw.value.trim())!==CFG.gate){msg('코드가 맞지 않습니다.');return}
     $('#krow').innerHTML='<span>관리자 모드</span><input id="gk" type="password" placeholder="GitHub 키(토큰)" autocomplete="off"><button data-a="authok">[확인]</button>';$('#gk').focus();
   }else if(gk){
     const k=gk.value.replace(/\s/g,'');
@@ -356,7 +371,7 @@ document.addEventListener('keydown',e=>{if(e.key=='Escape'&&S.modal){S.modal=nul
 document.addEventListener('click',e=>{if(e.target.closest('[data-a="authok"]'))authStep();if(e.target.id=='modal'){S.modal=null;renderModal()}});
 
 function setLogo(){
-  const i=$('#logoimg'),L=$('#logo'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
+  const i=$('#logoimg'),L=$('#logo a'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
   delete L.dataset.t;i.style.display='';
   i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='LOGO'}};
   i.src=f;
