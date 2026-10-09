@@ -3,10 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>takesoul</title>
+<title>Home</title>
 <style>
 :root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#999;--line:#bbb;--dot:#5b95e8;--sel:#cfe0fb;--logo:#a00014}
-@media(prefers-color-scheme:dark){:root{--bg:#141414;--ink:#ddd;--mid:#999;--lo:#666;--line:#444;--sel:#26456f}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 "Noto Sans KR",system-ui,sans-serif}
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
@@ -63,7 +62,7 @@ aside{order:2}
 <body>
 <div class="wrap">
 <header>
-  <div id="logo"><img src="logo.gif" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
+  <div id="logo"><img src="logo.png" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
@@ -80,7 +79,7 @@ aside{order:2}
 <audio id="au"></audio>
 <script>
 // ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
-const CFG={owner:'takesoulcom-art',repo:'takesoul.github.io',branch:'',pw:'janners'};
+const CFG={owner:'',repo:'',branch:'',pw:'janners'};
 const O=CFG.owner||location.hostname.split('.')[0];
 const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
