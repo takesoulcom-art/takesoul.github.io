@@ -421,7 +421,11 @@ function setLogo(){
 }
 setLogo();
 // ---- Google Analytics (측정 ID를 넣으면 켜집니다. 예: 'G-XXXXXXXXXX') ----
-
+const GA_ID='';
+if(GA_ID&&!sessionStorage.gk){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',GA_ID,{send_page_view:false});
+  const g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;document.head.appendChild(g)}
+const track=p=>{if(window.gtag&&S.lt!=p.id){S.lt=p.id;gtag('event','page_view',{page_title:p.title,page_location:location.origin+location.pathname+'?p='+p.id})}};
+// ---- 시작 ----
 (async()=>{
   await reload();
   const hv=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden)),v=hv||vis()[0],d=v?new Date(v.date+'T00:00'):new Date();
