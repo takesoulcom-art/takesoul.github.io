@@ -106,7 +106,7 @@ const au=$('#au');
 const WD=['일','월','화','수','목','금','토'];
 
 // ---- GitHub API ----
-const api=(p,o={})=>fetch(`https://api.github.com/repos/${O}/${R}/contents/${p}`+(CFG.branch&&!o.method?`?ref=${CFG.branch}`:''),{...o,headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'}});
+const api=(p,o={})=>fetch(`https://api.github.com/repos/${O}/${R}/contents/${p}`+(CFG.branch&&!o.method?`?ref=${CFG.branch}`:''),{...o,headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'},cache:'no-store'});
 const b64=s=>btoa(unescape(encodeURIComponent(s)));
 async function put(p,content){ // content: base64
   const g=await api(p);const sha=g.ok?(await g.json()).sha:undefined;
@@ -122,7 +122,7 @@ const savePosts=()=>saveJSON('data/posts.json',S.posts);
 const saveTags=()=>saveJSON('data/tags.json',S.tags);
 const saveMusic=()=>saveJSON('data/music.json',S.music);
 const load=async(f,d)=>{
-  if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'}});if(r.ok)return JSON.parse(await r.text());if(r.status==404)return d}catch(e){}}
+  if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok)return JSON.parse(await r.text());if(r.status==404)return d}catch(e){}}
   try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
 };
 const reload=async()=>{[S.posts,S.tags,S.music]=await Promise.all([load('data/posts.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])])};
@@ -168,7 +168,7 @@ function renderTags(){
   $('#tags').innerHTML=h||'<h4>Tags</h4>';
 }
 S.blob={};S.up=[];
-async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'}});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
+async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
 const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
 const purge=async c=>{const used=new Set(S.posts.flatMap(p=>imgsOf(p.body)));for(const p of new Set(c))if(!used.has(p))await del(p).catch(()=>{})};
 function body(t){
@@ -233,7 +233,7 @@ function playIdx(i){
 }
 au.onended=()=>playIdx(S.cur+1);
 au.onerror=async()=>{const f=S.music[S.cur]&&S.music[S.cur].file;
-  if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'}});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
+  if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
   S.playing=false;renderMusic()};
 
 const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date').value,title:g('e-title').value,body:g('e-body').value,tags:g('e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:g('e-hid').checked})};
