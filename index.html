@@ -9,7 +9,7 @@
 <meta name="author" content="변재신">
 <link rel="canonical" href="https://takesoulcom-art.github.io/takesoul.github.io/">
 <meta property="og:type" content="website">
-<meta property="og:title" content=".& takesoul">
+<meta property="og:title" content="takesoul - 변재신">
 <meta property="og:description" content="변재신, takesoul, janners">
 <meta property="og:url" content="https://takesoulcom-art.github.io/takesoul.github.io/">
 <meta property="og:locale" content="ko_KR">
@@ -54,7 +54,12 @@ aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 .cal-h{display:flex;align-items:center;justify-content:space-between;font-size:16px;letter-spacing:1px}
 .cal-h{display:block}
 .ch{display:flex;align-items:center;justify-content:space-between}
+.ch{padding-right:12px}
+.ch>span{display:flex;align-items:center}
+.ch>span:first-child{margin-left:-8px;gap:6px}
 .ch button{font-size:16px;letter-spacing:1px}
+.ch [data-a=py],.ch [data-a=pm]{padding:10px 10px}
+.ch [data-a=prev],.ch [data-a=next]{font-size:26px;line-height:1;padding:6px 16px;letter-spacing:0}
 .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
 .pk button{padding:4px 0;color:var(--mid)}
 .pk .on{color:var(--ink);background:var(--sel)}
@@ -161,7 +166,7 @@ function renderCal(){
   const pk=S.pick=='y'?`<div class="pk">${yrs.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`
     :S.pick=='m'?`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`:'';
   $('#calh').innerHTML=`<div class="ch"><span><button data-a="py">${S.y}</button> <button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
-  <span><button data-a="prev">‹</button>&nbsp;&nbsp;<button data-a="next">›</button></span></div>${pk}`;
+  <span><button data-a="prev">‹</button><button data-a="next">›</button></span></div>${pk}`;
   const first=new Date(S.y,S.m,1).getDay(),n=new Date(S.y,S.m+1,0).getDate();
   let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>`<div class="w">${w}</div>`).join('');
   for(let i=0;i<first;i++)h+='<div></div>';
