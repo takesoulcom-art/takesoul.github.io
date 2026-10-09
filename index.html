@@ -26,7 +26,7 @@ input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
 .wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
 #logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
-#logo img{height:27px;display:block}
+#logo img{height:70px;display:block}
 #logo[data-t]::before{content:attr(data-t)}
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
 #music button{color:var(--ink)}
@@ -121,7 +121,11 @@ const saveJSON=(p,o)=>put(p,b64(JSON.stringify(o,null,1)));
 const savePosts=()=>saveJSON('data/posts.json',S.posts);
 const saveTags=()=>saveJSON('data/tags.json',S.tags);
 const saveMusic=()=>saveJSON('data/music.json',S.music);
-const load=async(f,d)=>{try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}};
+const load=async(f,d)=>{
+  if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'}});if(r.ok)return JSON.parse(await r.text());if(r.status==404)return d}catch(e){}}
+  try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
+};
+const reload=async()=>{[S.posts,S.tags,S.music]=await Promise.all([load('data/posts.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])])};
 const busy=async fn=>{try{await fn()}catch(e){alert('저장 실패: '+e.message)}};
 
 // ---- 데이터 계산 ----
@@ -163,8 +167,12 @@ function renderTags(){
     :`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('');
   $('#tags').innerHTML=h||'<h4>Tags</h4>';
 }
+S.blob={};S.up=[];
+async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'}});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
+const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
+const purge=async c=>{const used=new Set(S.posts.flatMap(p=>imgsOf(p.body)));for(const p of new Set(c))if(!used.has(p))await del(p).catch(()=>{})};
 function body(t){
-  return esc(t).replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img src="${u}" alt="${a}">`);
+  return esc(t).replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img src="${S.blob[u]||u}" data-p="${u}" alt="${a}" onerror="imgFix(this)">`);
 }
 function renderArt(){
   const a=$('#art');
@@ -176,7 +184,7 @@ function renderArt(){
       <input id="e-title" placeholder="제목" value="${esc(d.title)}">
       <input id="e-tags" placeholder="Tags (쉼표로 구분, 예: 일상, 생각)" value="${esc((d.tags||[]).join(', '))}">
       <textarea id="e-body" placeholder="본문">${esc(d.body)}</textarea>
-      <div><button data-a="imgs">[이미지 ${imgs.length}]</button></div>
+      <div><button data-a="imgs">[이미지 관리 (${imgs.length})]</button></div>
       <label><input type="checkbox" id="e-hid" style="width:auto" ${d.hidden?'checked':''}> 숨김</label>
       <div><button data-a="save">[저장]</button> <button data-a="cancel">[취소]</button></div></div>`;
     return;
@@ -209,7 +217,7 @@ function renderMusic(){
     const t=S.music[S.cur>=0?S.cur:0].name;
     m.innerHTML=`<button data-a="mtoggle">"${esc(t)}" ♬</button><button data-a="play">${S.playing?'■':'▶'}</button><button data-a="nextm">▶|</button>`;
   }
-  if(S.modal=='music')renderModal();
+  if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
 }
 function musicHTML(){
   return S.music.map((t,i)=>`<div class="row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${S.admin?`<input type="checkbox" class="mck" data-i="${i}" style="width:auto" onclick="event.stopPropagation()">`:''}${esc(t.name)}</div>`).join('')+
@@ -221,9 +229,12 @@ const render=()=>{renderCal();renderTags();renderArt();renderMusic()};
 function playIdx(i){
   if(!S.music.length)return;
   S.cur=(i+S.music.length)%S.music.length;
-  au.src=encodeURI(S.music[S.cur].file);au.play();S.playing=true;renderMusic();
+  const f=S.music[S.cur].file;au.src=S.blob[f]||encodeURI(f);au.play().catch(()=>{});S.playing=true;renderMusic();
 }
 au.onended=()=>playIdx(S.cur+1);
+au.onerror=async()=>{const f=S.music[S.cur]&&S.music[S.cur].file;
+  if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'}});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
+  S.playing=false;renderMusic()};
 
 const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date').value,title:g('e-title').value,body:g('e-body').value,tags:g('e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:g('e-hid').checked})};
 function renderModal(){
@@ -236,7 +247,7 @@ function renderModal(){
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
   else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tdone">[완료]</button></div>';
-  else if(k=='img')h='<label style="cursor:pointer">[이미지 업로드]<input type="file" id="e-img" accept="image/*" multiple class="hide"></label>'+[...S.draft.body.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)].map(m=>`<div class="row">${esc(m[1])} <button data-a="rmimg" data-v="${esc(m[0])}">x</button></div>`).join('')+`<div class="bar">${X}</div>`;
+  else if(k=='img')h='<div class="meta">x로 지운 이미지는 [저장] 시 저장소에서도 삭제됩니다</div><label style="cursor:pointer">[이미지 업로드]<input type="file" id="e-img" accept="image/*" multiple class="hide"></label>'+[...S.draft.body.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)].map(m=>`<div class="row">${esc(m[1])} <button data-a="rmimg" data-v="${esc(m[0])}">x</button></div>`).join('')+`<div class="bar">${X}</div>`;
   else if(k=='music')h=musicHTML();
   b.innerHTML=h;
   const f=b.querySelector('input:not([type=checkbox]):not([type=file])');if(f)f.focus();
@@ -245,8 +256,10 @@ function renderModal(){
 const go=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth();S.modal=null;renderCal();renderModal()};
 const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
 const mvt=(i,d)=>{const L=tagList(true).map(x=>x[0]);const j=i+d;if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];S.tags.order=L;renderModal()};
-const mvm=d=>{const ck=[...document.querySelectorAll('.mck')];const i=ck.findIndex(c=>c.checked);if(i<0)return;const j=i+d;if(j<0||j>=S.music.length)return;
-  [S.music[i],S.music[j]]=[S.music[j],S.music[i]];busy(saveMusic).then(renderMusic)};
+const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck')].findIndex(c=>c.checked);if(i<0)return;const j=i+d;if(j<0||j>=S.music.length)return;
+  S.lock=1;const cf=S.cur>=0?S.music[S.cur].file:null;
+  [S.music[i],S.music[j]]=[S.music[j],S.music[i]];if(cf)S.cur=S.music.findIndex(t=>t.file==cf);
+  await busy(saveMusic);S.lock=0;renderMusic();document.querySelectorAll('.mck').forEach((c,k)=>c.checked=k==j)};
 
 document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-a]');if(!el)return;
@@ -263,19 +276,19 @@ document.addEventListener('click',async e=>{
   else if(a=='open'){S.pid=+v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal()}
   else if(a=='new'){S.draft={date:new Date().toISOString().slice(0,10),title:'',body:'',tags:[],hidden:false};S.mode='edit';renderArt()}
   else if(a=='edit'){S.draft={...S.posts.find(x=>x.id==S.pid)};S.mode='edit';renderArt()}
-  else if(a=='cancel'){S.mode='view';renderArt()}
+  else if(a=='cancel'){await busy(()=>purge(S.up));S.up=[];S.mode='view';renderArt()}
   else if(a=='rmimg'){syncDraft();S.draft.body=S.draft.body.replace(v,'');renderArt();renderModal()}
   else if(a=='save'){
     const d={...S.draft,date:$('#e-date').value,title:$('#e-title').value.trim(),body:$('#e-body').value,
       tags:$('#e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:$('#e-hid').checked};
     if(!d.title||!d.date||!d.tags.length){alert('날짜, 제목, Tags는 필수입니다.');return}
     if(!d.id)d.id=Date.now();
-    const i=S.posts.findIndex(x=>x.id==d.id);i<0?S.posts.push(d):S.posts[i]=d;
-    await busy(savePosts);S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
+    const i=S.posts.findIndex(x=>x.id==d.id);const old=i<0?'':S.posts[i].body;i<0?S.posts.push(d):S.posts[i]=d;
+    await busy(savePosts);await busy(()=>purge([...imgsOf(old),...S.up]));S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
     const dt=new Date(d.date+'T00:00');S.y=dt.getFullYear();S.m=dt.getMonth();render();
   }
   else if(a=='delpost'){if(!confirm('이 글을 삭제할까요?'))return;
-    S.posts=S.posts.filter(x=>x.id!=S.pid);await busy(savePosts);pick({});render()}
+    const gone=imgsOf((S.posts.find(x=>x.id==S.pid)||{}).body);S.posts=S.posts.filter(x=>x.id!=S.pid);await busy(savePosts);await busy(()=>purge(gone));pick({});render()}
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tdone'){await busy(saveTags);S.modal=null;render()}
   else if(a=='tone'){document.documentElement.dataset.tone=v;try{localStorage.tone=v}catch(e){}setLogo();renderModal()}
@@ -289,10 +302,14 @@ document.addEventListener('click',async e=>{
   else if(a=='play'){if(S.playing){au.pause();S.playing=false;renderMusic()}else if(S.cur<0)playIdx(0);else{au.play();S.playing=true;renderMusic()}}
   else if(a=='nextm')playIdx(S.cur+1);
   else if(a=='song')playIdx(+v);
-  else if(a=='mdel'){const ix=[...document.querySelectorAll('.mck')].filter(c=>c.checked).map(c=>+c.dataset.i);
+  else if(a=='mdel'){if(S.lock)return;const ix=[...document.querySelectorAll('.mck')].filter(c=>c.checked).map(c=>+c.dataset.i);
     if(!ix.length||!confirm('선택한 곡을 삭제할까요?'))return;
-    await busy(async()=>{for(const i of ix)await del(S.music[i].file);S.music=S.music.filter((_,i)=>!ix.includes(i));await saveMusic()});
-    if(S.cur>=S.music.length){S.cur=-1;au.pause();S.playing=false}renderMusic()}
+    S.lock=1;const gone=ix.map(i=>S.music[i].file),cf=S.cur>=0?S.music[S.cur].file:null;
+    S.music=S.music.filter((_,i)=>!ix.includes(i));
+    await busy(async()=>{await saveMusic();for(const f of gone)await del(f).catch(()=>{})});
+    S.lock=0;
+    if(cf&&gone.includes(cf)){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}else S.cur=cf?S.music.findIndex(t=>t.file==cf):-1;
+    renderMusic()}
   else if(a=='mup')mvm(-1);
   else if(a=='mdn')mvm(1);
 });
@@ -305,12 +322,13 @@ document.addEventListener('change',async e=>{
   if(t.id=='e-img'){
     syncDraft();
     await busy(async()=>{for(const f of t.files){const p='img/'+Date.now()+'-'+f.name.replace(/[^\w.\-]/g,'_');
-      await put(p,await rd(f));S.draft.body+=`\n![${f.name.replace(/\.[^.]+$/,'')}](${p})\n`}});
+      S.blob[p]=URL.createObjectURL(f);S.up.push(p);await put(p,await rd(f));S.draft.body+=`\n![${f.name.replace(/\.[^.]+$/,'')}](${p})\n`}});
     renderArt();renderModal();
   }
   if(t.id=='m-up'){
-    await busy(async()=>{for(const f of t.files){const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
-      await put(p,await rd(f));S.music.push({name:f.name.replace(/\.[^.]+$/,''),file:p})}await saveMusic()});
+    await busy(async()=>{try{for(const f of t.files){const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
+      S.blob[p]=URL.createObjectURL(f);await put(p,await rd(f));
+      const e={name:f.name.replace(/\.[^.]+$/,''),file:p},i=S.music.findIndex(m=>m.file==p);i<0?S.music.push(e):S.music[i]=e}}finally{await saveMusic()}});
     renderMusic();
   }
 });
@@ -330,7 +348,7 @@ async function authStep(){
       if(!r.ok){msg(`실패(${r.status}): 저장소 ${O}/${R} 또는 키 권한을 확인하세요. 주소가 다르면 코드 상단 CFG에 owner/repo를 적으세요.`);return}
       const j=await r.json();
       if(j.permissions&&j.permissions.push===false){msg('이 키에는 쓰기 권한이 없습니다. (Contents: Read and write 필요)');return}
-      S.key=k;sessionStorage.gk=k;S.admin=true;S.modal=null;render();
+      S.key=k;sessionStorage.gk=k;S.admin=true;S.modal=null;await reload();render();
     }catch(err){msg('오류: '+err.message)}
   }
 }
@@ -346,7 +364,7 @@ function setLogo(){
 setLogo();
 // ---- 시작 ----
 (async()=>{
-  [S.posts,S.tags,S.music]=await Promise.all([load('data/posts.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])]);
+  await reload();
   const v=vis()[0],d=v?new Date(v.date+'T00:00'):new Date();
   S.y=d.getFullYear();S.m=d.getMonth();if(v){S.pid=v.id;S.date=v.date}
   render();
