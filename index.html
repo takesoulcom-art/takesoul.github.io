@@ -7,13 +7,13 @@
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
 <meta name="author" content="변재신">
-<link rel="canonical" href="https://takesoulcom-art.github.io/takesoul.github.io/">
+<link rel="canonical" href="https://takesoul.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="takesoul - 변재신">
 <meta property="og:description" content="변재신, takesoul, janners">
-<meta property="og:url" content="https://takesoulcom-art.github.io/takesoul.github.io/">
+<meta property="og:url" content="https://takesoul.com/">
 <meta property="og:locale" content="ko_KR">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoulcom-art.github.io/takesoul.github.io/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoul.com/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
 <script>try{document.documentElement.dataset.tone=localStorage.tone||"white"}catch(e){}</script>
 <style>
 :root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#999;--line:#bbb;--dot:#5b95e8;--sel:#cfe0fb;--logo:#a00014}
@@ -114,7 +114,7 @@ aside{order:2}
 <audio id="au"></audio>
 <script>
 // ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
-const CFG={owner:'',repo:'',branch:'',gate:'eb58deb26c6708ffd17ef704ea31045c177fccba638f133d70545847a708ac88'};
+const CFG={owner:'takesoulcom-art',repo:'takesoul.github.io',branch:'',gate:'eb58deb26c6708ffd17ef704ea31045c177fccba638f133d70545847a708ac88'};
 const O=CFG.owner||location.hostname.split('.')[0];
 const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
@@ -226,7 +226,7 @@ function renderArt(){
   S.pid=p.id;
   const fp=S.full[p.id];
   if(!fp){a.innerHTML='<div class="meta">불러오는 중…</div>';loadPost(p.id).then(()=>{if(S.pid==p.id&&S.mode=='view')renderArt()});return}
-  p={...p,body:fp.body};
+  p={...p,body:fp.body};track(p);
   const dt=new Date(p.date+'T00:00');
   a.innerHTML=(S.admin?`<div class="act"><button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button><button data-a="new">[글쓰기]</button></div>`:'')+
     `<div class="meta">${p.date.replace(/-/g,'. ')} ${WD[dt.getDay()]}요일${p.hidden?' · 숨김':''}</div><h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
@@ -382,7 +382,7 @@ async function authStep(){
       if(!r.ok){msg(`실패(${r.status}): 저장소 ${O}/${R} 또는 키 권한을 확인하세요. 주소가 다르면 코드 상단 CFG에 owner/repo를 적으세요.`);return}
       const j=await r.json();
       if(j.permissions&&j.permissions.push===false){msg('이 키에는 쓰기 권한이 없습니다. (Contents: Read and write 필요)');return}
-      S.key=k;sessionStorage.gk=k;S.admin=true;S.modal=null;await reload();render();
+      S.key=k;sessionStorage.gk=k;S.admin=true;S.modal=null;window.gtag=null;await reload();render();
     }catch(err){msg('오류: '+err.message)}
   }
 }
@@ -396,6 +396,11 @@ function setLogo(){
   i.src=f;
 }
 setLogo();
+// ---- Google Analytics (측정 ID를 넣으면 켜집니다. 예: 'G-XXXXXXXXXX') ----
+const GA_ID='';
+if(GA_ID&&!sessionStorage.gk){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',GA_ID,{send_page_view:false});
+  const g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;document.head.appendChild(g)}
+const track=p=>{if(window.gtag&&S.lt!=p.id){S.lt=p.id;gtag('event','page_view',{page_title:p.title,page_location:location.origin+location.pathname+'?p='+p.id})}};
 // ---- 시작 ----
 (async()=>{
   await reload();
