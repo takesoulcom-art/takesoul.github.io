@@ -249,7 +249,7 @@ function renderMusic(){
     m.innerHTML=S.admin?'<button data-a="mtoggle">음악 관리</button>':'';
   }else{
     const t=S.music[S.cur>=0?S.cur:0].name;
-    m.innerHTML=`<button data-a="mtoggle">♬ ${esc(t)}  </button><button data-a="play">${S.playing?'Stop':'Start'}</button><button data-a="nextm">Next</button>`;
+    m.innerHTML=`<button data-a="mtoggle">♬ ${esc(t)}  </button><button data-a="play">${S.playing?'STOP':'PLAY'}</button><button data-a="nextm">NEXT</button>`;
   }
   if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
 }
