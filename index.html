@@ -27,6 +27,7 @@ input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
 #logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
 #logo img{height:70px;display:block}
+#logo[data-t]::before{content:attr(data-t)}
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
 #music button{color:var(--ink)}
 #menu{font-size:20px;color:var(--mid)}
@@ -79,7 +80,7 @@ aside{order:2}
 <body>
 <div class="wrap">
 <header>
-  <div id="logo"><img src="logo.gif" alt="LOGO" onerror="this.replaceWith('LOGO')"></div>
+  <div id="logo"><img id="logoimg" alt="LOGO"></div>
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
@@ -277,7 +278,7 @@ document.addEventListener('click',async e=>{
     S.posts=S.posts.filter(x=>x.id!=S.pid);await busy(savePosts);pick({});render()}
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tdone'){await busy(saveTags);S.modal=null;render()}
-  else if(a=='tone'){document.documentElement.dataset.tone=v;try{localStorage.tone=v}catch(e){}renderModal()}
+  else if(a=='tone'){document.documentElement.dataset.tone=v;try{localStorage.tone=v}catch(e){}setLogo();renderModal()}
   else if(a=='kinput'){$('#krow').innerHTML='<span>관리자 모드</span><input id="pw" type="password" placeholder="관리자 코드" autocomplete="off"><button data-a="authok">[확인]</button>';$('#pw').focus()}
   else if(a=='mclose'){S.modal=null;renderModal()}
   else if(a=='imgs'){syncDraft();S.modal='img';renderModal()}
@@ -336,6 +337,13 @@ async function authStep(){
 document.addEventListener('keydown',e=>{if(e.key=='Escape'&&S.modal){S.modal=null;renderModal()}if(e.key=='Enter'&&e.target.closest('#mbox')){e.preventDefault();authStep()}});
 document.addEventListener('click',e=>{if(e.target.closest('[data-a="authok"]'))authStep();if(e.target.id=='modal'){S.modal=null;renderModal()}});
 
+function setLogo(){
+  const i=$('#logoimg'),L=$('#logo'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
+  delete L.dataset.t;i.style.display='';
+  i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='LOGO'}};
+  i.src=f;
+}
+setLogo();
 // ---- 시작 ----
 (async()=>{
   [S.posts,S.tags,S.music]=await Promise.all([load('data/posts.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])]);
