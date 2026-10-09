@@ -7,6 +7,9 @@
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
 <meta name="author" content="변재신">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://takesoul.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="takesoul - 변재신">
@@ -93,16 +96,6 @@ aside{order:2}
 #music span{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JC6PD25F8X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-JC6PD25F8X');
-</script>
-  
 </head>
 <body>
 <div class="wrap">
@@ -233,7 +226,7 @@ function renderArt(){
     p=day[0];
   }
   if(!p){a.innerHTML=acts+'<div class="meta">아직 작성된 글이 없습니다.</div>';return}
-  S.pid=p.id;
+  S.pid=p.id;setHash(p.id);
   const fp=S.full[p.id];
   if(!fp){a.innerHTML='<div class="meta">불러오는 중…</div>';loadPost(p.id).then(()=>{if(S.pid==p.id&&S.mode=='view')renderArt()});return}
   p={...p,body:fp.body};track(p);
@@ -284,6 +277,17 @@ function renderModal(){
   b.innerHTML=h;
   const f=b.querySelector('input:not([type=checkbox]):not([type=file])');if(f)f.focus();
 }
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fld=d=>JSON.stringify([d.date,d.title,d.body,(d.tags||[]).join(','),!!d.hidden]);
+const getDraft=()=>{try{return JSON.parse(localStorage.draft||'null')}catch(e){return null}};
+const dropDraft=()=>{try{localStorage.removeItem('draft')}catch(e){}};
+const dirty=()=>{if(S.mode!='edit'||!$('#e-body'))return false;syncDraft();return fld(S.draft)!=S.snap};
+const leave=()=>!dirty()||confirm('저장하지 않은 내용이 있습니다. 나갈까요?');
+const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:history.replaceState).call(history,null,'','#'+id);S.hs=1};
+window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
+document.addEventListener('input',e=>{if(S.mode=='edit'&&e.target.closest('.ed')){try{syncDraft();localStorage.draft=JSON.stringify(S.draft)}catch(x){}}});
+window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
+  Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal()});
 // ---- 이벤트 ----
 const go=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth();S.modal=null;renderCal();renderModal()};
 const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
@@ -296,6 +300,7 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
 document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-a]');if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
+  if(['day','tag','open','home'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
   if(a=='menu'){S.modal='auth';S.mstep=S.admin?'out':'pw';renderModal()}
   else if(a=='logout'){delete sessionStorage.gk;location.reload()}
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
@@ -307,29 +312,29 @@ document.addEventListener('click',async e=>{
   else if(a=='day'){pick({date:v});S.pid=null;render()}
   else if(a=='tag'){pick({tag:v});render()}
   else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal()}
-  else if(a=='new'){S.draft={date:new Date().toISOString().slice(0,10),title:'',body:'',tags:[],hidden:false};S.mode='edit';renderArt()}
-  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;S.draft={...f};S.up=[];S.mode='edit';renderArt()}
-  else if(a=='cancel'){await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
+  else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='cancel'){if(!leave())return;dropDraft();await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
   else if(a=='rmimg'){syncDraft();S.draft.body=S.draft.body.replace(v,'');renderArt();renderModal()}
   else if(a=='save'){
     const d={...S.draft,date:$('#e-date').value,title:$('#e-title').value.trim(),body:$('#e-body').value,
       tags:$('#e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:$('#e-hid').checked};
     if(!d.title||!d.date||!d.tags.length){alert('날짜, 제목, Tags는 필수입니다.');return}
-    const pre=d.date.replace(/-/g,'');
-    if(!d.id){const n=Math.max(0,...S.posts.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+String(n).padStart(2,'0')}
+    const base=await load('data/index.json',S.posts),pre=d.date.replace(/-/g,'');
+    if(!d.id){const n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+String(n).padStart(2,'0')}
     const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'';
     try{
       await put(`data/${d.id.slice(0,4)}/${d.id}.json`,b64(JSON.stringify({...m,body:d.body},null,1)));
-      const arr=[...S.posts],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;
+      const arr=[...base],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;
       await saveJSON('data/index.json',arr);S.posts=arr;S.full[d.id]={...m,body:d.body};
       await purge([...imgsOf(old),...S.up],new Set(imgsOf(d.body)));
     }catch(e){alert('저장 실패: '+e.message);return}
-    S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
+    dropDraft();S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
     const dt=new Date(d.date+'T00:00');S.y=dt.getFullYear();S.m=dt.getMonth();render();
   }
   else if(a=='delpost'){if(!confirm('이 글을 삭제할까요?'))return;
     const id=S.pid,fp=await loadPost(id),gone=imgsOf(fp&&fp.body);
-    try{const arr=S.posts.filter(x=>x.id!=id);await saveJSON('data/index.json',arr);S.posts=arr;delete S.full[id];
+    try{const arr=(await load('data/index.json',S.posts)).filter(x=>x.id!=id);await saveJSON('data/index.json',arr);S.posts=arr;delete S.full[id];
       await del(`data/${id.slice(0,4)}/${id}.json`);await purge(gone,new Set())}catch(e){alert('삭제 실패: '+e.message);return}
     pick({});render()}
   else if(a=='tedit'){S.modal='tags';renderModal()}
@@ -414,7 +419,7 @@ const track=p=>{if(window.gtag&&S.lt!=p.id){S.lt=p.id;gtag('event','page_view',{
 // ---- 시작 ----
 (async()=>{
   await reload();
-  const v=vis()[0],d=v?new Date(v.date+'T00:00'):new Date();
+  const hv=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden)),v=hv||vis()[0],d=v?new Date(v.date+'T00:00'):new Date();
   S.y=d.getFullYear();S.m=d.getMonth();if(v){S.pid=v.id;S.date=v.date}
   render();
 })();
