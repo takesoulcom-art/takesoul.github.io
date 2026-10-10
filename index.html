@@ -619,7 +619,7 @@ function setLogo(){
   const i=$('#logoimg'),L=$('#logo a'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
   delete L.dataset.t;i.style.display='';
 // [크기] 로고 이미지(i)는 CSS 의 #logo img{height:27px} 크기로 표시. 이미지 로딩에 실패하면 display:none 으로 숨기고 'LOGO' 글자(20px, --logo 색)로 대체
-  i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='LOGO'}};
+  i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='TAKESOUL'}};
   i.src=f;
 }
 setLogo();
