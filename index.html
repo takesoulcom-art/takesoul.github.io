@@ -63,6 +63,8 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
 #mbox .row.on{color:var(--ink);font-weight:600}
 #mbox .mh{text-align:right;font-weight:700;color:var(--ink);margin-bottom:12px}
+#mbox .bar [data-a=mclose],#mbox .bar [data-a=mtoggle],#mbox .bar [data-a=tcancel]{order:99;margin-left:auto}
+.pd{text-align:right}
 #mbox .bar{display:flex;gap:12px;margin-top:14px;color:var(--mid)}
 #mbox input[type=password]{margin-bottom:4px}
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
@@ -255,7 +257,7 @@ function renderArt(){
   p={...p,body:fp.body,weather:fp.weather};track(p);
   const dt=new Date(p.date+'T00:00');
   a.innerHTML=(S.admin?`<div class="act"><button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button><button data-a="new">[글쓰기]</button></div>`:'')+
-    `<div class="meta">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일${p.weather?', '+esc(p.weather):''}${p.hidden?' · 숨김':''}</div><h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
+    `<div class="meta pd">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일${p.weather?', '+esc(p.weather):''}${p.hidden?' · 숨김':''}</div><h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
 }
 function renderMusic(){
   const m=$('#music');
