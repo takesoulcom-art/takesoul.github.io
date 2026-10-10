@@ -20,7 +20,7 @@
 <!-- [컬러] 방문자가 마지막에 고른 톤(white / dark / note)을 localStorage 에서 읽어 html 태그의 data-tone 속성으로 먼저 적용
      이 값에 따라 아래 CSS 의 :root[data-tone=...] 색상 세트가 선택됨 (페이지가 그려지기 전에 실행되므로 색 깜빡임이 없음)
      저장된 값이 없으면 white 가 기본 -->
-<script>try{document.documentElement.dataset.tone=localStorage.tone||"white"}catch(e){}</script>
+<script>try{document.documentElement.dataset.tone=localStorage.tone||"note"}catch(e){}</script>
 <script>try{if(sessionStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JC6PD25F8X"></script>
