@@ -157,22 +157,29 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
 /* [간격] 왼쪽 열(aside): 세로 배치, 달력과 Tags 사이 간격 gap:24px, 내용이 길면 이 열만 스크롤 */
 aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
-/* [폰트] 달력 제목(연·월) 글자 크기 16px, 글자 사이 간격 1px (display 는 바로 아래 줄에서 block 으로 덮어씀) */
+/* [폰트] 달력 제목줄(‹ 년 월 ›) 글자 크기 16px, 글자 사이 간격 1px (display 는 바로 아래 줄에서 block 으로 덮어씀, 실제 배치는 아래 .ch 가 담당) */
 .cal-h{display:flex;align-items:center;justify-content:space-between;font-size:16px;letter-spacing:1px}
 .cal-h{display:block}
-/* [정렬] .ch = 달력 맨 윗줄: 왼쪽 '연 월' / 오른쪽 '‹ ›' 를 양 끝으로 벌려 정렬 (justify-content:space-between) */
-.ch{display:flex;align-items:center;justify-content:space-between}
-/* [간격] 달력 윗줄 오른쪽 안쪽 여백 12px (› 버튼이 오른쪽 끝에서 12px 안쪽에 오도록) */
-.ch{padding-right:12px}
-.ch>span{display:flex;align-items:center}
-/* [정렬·간격] 왼쪽 묶음(연·월 버튼): margin-left:-8px = 버튼 안쪽 여백(10px)만큼 왼쪽으로 당겨 '2026' 글자가 달력 왼쪽 선에 맞게 정렬, gap:6px = 연과 월 사이 간격 */
-.ch>span:first-child{margin-left:-8px;gap:6px}
-/* [폰트] 연·월 버튼 글자 크기 16px, 글자 사이 간격 1px */
+/* [정렬·간격] .ch = 달력 맨 윗줄 : '‹  년도  월  ›' 4개 버튼을 달력 폭 기준 '가운데'에 모아 정렬
+   (예전: 왼쪽 '년 월' + 오른쪽 '‹ ›' 양 끝 배치 → 변경: 이전달 / 년 / 월 / 다음달 순서로 가운데 한 묶음)
+   justify-content:center = 묶음 전체를 달력(왼쪽 열 320px, 모바일은 화면 폭) 가운데에 놓음
+   gap:8px = '‹' 버튼과 '년·월 묶음', '년·월 묶음'과 '›' 버튼 사이 간격
+   ※ 묶음을 양 끝으로 벌리고 싶으면 center 를 space-between 으로, 간격을 넓히고 싶으면 gap 값을 키움 */
+.ch{display:flex;align-items:center;justify-content:center;gap:8px}
+/* [정렬·간격] 가운데 '년도 월' 묶음(span): 두 버튼을 가로로 나란히, 세로 가운데 맞춤, 년도와 월 사이 gap:6px
+   ※ 예전에 있던 padding-right:12px(오른쪽 여백)과 margin-left:-8px(왼쪽 당김)는 가운데 정렬에 방해가 되어 제거함 */
+.ch>span{display:flex;align-items:center;gap:6px}
+/* [폰트] 년도·월·‹ › 버튼 공통 글자 크기 16px, 글자 사이 간격 1px (아래 ‹ › 는 26px 로 다시 덮어씀) */
 .ch button{font-size:16px;letter-spacing:1px}
-/* [크기] 연/월 버튼 클릭 영역: 안쪽 여백 위아래 10px / 좌우 10px */
-.ch [data-a=py],.ch [data-a=pm]{padding:10px 10px}
-/* [폰트·크기] ‹ › 이전/다음 달 버튼: 글자 크기 26px, 클릭 영역 위아래 6px / 좌우 10px, 글자 사이 간격 5 */
-.ch [data-a=prev],.ch [data-a=next]{font-size:26px;line-height:1;padding:6px 10px;letter-spacing:5}
+/* [크기·터치] 년도/월 버튼 터치 영역: 높이 최소 44px(스마트폰 권장 터치 크기), 안쪽 여백 위아래 10px / 좌우 12px
+   → 년도 버튼 폭은 글자 '2026'(약 40px) + 좌우 24px ≈ 64px, 월 버튼은 최소 약 44px
+   ※ 터치가 어려우면 min-height 와 padding 값을 키우고, 공간이 부족하면 줄임 */
+.ch [data-a=py],.ch [data-a=pm]{min-height:44px;padding:10px 12px}
+/* [폰트·크기·터치·세로정렬] ‹ › 이전/다음 달 버튼: 글자 크기 26px, line-height:1 = 글자 높이를 26px 로 고정
+   min-width:44px; min-height:44px = 가로·세로 최소 44px 터치 영역 확보, 안쪽 여백 위아래 6px / 좌우 12px, 글자 사이 간격 0
+   position:relative; top:-2px = ‹ › 글자 모양이 폰트상 년·월 숫자보다 아래로 처져 보여서 2px 위로 올려 세로 가운데를 맞춤(터치 영역은 그대로)
+   ※ 아직 아래로 보이면 top 값을 -3px, -4px 로 키우고, 위로 올라가 보이면 -1px 또는 0 으로 줄임 */
+.ch [data-a=prev],.ch [data-a=next]{min-width:44px;min-height:44px;font-size:26px;line-height:1;padding:6px 12px;letter-spacing:0;position:relative;top:-2px}
 /* [크기·정렬] 연/월 선택 판(.pk): 가로 3칸 균등 분할(repeat(3,1fr)), 칸 사이 gap:6px, 윗 간격 12px, 글자 가운데 정렬 */
 .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
 /* [크기·컬러] 선택 판의 각 버튼: 안쪽 여백 위아래 4px, 글자색 --mid */
@@ -335,8 +342,12 @@ function renderCal(){
   for(let y=y0;y<=y1;y++)yrs.push(y);
   const pk=S.pick=='y'?`<div class="pk">${yrs.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`
     :S.pick=='m'?`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`:'';
-  $('#calh').innerHTML=`<div class="ch"><span><button data-a="py">${S.y}</button> <button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
-  <span><button data-a="prev">‹</button><button data-a="next">›</button></span></div>${pk}`;
+  // [배치·정렬] 달력 맨 윗줄 버튼 순서: ‹(이전 달, data-a=prev) → 년도(data-a=py, 누르면 년도 선택) → 월(data-a=pm, 누르면 월 선택) → ›(다음 달, data-a=next)
+  // 네 버튼이 한 줄에서 달력 가운데에 모이도록 정렬하는 값은 CSS 의 .ch (justify-content:center, gap:8px) 와 .ch>span (gap:6px)
+  // 버튼 크기(터치 영역 44px 이상)는 CSS 의 .ch [data-a=py],.ch [data-a=pm] 와 .ch [data-a=prev],.ch [data-a=next] 에서 설정
+  // 버튼을 누르면 아래 click 이벤트(data-a 값별 분기)가 처리하며, 이 순서를 바꿔도 동작에는 영향이 없음
+  $('#calh').innerHTML=`<div class="ch"><button data-a="prev" aria-label="이전 달">‹</button><span><button data-a="py">${S.y}</button><button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
+  <button data-a="next" aria-label="다음 달">›</button></div>${pk}`;
   const first=new Date(S.y,S.m,1).getDay(),n=new Date(S.y,S.m+1,0).getDate();
   let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>`<div class="w">${w}</div>`).join('');
   for(let i=0;i<first;i++)h+='<div></div>';
