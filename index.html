@@ -237,6 +237,13 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
 /* [높이·폰트] 글쓰기 본문 입력칸(textarea): 최소 높이 300px, 명조 글꼴 */
 .ed textarea{min-height:300px;font-family:"Noto Serif KR",serif}
+/* [간격·정렬] .wx = 글쓰기 화면의 날씨 이모지 선택줄: 날씨 입력칸 바로 아래에 가로로 나열, 한 줄에 다 안 들어가면 다음 줄로(flex-wrap), 이모지 사이 gap:4px */
+.wx{display:flex;flex-wrap:wrap;gap:4px}
+/* [폰트·크기·터치] 이모지 버튼: 글자(이모지) 크기 20px, 최소 40px x 40px 터치 영역, 안쪽 여백 6px, 평소엔 테두리 없음(투명 1px 테두리로 선택 시 크기 변화 방지) */
+.wx button{font-size:20px;line-height:1;min-width:40px;min-height:40px;padding:6px;border:1px solid transparent}
+/* [컬러] 마우스를 올리면 1px 테두리(--line), 이미 날씨 칸에 들어간 이모지(.on)는 배경 --sel (연한 파랑) 로 표시 */
+.wx button:hover{border-color:var(--line)}
+.wx button.on{background:var(--sel)}
 /* [간격·컬러] .chip: 글자 사이 4px, 오른쪽 간격 10px, 글자색 --mid */
 .chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
 .hide{display:none!important}
@@ -380,6 +387,8 @@ function body(t){
     return x?`<div class="tx">${esc(x)}</div>`:'';
   }).join('');
 }
+// [날씨 이모지 목록] 글쓰기 화면의 날씨 선택줄에 표시되는 이모지들 - 빼거나 추가하려면 이 배열의 따옴표 항목을 지우거나 넣으면 됨
+const WX=['☀️','🌞','☁️','🌤️','🌥️','🌦️','🌧️','🌩️','🌪️','🌨️','🌀','🌈','☔','❄️'];
 function renderArt(){
   const a=$('#art');
   const acts=S.admin?`<div class="act">${S.mode=='view'&&S.pid?'<button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button>':''}${S.mode=='view'?'<button data-a="new">[글쓰기]</button>':''}</div>`:'';
@@ -389,7 +398,8 @@ function renderArt(){
 // 숨김 체크박스(#e-hid)만 inline style="width:auto" 로 100% 를 해제해 체크박스 본래 크기(12px)로 표시
     a.innerHTML=`<div class="ed">
       <input id="e-date" type="date" value="${d.date}">
-      <input id="e-wx" placeholder="날씨 (선택, 예: 맑음)" value="${esc(d.weather||'')}">
+      <input id="e-wx" placeholder="날씨 (선택) - 아래 이모지를 눌러 추가/해제, 직접 입력도 가능" value="${esc(d.weather||'')}">
+      <div class="wx">${WX.map(w=>`<button type="button" class="${(d.weather||'').includes(w)?'on':''}" data-w="${w}" aria-label="날씨 ${w}">${w}</button>`).join('')}</div>
       <input id="e-title" placeholder="제목" value="${esc(d.title)}">
       <input id="e-tags" placeholder="Tags (쉼표로 구분, 예: 일상, 생각)" value="${esc((d.tags||[]).join(', '))}">
       <textarea id="e-body" placeholder="본문">${esc(d.body)}</textarea>
@@ -482,6 +492,9 @@ const leave=()=>!dirty()||confirm('저장하지 않은 내용이 있습니다. �
 const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:history.replaceState).call(history,null,'','#'+id);S.hs=1};
 window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
 document.addEventListener('input',e=>{if(S.mode=='edit'&&e.target.closest('.ed')){try{syncDraft();localStorage.draft=JSON.stringify(S.draft)}catch(x){}}});
+// [날씨 이모지 선택] 이모지 버튼(data-w)을 누르면 날씨 입력칸(#e-wx)에 추가, 이미 들어 있으면 제거(토글) → input 이벤트를 발생시켜 임시저장(draft)에도 반영
+document.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const i=$('#e-wx'),w=b.dataset.w;
+  i.value=i.value.includes(w)?i.value.replace(w,''):i.value+w;b.classList.toggle('on',i.value.includes(w));i.dispatchEvent(new Event('input',{bubbles:true}))});
 window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
   Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()});
 // ---- 이벤트 ----
