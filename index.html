@@ -105,7 +105,7 @@ body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 
 main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
 article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.tags{padding-top:24px}
 aside{order:2}
-header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
 </head>
@@ -254,7 +254,7 @@ function renderMusic(){
     m.innerHTML=S.admin?'<button data-a="mtoggle">음악 관리</button>':'';
   }else{
     const t=S.music[S.cur>=0?S.cur:0].name;
-    m.innerHTML=`<button data-a="mtoggle">"${esc(t)}" ♬</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button>`;
+    m.innerHTML=`<button data-a="mtoggle">♬ ${esc(t)}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button>`;
   }
   if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
 }
