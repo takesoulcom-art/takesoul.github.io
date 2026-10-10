@@ -17,6 +17,9 @@
 <meta property="og:url" content="https://takesoul.com/">
 <meta property="og:locale" content="ko_KR">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoul.com/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
+<!-- [컬러] 방문자가 마지막에 고른 톤(white / dark / note)을 localStorage 에서 읽어 html 태그의 data-tone 속성으로 먼저 적용
+     이 값에 따라 아래 CSS 의 :root[data-tone=...] 색상 세트가 선택됨 (페이지가 그려지기 전에 실행되므로 색 깜빡임이 없음)
+     저장된 값이 없으면 white 가 기본 -->
 <script>try{document.documentElement.dataset.tone=localStorage.tone||"white"}catch(e){}</script>
 <script>try{if(sessionStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
 <!-- Google tag (gtag.js) -->
@@ -29,86 +32,230 @@
   gtag('config', 'G-JC6PD25F8X');
 </script>
 <style>
+/* ================================================================================
+   [빠른 찾기]  CSS 에서 크기 / 색 / 정렬을 바꾸고 싶을 때 이 목록의 줄을 찾아가세요
+     · 색상 세트(톤 3종) ........ 아래 :root 3줄 (white / dark / note)
+     · 기본 글자 크기·줄 간격 ... body                  (13px / 줄간격 1.7)
+     · 전체 폭·바깥 여백 ........ .wrap                  (최대 1100px, 안쪽 여백 24px 20px)
+     · 로고 크기/색 ............. #logo, #logo img       (글자 20px, 이미지 높이 27px)
+     · 음악 / ≡ 메뉴 ............ #music, #menu
+     · 설정 팝업(메뉴·음악 목록) . #modal, #mbox, .row, .bar
+     · 좌측(달력·Tags) 폭 ....... main 의 grid-template-columns  (왼쪽 320px)
+     · 달력 셀 크기 ............. .cal, .d, .d.sel span, .d.has::after
+     · Tags 목록 ................ .tags, .tag
+     · 본문(글) 영역 ............ article, .meta, h2, .body, .act
+     · 모바일(폭 760px 이하) .... 맨 아래 @media(max-width:760px)
+   ※ 색은 직접 쓰지 않고 var(--이름) 으로 가져다 쓰므로, 색을 바꾸려면 아래 :root 의 값만 고치면 전체에 반영됨
+   ================================================================================ */
+/* [컬러] 기본 톤 'white' 색상 변수 (:root)
+   --bg   : 페이지 전체 배경색 (#fafbfb, 거의 흰색)
+   --ink  : 가장 진한 글자색 - 제목, 선택된 항목, 글 있는 날짜 숫자 (#222)
+   --mid  : 중간 농도 글자색 - 본문, 일반 메뉴, 버튼, 글 없는 날짜 (#666)
+   --lo   : 가장 연한 글자색 - 요일, 글 날짜(meta), 보조 설명 (#999)
+   --line : 1px 선 색 - 헤더 아래선, 글 카드 테두리, 입력창 테두리, Tags 위 선 (#bbb)
+   --dot  : 글이 있는 날짜 아래의 푸른 점 색 (#5b95e8)
+   --sel  : 선택된 날짜 원 / 연·월 선택 버튼 배경색, 연한 파랑 (#cfe0fb)
+   --logo : 로고 이미지가 없을 때 대신 나오는 'LOGO' 글자색, 붉은색 (#a00014) */
 :root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#999;--line:#bbb;--dot:#5b95e8;--sel:#cfe0fb;--logo:#a00014}
+/* [컬러] 'dark' 톤 색상 변수 - 항목 의미는 위 white 톤과 같고 값만 어두운 배경용으로 바뀜
+   color-scheme:dark = 스크롤바·입력창·체크박스 등 브라우저 기본 UI 도 어둡게
+   배경 #262624 / 진한글자 #faf9f5 / 중간글자 #c2c0b6 / 연한글자 #8a887f / 선 #43423e / 점 #6fa3f2 / 선택 #3b4a63 / 로고글자 #e5533d */
 :root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c2c0b6;--lo:#8a887f;--line:#43423e;--dot:#6fa3f2;--sel:#3b4a63;--logo:#e5533d}
+/* [컬러] 'note' 톤(노트 느낌) 색상 변수 - 항목 의미는 white 톤과 같음. 추가 변수 2개:
+   --paper : 글 카드·메뉴 상자·수정 버튼줄의 '종이' 배경색 (#fbf6e3)  ← 페이지 배경(--bg #f3ebd4)보다 한 단계 밝음
+   --rule  : 본문에 깔리는 노트 가로줄 색 (#e8dfc0)
+   나머지: 진한글자 #3b3226 / 중간글자 #6b5f4c / 연한글자 #a09580 / 선 #d2c6a6 / 점 #4f86d9 / 선택(노란 형광) #ecd99a
+   (--logo 는 여기 없으므로 white 톤의 #a00014 를 그대로 사용) */
 :root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#6b5f4c;--lo:#a09580;--line:#d2c6a6;--rule:#e8dfc0;--dot:#4f86d9;--sel:#ecd99a}
+/* [컬러] note 톤에서만 글 카드(article), 수정 버튼줄(.act), 메뉴 상자(#mbox)의 배경을 --paper(종이색)로 바꿈 */
 :root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
+/* [폰트·높이] note 톤에서만 본문 글줄(.tx)에 노트 줄 무늬를 깖
+   line-height:26px = 한 줄의 높이 26px, repeating-linear-gradient 의 25px~26px 구간(두께 1px)이 --rule 색 가로줄
+   ※ 줄 무늬 간격(26px)과 line-height(26px)는 반드시 같은 값이어야 글자가 줄 위에 맞음 */
 :root[data-tone=note] .tx{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
+/* [컬러] dark 톤에서는 팝업 뒤 어두운 막(#modal)을 기본(.25)보다 진하게 rgba(0,0,0,.5) */
 :root[data-tone=dark] #modal{background:rgba(0,0,0,.5)}
+/* [정렬·높이] .row2 = 메뉴 팝업의 'Tone', '관리자 모드' 한 줄
+   display:flex + align-items:center = 가로 배치, 세로 가운데 맞춤 / gap:14px = 항목 사이 간격 / margin:6px 0 = 줄 위아래 바깥 여백 */
 .row2{display:flex;align-items:center;gap:14px;margin:6px 0}
+/* [폭·정렬·컬러] 줄의 첫 글자(라벨)는 폭 76px 로 고정(flex:none)해서 오른쪽 항목들의 시작 위치를 줄마다 같게 맞춤, 라벨 색은 --lo(연한 글자) */
 .row2>span:first-child{width:76px;flex:none;color:var(--lo)}
+/* [폭] 입력창은 flex:1 = 라벨 오른쪽의 남은 폭을 모두 차지, min-width:0 = 좁은 화면에서도 줄이 삐져나가지 않게 */
 .row2 input{flex:1;min-width:0}
+/* [컬러] 줄 안의 버튼 글자색 = --mid (중간 농도) */
 .row2 button{color:var(--mid)}
+/* [컬러·폰트] 현재 선택된 버튼(.on)은 --ink(진한 글자) + font-weight:600(굵게) */
 .row2 button.on{color:var(--ink);font-weight:600}
 *{box-sizing:border-box}
+/* [폰트] 모바일에서 가로/세로 전환 시 글자가 자동으로 커지는 것을 막음 (크기를 직접 지정한 대로 유지) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* [폰트·컬러] 사이트 기본 글자 설정 (body)
+   font:13px/1.7 ... = 기본 글자 크기 13px / 줄 간격 1.7배 / 글꼴 Noto Sans KR → 시스템 기본 고딕
+   background:var(--bg) = 페이지 배경색, color:var(--ink) = 기본 글자색
+   height:100dvh + overflow:hidden = 화면 높이에 딱 맞추고 body 자체는 스크롤하지 않음 (글·왼쪽 영역이 각자 안에서 스크롤)
+   ※ 13px 를 바꾸면 이 값을 상속하는 버튼·입력창·메뉴 글자 크기가 함께 바뀜 */
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 "Noto Sans KR",system-ui,sans-serif;height:100dvh;overflow:hidden}
+/* [폰트·컬러] 버튼/입력창/글쓰기 칸이 브라우저 기본 글꼴 대신 body 의 글꼴·크기(13px)·글자색을 그대로 쓰도록 상속, 테두리·배경·안쪽 여백은 모두 제거 */
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
+/* [크기] 체크박스 크기 12px x 12px, 오른쪽 바깥 여백 4px(뒤따르는 글자와의 간격), 체크 색은 --mid */
 input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
+/* [컬러·크기] 입력창/글쓰기 칸 공통: 테두리 1px --line 색, 안쪽 여백 위아래 4px / 좌우 8px, 폭은 부모 폭 100% */
 input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
+/* [폭·정렬] 페이지 전체 틀(.wrap)
+   max-width:1100px = 화면이 아무리 커도 가로 최대 1100px / margin:0 auto = 좌우 가운데 정렬
+   padding:24px 20px = 안쪽 여백 위아래 24px, 좌우 20px / height:100dvh = 화면 높이만큼 */
 .wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
+/* [정렬·높이] 맨 위 헤더(로고 / 음악 / ≡)
+   display:flex + align-items:center = 가로 일렬 배치, 세로 가운데 / gap:16px = 로고·음악·메뉴 사이 간격
+   padding:12px 0 8px = 안쪽 위 12px, 아래 8px(좌우 0) / border-bottom:1px solid var(--line) = 아래 1px 선 */
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
+/* [정렬·폰트·컬러] 로고 영역
+   flex:1 = 헤더의 남는 폭을 전부 차지 → 로고는 왼쪽에 남고 음악·≡ 메뉴는 자연스럽게 오른쪽 끝으로 밀림 (좌/우 정렬의 핵심)
+   font-size:20px = 이미지가 없을 때 'LOGO' 글자 크기 / color:var(--logo) = 그 글자색 / letter-spacing:.5px = 글자 사이 간격 */
 #logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
+/* [높이] 로고 이미지(logo.gif 등) 높이 27px, 폭은 비율에 맞춰 자동 / display:block = 이미지 아래 불필요한 빈 줄 제거 */
 #logo img{height:27px;display:block}
 #logo a{display:inline-block;vertical-align:top;color:inherit;text-decoration:none}
 #logo a[data-t]::before{content:attr(data-t)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* [정렬·컬러] 음악 영역(♬ 곡명, ▶, ▶|): 가로 일렬·세로 가운데, 항목 간격 gap:10px, 글자색 --mid */
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
+/* [크기·컬러] 음악 버튼 클릭 영역: 안쪽 여백 위아래 6px / 좌우 4px (아이콘 자체 크기는 아래 JS 의 sv() 에서 17px) */
 #music button{color:var(--mid);display:flex;align-items:center;padding:6px 4px}
 #music svg{display:block}
+/* [폰트·컬러] 오른쪽 위 ≡ 메뉴 버튼: 글자 크기 20px, 색 --mid (헤더 맨 오른쪽에 위치) */
 #menu{font-size:20px;color:var(--mid)}
+/* [컬러·정렬] #modal = 메뉴/음악 목록/Tags 편집 등이 뜨는 전체 화면 반투명 막
+   background:rgba(0,0,0,.25) = 검정 25% 투명도(뒤 화면이 어둡게 비침)
+   align-items:center + justify-content:center = 팝업 상자를 화면 가운데(세로·가로)에 정렬 / z-index:9 = 다른 요소 위에 표시 */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
+/* [크기·컬러] #mbox = 팝업 상자 본체
+   width:min(340px,90vw) = 가로 340px, 단 화면이 좁으면 화면 폭의 90% / max-height:80vh = 높이는 화면의 80%까지(넘으면 스크롤)
+   padding:20px 24px = 안쪽 여백 위아래 20px, 좌우 24px / border:1px solid var(--line) = 1px 테두리 / background:var(--bg) = 배경색 */
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;overflow:auto}
+/* [정렬·컬러·높이] 팝업 안의 목록 한 줄(.row: 곡 목록, 이미지 목록, Tags 편집)
+   가로 배치(왼쪽부터), gap:8px = 체크박스·글자 사이 간격, padding:2px 0 = 줄 위아래 안쪽 여백 2px(줄 높이), 글자색 --mid */
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
+/* [컬러·폰트] 현재 재생 중인 곡 줄(.row.on): --ink(진한 글자) + font-weight:600(굵게) */
 #mbox .row.on{color:var(--ink);font-weight:600}
+/* [정렬·폰트·컬러] 음악 목록 제목('요즘 듣는 음악'): text-align:right = 오른쪽 정렬, 굵기 700, 색 --ink, 아래 간격 12px */
 #mbox .mh{text-align:right;font-weight:700;color:var(--ink);margin-bottom:12px}
+/* [정렬] 팝업 아래 버튼줄(.bar)에서 [닫기]/[접기]/[취소] 버튼만 오른쪽 끝으로 보냄
+   order:99 = 버튼 순서를 맨 뒤로 / margin-left:auto = 남는 왼쪽 공간을 모두 차지해 오른쪽 끝에 붙음
+   (나머지 [업로드] [삭제] ▲ ▼ 는 왼쪽부터 차례로 정렬) */
 #mbox .bar [data-a=mclose],#mbox .bar [data-a=mtoggle],#mbox .bar [data-a=tcancel]{order:99;margin-left:auto}
+/* [정렬] .pd = 글 상단 날짜(예: 2026년 5월 21일)를 오른쪽 정렬 */
 .pd{text-align:right}
+/* [정렬·간격·컬러] 팝업 아래 버튼줄(.bar): 가로 배치, 버튼 사이 gap:12px, 위쪽 바깥 여백 14px, 글자색 --mid */
 #mbox .bar{display:flex;gap:12px;margin-top:14px;color:var(--mid)}
+/* [간격] 관리자 코드 입력창(비밀번호) 아래 바깥 여백 4px (오류 메시지와 간격) */
 #mbox input[type=password]{margin-bottom:4px}
+/* [폭·높이·간격] 헤더 아래 본문 영역(main): 2단 배치
+   grid-template-columns:320px 1fr = 왼쪽 열(달력·Tags) 폭 320px 고정, 오른쪽 열(글)은 나머지 전부
+   gap:32px = 두 열 사이 간격 / margin-top:24px = 헤더와의 간격 / flex:1 = 헤더 아래 남은 높이 전부 차지 */
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
+/* [간격] 왼쪽 열(aside): 세로 배치, 달력과 Tags 사이 간격 gap:24px, 내용이 길면 이 열만 스크롤 */
 aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
+/* [폰트] 달력 제목(연·월) 글자 크기 16px, 글자 사이 간격 1px (display 는 바로 아래 줄에서 block 으로 덮어씀) */
 .cal-h{display:flex;align-items:center;justify-content:space-between;font-size:16px;letter-spacing:1px}
 .cal-h{display:block}
+/* [정렬] .ch = 달력 맨 윗줄: 왼쪽 '연 월' / 오른쪽 '‹ ›' 를 양 끝으로 벌려 정렬 (justify-content:space-between) */
 .ch{display:flex;align-items:center;justify-content:space-between}
+/* [간격] 달력 윗줄 오른쪽 안쪽 여백 12px (› 버튼이 오른쪽 끝에서 12px 안쪽에 오도록) */
 .ch{padding-right:12px}
 .ch>span{display:flex;align-items:center}
+/* [정렬·간격] 왼쪽 묶음(연·월 버튼): margin-left:-8px = 버튼 안쪽 여백(10px)만큼 왼쪽으로 당겨 '2026' 글자가 달력 왼쪽 선에 맞게 정렬, gap:6px = 연과 월 사이 간격 */
 .ch>span:first-child{margin-left:-8px;gap:6px}
+/* [폰트] 연·월 버튼 글자 크기 16px, 글자 사이 간격 1px */
 .ch button{font-size:16px;letter-spacing:1px}
+/* [크기] 연/월 버튼 클릭 영역: 안쪽 여백 위아래 10px / 좌우 10px */
 .ch [data-a=py],.ch [data-a=pm]{padding:10px 10px}
+/* [폰트·크기] ‹ › 이전/다음 달 버튼: 글자 크기 26px, 클릭 영역 위아래 6px / 좌우 16px, 글자 사이 간격 0 */
 .ch [data-a=prev],.ch [data-a=next]{font-size:26px;line-height:1;padding:6px 16px;letter-spacing:0}
+/* [크기·정렬] 연/월 선택 판(.pk): 가로 3칸 균등 분할(repeat(3,1fr)), 칸 사이 gap:6px, 윗 간격 12px, 글자 가운데 정렬 */
 .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
+/* [크기·컬러] 선택 판의 각 버튼: 안쪽 여백 위아래 4px, 글자색 --mid */
 .pk button{padding:4px 0;color:var(--mid)}
+/* [컬러] 현재 선택된 연/월(.on): 글자 --ink, 배경 --sel (연한 파랑) */
 .pk .on{color:var(--ink);background:var(--sel)}
+/* [폭·높이·폰트] .cal = 달력 날짜 격자
+   grid-template-columns:repeat(7,1fr) = 일~토 7칸 균등 폭 (왼쪽 열 320px 를 7등분) / text-align:center = 숫자 가운데 정렬
+   margin-top:16px = 위 간격 / row-gap:10px = 주(행) 사이 간격 / font-size:12px = 날짜 숫자 크기 */
 .cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-top:16px;row-gap:10px;font-size:12px}
+/* [폰트·컬러] 요일 글자(Sun~Sat): 크기 11px, 색 --lo(연한 글자) */
 .cal .w{color:var(--lo);font-size:11px}
+/* [높이·폰트·컬러] .d = 날짜 한 칸(셀)
+   height:30px = 셀 높이 (폭은 위 7등분으로 자동) / line-height:24px = 숫자가 셀 안에서 위쪽 24px 줄에 세로 배치(아래 6px 은 푸른 점 자리) / 글자색 --mid */
 .d{height:30px;line-height:24px;position:relative;color:var(--mid)}
+/* [컬러] 글이 있는 날짜(.has): 글자색 --ink(진하게) + 클릭 가능 표시(pointer 커서) */
 .d.has{cursor:pointer;color:var(--ink)}
+/* [크기·컬러·정렬] 글 있는 날짜 아래 푸른 점
+   width:4px; height:4px; border-radius:50% = 지름 4px 원 / background:var(--dot) = 점 색
+   left:50% + margin-left:-2px = 셀 가로 가운데(점 폭 4px 의 절반만큼 보정) / bottom:0 = 셀 맨 아래 */
 .d.has::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dot)}
+/* [크기·컬러] 선택된 날짜 숫자 뒤 원: 가로 26px x 세로 26px(line-height 도 26px 로 숫자를 원 가운데에), 완전한 원(border-radius:50%), 배경 --sel */
 .d.sel span{background:var(--sel);display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%}
+/* [컬러·간격] Tags 영역: 위쪽 1px 구분선(--line) + 선과 'Tags' 글자 사이 안쪽 여백 16px */
 .tags{border-top:1px solid var(--line);padding-top:16px}
+/* [정렬·폰트] 'Tags' 제목줄: 아래 간격 8px, 굵기 400(보통), 왼쪽 'Tags' / 오른쪽 'Edit' 버튼을 양 끝 정렬(space-between) */
 .tags h4{margin:0 0 8px;font-weight:400;display:flex;justify-content:space-between}
+/* [간격·컬러] Tags 한 줄(.tag): 가로 배치, '#'과 이름 사이 gap:6px, 줄 위아래 안쪽 여백 2px(줄 높이), 글자색 --mid */
 .tag{display:flex;gap:6px;color:var(--mid);padding:2px 0;cursor:pointer}
+/* [컬러·폰트] 선택된 Tag: --ink(진한 글자) + 굵게(600) */
 .tag.on{color:var(--ink);font-weight:600}
+/* [폰트·컬러·크기] 글 영역(article) 카드
+   font-family:Noto Serif KR = 글 영역은 명조(세리프) 글꼴, 글자 크기는 body 상속(13px) / border:1px solid var(--line) = 1px 테두리
+   padding:36px 40px = 안쪽 여백 위아래 36px, 좌우 40px / overflow-y:auto = 글이 길면 이 카드 안에서 스크롤 */
 article{font-family:"Noto Serif KR",serif;border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
+/* [폰트·컬러] 글 위 날짜·태그줄(.meta): 크기 12px, 색 --lo(연한 글자), 글자 사이 1px */
 .meta{color:var(--lo);font-size:12px;letter-spacing:1px}
+/* [폰트·간격] 글 제목(h2): 크기 20px, 굵기 400(보통), 바깥 여백 위 12px / 좌우 0 / 아래 28px (제목과 본문 사이 간격) */
 h2{font-weight:400;font-size:20px;margin:12px 0 28px}
+/* [폰트·컬러] 글 본문(.body): 명조, 줄 간격 1.95배, 글자색 --mid, white-space:pre-wrap = 입력한 줄바꿈·공백 그대로 표시 (글자 크기는 body 의 13px 상속) */
 .body{white-space:pre-wrap;font-family:"Noto Serif KR",serif;line-height:1.95;color:var(--mid)}
 .tx{white-space:pre-wrap}
+/* [크기] 본문 속 이미지: 최대 폭 100%(글 영역 폭을 넘지 않음), 위아래 바깥 여백 16px */
 .body img{display:block;max-width:100%;margin:16px 0}
+/* [정렬·간격·컬러] .act = 관리자의 [수정] [삭제] [글쓰기] 버튼줄
+   float:right = 오른쪽 정렬(글 카드 오른쪽 위에 붙임) / position:sticky; top:6px = 스크롤해도 위에서 6px 에 고정
+   margin:-28px -32px 0 0 = 위로 28px, 오른쪽으로 32px 끌어당겨 카드 안쪽 여백(36px/40px)을 뚫고 모서리 쪽에 배치
+   gap:10px = 버튼 사이 간격, 글자색 --mid, 배경 --bg(글자와 겹쳐도 가려지게) */
 .act{position:sticky;top:6px;float:right;margin:-28px -32px 0 0;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
+/* [높이·컬러] 글 목록(.plist: 날짜/태그 클릭 시 나오는 목록) 한 줄: 위아래 안쪽 여백 6px, 아래 1px 구분선 --line */
 .plist div{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
+/* [폰트·컬러] 목록 속 날짜(small): 색 --lo(연한 글자), 오른쪽 간격 10px (제목과 떨어뜨림), 크기는 small 기본값(본문보다 작게) */
 .plist small{color:var(--lo);margin-right:10px}
+/* [간격] 글쓰기 화면(.ed): 입력칸들을 세로로 쌓고 칸 사이 gap:8px, 위쪽 바깥 여백 20px */
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+/* [높이·폰트] 글쓰기 본문 입력칸(textarea): 최소 높이 300px, 명조 글꼴 */
 .ed textarea{min-height:300px;font-family:"Noto Serif KR",serif}
+/* [간격·컬러] .chip: 글자 사이 4px, 오른쪽 간격 10px, 글자색 --mid */
 .chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
 .hide{display:none!important}
+/* ================================================================================
+   [모바일] 화면 폭 760px 이하(스마트폰 세로)일 때만 적용되는 설정 - 위의 PC 설정을 아래 값으로 덮어씀
+     · 760 이라는 기준 폭을 바꾸려면 위 @media(max-width:760px) 의 숫자를 수정
+   ================================================================================ */
 @media(max-width:760px){
+/* [모바일 높이·간격·정렬]
+   body : height:auto; overflow:auto = 화면 전체가 위아래로 스크롤 (PC 와 달리 안쪽 스크롤 없음)
+   .wrap : padding:8px 14px 48px = 안쪽 여백 위 8px, 좌우 14px, 아래 48px / display:block = 세로로 그냥 쌓음
+   header : sticky + top:0 = 스크롤해도 맨 위에 고정, 배경 --bg 로 아래 글이 비치지 않게
+   .act : margin:-12px -12px 0 0 = 수정 버튼줄을 위·오른쪽으로 12px 당김 (PC 는 -28px -32px) */
 body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{margin:-12px -12px 0 0}
+/* [모바일 폭·간격] main : 2단 → 1단(grid-template-columns:1fr = 폭 가득), 위·아래 블록 사이 gap:44px */
 main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
+/* [모바일 배치·간격]
+   article : order:1 = 글이 맨 위, 안쪽 여백 20px(PC 는 36px 40px), overflow:visible = 카드 안쪽 스크롤 대신 페이지 스크롤
+   aside : overflow:visible, gap:44px = 달력과 Tags 사이 간격(PC 는 24px) / .tags : 위 안쪽 여백 24px(PC 는 16px) */
 article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.tags{padding-top:24px}
+/* [모바일 배치] aside(달력·Tags) 는 order:2 = 글 아래에 표시 */
 aside{order:2}
+/* [모바일 정렬·폭]
+   header : flex-wrap:wrap = 한 줄에 안 들어가면 다음 줄로 넘김
+   #menu : order:2 / #music : order:3, flex-basis:100% = 음악 영역은 헤더 두 번째 줄 전체 폭, justify-content:flex-end = 오른쪽 정렬, padding-bottom:4px
+   #music [data-a=mtoggle] = 곡 제목 버튼: 폭이 모자라면 ... 으로 줄여 한 줄 유지 (ellipsis + nowrap) */
 header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
@@ -141,6 +288,8 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:sessionStorage.gk||'',admin:!!sessionStorage.gk,editTags:false,mOpen:false,cur:-1,playing:false,draft:null};
 const au=$('#au');
 const WD=['일','월','화','수','목','금','토'];
+// [크기·컬러] 아이콘(SVG) 설정: 내부 좌표는 16x16(viewBox), 화면에 그려지는 크기는 width=17 / height=17(px)
+// fill=currentColor = 아이콘 색이 버튼의 글자색(--mid)을 그대로 따름 (색을 바꾸려면 CSS 의 #music button 의 color 수정)
 const sv=p=>`<svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={play:sv('M4 2.5v11l9-5.5z'),pause:sv('M4 2.5h3v11H4zM9 2.5h3v11H9z'),next:sv('M3 2.5v11l7-5.5zM11 2.5h2.2v11H11z')};
 
@@ -225,6 +374,8 @@ function renderArt(){
   const acts=S.admin?`<div class="act">${S.mode=='view'&&S.pid?'<button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button>':''}${S.mode=='view'?'<button data-a="new">[글쓰기]</button>':''}</div>`:'';
   if(S.mode=='edit'){
     const d=S.draft,imgs=[...d.body.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)];
+// [크기] 글쓰기 화면의 입력칸들은 CSS 의 input,textarea{width:100%} 로 폭을 가득 채움
+// 숨김 체크박스(#e-hid)만 inline style="width:auto" 로 100% 를 해제해 체크박스 본래 크기(12px)로 표시
     a.innerHTML=`<div class="ed">
       <input id="e-date" type="date" value="${d.date}">
       <input id="e-wx" placeholder="날씨 (선택, 예: 맑음)" value="${esc(d.weather||'')}">
@@ -238,6 +389,7 @@ function renderArt(){
   }
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
   if(S.tag&&!S.pid){
+// [간격] 목록 상자(.plist) 위쪽 바깥 여백 16px 을 style="margin-top:16px" 로 직접 지정 (태그 클릭 시 글 목록)
     a.innerHTML=acts+`<div class="meta"># ${esc(S.tag)}</div><div class="plist" style="margin-top:16px">`+
       (posts.map(p=>`<div data-a="open" data-v="${p.id}"><small>${p.date}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
     return;
@@ -246,6 +398,7 @@ function renderArt(){
   if(!p){
     const day=S.date?list().filter(x=>x.date==S.date):list();
     if(day.length>1&&S.date){
+// [간격] 같은 날 글이 여러 개일 때의 목록도 위쪽 바깥 여백 16px (style="margin-top:16px")
       a.innerHTML=acts+`<div class="meta">${S.date}</div><div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${x.id}">${esc(x.title)}</div>`).join('')+'</div>';return;
     }
     p=day[0];
@@ -270,6 +423,8 @@ function renderMusic(){
   if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
 }
 function musicHTML(){
+// [크기] 음악 목록의 체크박스(.mck): inline style="width:auto" = CSS 의 폭 100% 를 해제해 체크박스 본래 크기(12px)로 표시
+// 곡 제목 줄 자체의 높이·간격·색은 CSS 의 #mbox .row (줄 높이 2px 안쪽 여백, 색 --mid, 재생 중 --ink 굵게) 에서 설정
   return '<div class="mh">요즘 듣는 음악</div>'+S.music.map((t,i)=>`<div class="row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${S.admin?`<input type="checkbox" class="mck" data-i="${i}" style="width:auto" onclick="event.stopPropagation()">`:''}${esc(t.name)}</div>`).join('')+
     `<div class="bar"><button data-a="mtoggle">[닫기]</button>${S.admin?`<label style="cursor:pointer">[업로드]<input type="file" id="m-up" accept="audio/*" multiple class="hide"></label><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button>`:''}</div>`;
 }
@@ -291,12 +446,16 @@ function renderModal(){
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
   w.style.display=k?'flex':'none';if(!k)return;
   const X='<button data-a="mclose">[닫기]</button>';let h='';
+// [크기·정렬·컬러] ≡ 메뉴 팝업의 Tone / 관리자 모드 줄은 CSS 의 .row2 (라벨 폭 76px, 항목 간격 14px, 선택된 톤은 --ink 굵게)를 사용
+// Tone 버튼 문구는 white / dark / note 를 첫 글자만 대문자로 표시
   if(k=='auth'){const cur=document.documentElement.dataset.tone;
     h=`<div class="row2"><span>Tone</span>${['white','dark','note'].map(t=>`<button class="${t==cur?'on':''}" data-a="tone" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div><div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar"><button data-a="mclose">[닫기]</button></div>`}
+// [크기] 연·월 선택 팝업도 CSS 의 .pk (3칸 균등 격자, 칸 간격 6px, 선택된 값은 --sel 배경)를 그대로 사용
   else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
   else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tcancel">[닫기]</button><button data-a="tdone">[완료]</button></div>';
+// [크기] 이미지 관리 팝업의 업로드 라벨도 inline style 로 클릭 가능 표시(cursor:pointer)만 지정, 크기는 기본값
   else if(k=='img')h='<div class="meta">x로 지운 이미지는 [저장] 시 저장소에서도 삭제됩니다</div><label style="cursor:pointer">[이미지 업로드]<input type="file" id="e-img" accept="image/*" multiple class="hide"></label>'+[...S.draft.body.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)].map(m=>`<div class="row">${esc(m[1])} <button data-a="rmimg" data-v="${esc(m[0])}">x</button></div>`).join('')+`<div class="bar">${X}</div>`;
   else if(k=='music')h=musicHTML();
   b.innerHTML=h;
@@ -408,6 +567,7 @@ document.addEventListener('change',async e=>{
   }
 });
 
+// [컬러] 안내/오류 메시지 글자색: var(--logo) 즉 로고와 같은 붉은색 (톤에 따라 #a00014 또는 dark 톤의 #e5533d)
 const msg=t=>{let m=$('#amsg');if(!m){m=document.createElement('span');m.id='amsg';m.style.color='var(--logo)';$('#mbox').appendChild(m)}m.textContent=t};
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 async function authStep(){
@@ -434,6 +594,7 @@ document.addEventListener('click',e=>{if(e.target.closest('[data-a="authok"]'))a
 function setLogo(){
   const i=$('#logoimg'),L=$('#logo a'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
   delete L.dataset.t;i.style.display='';
+// [크기] 로고 이미지(i)는 CSS 의 #logo img{height:27px} 크기로 표시. 이미지 로딩에 실패하면 display:none 으로 숨기고 'LOGO' 글자(20px, --logo 색)로 대체
   i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='LOGO'}};
   i.src=f;
 }
