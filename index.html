@@ -33,7 +33,7 @@
 :root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c2c0b6;--lo:#8a887f;--line:#43423e;--dot:#6fa3f2;--sel:#3b4a63;--logo:#e5533d}
 :root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#6b5f4c;--lo:#a09580;--line:#d2c6a6;--rule:#e8dfc0;--dot:#4f86d9;--sel:#ecd99a}
 :root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
-:root[data-tone=note] .body{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
+:root[data-tone=note] .tx{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
 :root[data-tone=dark] #modal{background:rgba(0,0,0,.5)}
 .row2{display:flex;align-items:center;gap:14px;margin:6px 0}
 .row2>span:first-child{width:76px;flex:none;color:var(--lo)}
@@ -92,6 +92,7 @@ article{font-family:"Noto Serif KR",serif;border:1px solid var(--line);padding:3
 .meta{color:var(--lo);font-size:12px;letter-spacing:1px}
 h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .body{white-space:pre-wrap;font-family:"Noto Serif KR",serif;line-height:1.95;color:var(--mid)}
+.tx{white-space:pre-wrap}
 .body img{display:block;max-width:100%;margin:16px 0}
 .act{position:sticky;top:6px;float:right;margin:-28px -32px 0 0;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
 .plist div{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
@@ -208,7 +209,13 @@ async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const
 const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
 const purge=async(c,keep)=>{for(const p of new Set(c))if(!keep.has(p))await del(p).catch(()=>{})};
 function body(t){
-  return esc(t).replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,a,u)=>`<img src="${S.blob[u]||u}" data-p="${u}" alt="${a}" onerror="imgFix(this)">`);
+  const parts=String(t).split(/(!\[[^\]]*\]\([^)]+\))/),last=parts.length-1;
+  return parts.map((x,i)=>{
+    const m=x.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if(m)return `<img src="${S.blob[m[2]]||m[2]}" data-p="${esc(m[2])}" alt="${esc(m[1])}" onerror="imgFix(this)">`;
+    if(i>0)x=x.replace(/^\n/,'');if(i<last)x=x.replace(/\n$/,'');
+    return x?`<div class="tx">${esc(x)}</div>`:'';
+  }).join('');
 }
 function renderArt(){
   const a=$('#art');
@@ -291,6 +298,7 @@ function renderModal(){
   b.innerHTML=h;
   const f=b.querySelector('input:not([type=checkbox]):not([type=file])');if(f)f.focus();
 }
+const toTop=()=>{$('#art').scrollTop=0;window.scrollTo(0,0)};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fld=d=>JSON.stringify([d.date,d.title,d.body,(d.tags||[]).join(','),!!d.hidden]);
 const getDraft=()=>{try{return JSON.parse(localStorage.draft||'null')}catch(e){return null}};
@@ -301,7 +309,7 @@ const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:
 window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
 document.addEventListener('input',e=>{if(S.mode=='edit'&&e.target.closest('.ed')){try{syncDraft();localStorage.draft=JSON.stringify(S.draft)}catch(x){}}});
 window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
-  Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal()});
+  Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()});
 // ---- 이벤트 ----
 const go=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth();S.modal=null;renderCal();renderModal()};
 const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
@@ -320,12 +328,12 @@ document.addEventListener('click',async e=>{
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
   else if(a=='sy')go(+v,S.m);
   else if(a=='sm')go(S.y,+v);
-  else if(a=='home'){e.preventDefault();const v=vis()[0];Object.assign(S,{tag:null,pid:v?v.id:null,date:v?v.date:null,mode:'view',modal:null});const d=v?new Date(v.date+'T00:00'):new Date();S.y=d.getFullYear();S.m=d.getMonth();render();renderModal()}
+  else if(a=='home'){e.preventDefault();const v=vis()[0];Object.assign(S,{tag:null,pid:v?v.id:null,date:v?v.date:null,mode:'view',modal:null});const d=v?new Date(v.date+'T00:00'):new Date();S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()}
   else if(a=='prev')go(S.y,S.m-1);
   else if(a=='next')go(S.y,S.m+1);
-  else if(a=='day'){pick({date:v});S.pid=null;render()}
-  else if(a=='tag'){pick({tag:v});render()}
-  else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal()}
+  else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
+  else if(a=='tag'){pick({tag:v});render();toTop()}
+  else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal();toTop()}
   else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
   else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
   else if(a=='cancel'){if(!leave())return;dropDraft();await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
