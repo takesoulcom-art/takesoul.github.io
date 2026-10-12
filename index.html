@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- [보안] CSP: 인라인 script 는 아래 sha256 해시와 일치하는 것만 실행됨. 스크립트(특히 맨 아래 메인 스크립트)를 고치면 해시가 바뀌므로
+     반드시 `python3 update-csp.py index.html` 을 다시 실행할 것 (안 하면 사이트가 동작하지 않음). 인라인 이벤트(onclick 등)는 쓰지 않음 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-PfCMKyJRrSJ7SUO2YVGI+zYCcjQ6Su7s7BAj24l84mw=' 'sha256-7UUoUl1Sxh7DvOOCQwnzerxaV/coCUdNfxLG3ck+gDg=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -20,8 +23,8 @@
 <!-- [컬러] 방문자가 마지막에 고른 톤(white / dark / note)을 localStorage 에서 읽어 html 태그의 data-tone 속성으로 먼저 적용
      이 값에 따라 아래 CSS 의 :root[data-tone=...] 색상 세트가 선택됨 (페이지가 그려지기 전에 실행되므로 색 깜빡임이 없음)
      저장된 값이 없으면 white 가 기본 -->
-<script>try{document.documentElement.dataset.tone=localStorage.tone||"note"}catch(e){}</script>
-<script>try{if(sessionStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
+<script>try{document.documentElement.dataset.tone=localStorage.tone||"note"}catch(e){}
+try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JC6PD25F8X"></script>
 <script>
@@ -51,22 +54,26 @@
    --bg   : 페이지 전체 배경색 (#fafbfb, 거의 흰색)
    --ink  : 가장 진한 글자색 - 제목, 선택된 항목, 글 있는 날짜 숫자 (#222)
    --mid  : 중간 농도 글자색 - 본문, 일반 메뉴, 버튼, 글 없는 날짜 (#666)
-   --lo   : 가장 연한 글자색 - 요일, 글 날짜(meta), 보조 설명 (#999)
+   --lo   : 가장 연한 글자색 - 요일, 글 날짜(meta), 보조 설명 (#737373, 작은 글씨 가독성을 위해 #999 에서 높임. 배경 #fafbfb 기준 명암비 약 4.6:1)
    --line : 1px 선 색 - 헤더 아래선, 글 카드 테두리, 입력창 테두리, Tags 위 선 (#bbb)
    --dot  : 글이 있는 날짜 아래의 푸른 점 색 (#5b95e8)
+   --hid  : [관리자 전용] 숨김 글만 있는 날짜 아래의 점 색, 주황 (#d9822b) - 일반 방문자에게는 이 점이 아예 만들어지지 않음
+   --sans / --serif : 글꼴 목록. 설치돼 있으면 Noto 를 쓰고, 없으면 Windows(맑은 고딕/바탕) → macOS·iOS(Apple SD Gothic Neo/AppleMyungjo) → Android(Noto CJK) 순으로 각 기기 기본 한글 폰트를 사용 (웹폰트는 불러오지 않음)
    --sel  : 선택된 날짜 원 / 연·월 선택 버튼 배경색, 연한 파랑 (#cfe0fb)
    --logo : 로고 이미지가 없을 때 대신 나오는 'LOGO' 글자색, 붉은색 (#a00014) */
-:root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#999;--line:#bbb;--dot:#5b95e8;--sel:#cfe0fb;--logo:#a00014}
+:root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#737373;--line:#bbb;--dot:#5b95e8;--hid:#d9822b;--sel:#cfe0fb;--logo:#a00014;
+--sans:"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+--serif:"Noto Serif KR","Noto Serif CJK KR","AppleMyungjo","Batang","바탕",serif}
 /* [컬러] 'dark' 톤 색상 변수 - 항목 의미는 위 white 톤과 같고 값만 어두운 배경용으로 바뀜
    color-scheme:dark = 스크롤바·입력창·체크박스 등 브라우저 기본 UI 도 어둡게
-   배경 #262624 / 진한글자 #faf9f5 / 중간글자 #c2c0b6 / 연한글자 #8a887f / 선 #43423e / 점 #6fa3f2 / 선택 #3b4a63 / 로고글자 #e5533d */
-:root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c2c0b6;--lo:#8a887f;--line:#43423e;--dot:#6fa3f2;--sel:#3b4a63;--logo:#e5533d}
+   배경 #262624 / 진한글자 #faf9f5 / 중간글자 #c2c0b6 / 연한글자 #94928a(가독성 위해 #8a887f 에서 높임) / 선 #43423e / 점 #6fa3f2 / 숨김글 점 #e0a04a / 선택 #3b4a63 / 로고글자 #e5533d */
+:root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c2c0b6;--lo:#94928a;--line:#43423e;--dot:#6fa3f2;--hid:#e0a04a;--sel:#3b4a63;--logo:#e5533d}
 /* [컬러] 'note' 톤(노트 느낌) 색상 변수 - 항목 의미는 white 톤과 같음. 추가 변수 2개:
    --paper : 글 카드·메뉴 상자·수정 버튼줄의 '종이' 배경색 (#fbf6e3)  ← 페이지 배경(--bg #f3ebd4)보다 한 단계 밝음
    --rule  : 본문에 깔리는 노트 가로줄 색 (#e8dfc0)
-   나머지: 진한글자 #3b3226 / 중간글자 #6b5f4c / 연한글자 #a09580 / 선 #d2c6a6 / 점 #4f86d9 / 선택(노란 형광) #ecd99a
+   나머지: 진한글자 #3b3226 / 중간글자 #6b5f4c / 연한글자 #726652(가독성 위해 #a09580 에서 높임) / 숨김글 점 #2e8b57(초록) / 선 #d2c6a6 / 점 #4f86d9 / 선택(노란 형광) #ecd99a
    (--logo 는 여기 없으므로 white 톤의 #a00014 를 그대로 사용) */
-:root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#6b5f4c;--lo:#a09580;--line:#d2c6a6;--rule:#e8dfc0;--dot:#654321;--sel:#ecd99a}
+:root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#6b5f4c;--lo:#726652;--line:#d2c6a6;--rule:#e8dfc0;--dot:#654321;--hid:#2e8b57;--sel:#ecd99a}
 /* [컬러] note 톤에서만 글 카드(article), 수정 버튼줄(.act), 메뉴 상자(#mbox)의 배경을 --paper(종이색)로 바꿈 */
 :root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
 /* [폰트·높이] note 톤에서만 본문 글줄(.tx)에 노트 줄 무늬를 깖
@@ -90,11 +97,11 @@
 /* [폰트] 모바일에서 가로/세로 전환 시 글자가 자동으로 커지는 것을 막음 (크기를 직접 지정한 대로 유지) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* [폰트·컬러] 사이트 기본 글자 설정 (body)
-   font:13px/1.7 ... = 기본 글자 크기 13px / 줄 간격 1.7배 / 글꼴 Noto Sans KR → 시스템 기본 고딕
+   font:13px/1.7 ... = 기본 글자 크기 13px / 줄 간격 1.7배 / 글꼴 var(--sans) (Noto Sans KR → 각 OS 기본 한글 고딕)
    background:var(--bg) = 페이지 배경색, color:var(--ink) = 기본 글자색
    height:100dvh + overflow:hidden = 화면 높이에 딱 맞추고 body 자체는 스크롤하지 않음 (글·왼쪽 영역이 각자 안에서 스크롤)
    ※ 13px 를 바꾸면 이 값을 상속하는 버튼·입력창·메뉴 글자 크기가 함께 바뀜 */
-body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 "Noto Sans KR",system-ui,sans-serif;height:100dvh;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 var(--sans);height:100dvh;overflow:hidden}
 /* [폰트·컬러] 버튼/입력창/글쓰기 칸이 브라우저 기본 글꼴 대신 body 의 글꼴·크기(13px)·글자색을 그대로 쓰도록 상속, 테두리·배경·안쪽 여백은 모두 제거 */
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
@@ -201,6 +208,8 @@ aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
    width:4px; height:4px; border-radius:50% = 지름 4px 원 / background:var(--dot) = 점 색
    left:50% + margin-left:-2px = 셀 가로 가운데(점 폭 4px 의 절반만큼 보정) / bottom:0 = 셀 맨 아래 */
 .d.has::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dot)}
+/* [컬러] 관리자 전용: 숨김 글만 있는 날짜(.hid)는 점 색을 --hid(주황/초록)로 구분 (공개 글이 함께 있는 날은 기존 점 색) */
+.d.has.hid::after{background:var(--hid)}
 /* [크기·컬러] 선택된 날짜 숫자 뒤 원: 가로 26px x 세로 26px(line-height 도 26px 로 숫자를 원 가운데에), 완전한 원(border-radius:50%), 배경 --sel */
 .d.sel span{background:var(--sel);display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%}
 /* [컬러·간격] Tags 영역: 위쪽 1px 구분선(--line) + 선과 'Tags' 글자 사이 안쪽 여백 16px */
@@ -214,13 +223,13 @@ aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 /* [폰트·컬러·크기] 글 영역(article) 카드
    font-family:Noto Serif KR = 글 영역은 명조(세리프) 글꼴, 글자 크기는 body 상속(13px) / border:1px solid var(--line) = 1px 테두리
    padding:36px 40px = 안쪽 여백 위아래 36px, 좌우 40px / overflow-y:auto = 글이 길면 이 카드 안에서 스크롤 */
-article{font-family:"Noto Serif KR",serif;border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
+article{font-family:var(--serif);border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
 /* [폰트·컬러] 글 위 날짜·태그줄(.meta): 크기 12px, 색 --lo(연한 글자), 글자 사이 1px */
 .meta{color:var(--lo);font-size:12px;letter-spacing:1px}
 /* [폰트·간격] 글 제목(h2): 크기 20px, 굵기 400(보통), 바깥 여백 위 12px / 좌우 0 / 아래 28px (제목과 본문 사이 간격) */
 h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 /* [폰트·컬러] 글 본문(.body): 명조, 줄 간격 1.95배, 글자색 --mid, white-space:pre-wrap = 입력한 줄바꿈·공백 그대로 표시 (글자 크기는 body 의 13px 상속) */
-.body{white-space:pre-wrap;font-family:"Noto Serif KR",serif;line-height:1.95;color:var(--mid)}
+.body{white-space:pre-wrap;font-family:var(--serif);line-height:1.95;color:var(--mid)}
 .tx{white-space:pre-wrap}
 /* [크기] 본문 속 이미지: 최대 폭 100%(글 영역 폭을 넘지 않음), 위아래 바깥 여백 16px */
 .body img{display:block;max-width:100%;margin:16px 0}
@@ -236,7 +245,7 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 /* [간격] 글쓰기 화면(.ed): 입력칸들을 세로로 쌓고 칸 사이 gap:8px, 위쪽 바깥 여백 20px */
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
 /* [높이·폰트] 글쓰기 본문 입력칸(textarea): 최소 높이 300px, 명조 글꼴 */
-.ed textarea{min-height:300px;font-family:"Noto Serif KR",serif}
+.ed textarea{min-height:300px;font-family:var(--serif)}
 /* [간격·정렬] .wx = 글쓰기 화면의 날씨 이모지 선택줄: 날씨 입력칸 바로 아래에 가로로 나열, 한 줄에 다 안 들어가면 다음 줄로(flex-wrap), 이모지 사이 gap:4px */
 .wx{display:flex;flex-wrap:wrap;gap:4px}
 /* [폰트·크기·터치] 이모지 버튼: 글자(이모지) 크기 20px, 최소 40px x 40px 터치 영역, 안쪽 여백 6px, 평소엔 테두리 없음(투명 1px 테두리로 선택 시 크기 변화 방지) */
@@ -247,6 +256,10 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 /* [간격·컬러] .chip: 글자 사이 4px, 오른쪽 간격 10px, 글자색 --mid */
 .chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
 .hide{display:none!important}
+/* [정렬·컬러] 인라인 토스트(#toast): 화면 아래 가운데에 잠깐 떴다 사라지는 알림. 저장/삭제 실패 등 alert 대신 사용
+   z-index:20 = 팝업(#modal, 9) 위에 표시 / pointer-events:none = 클릭을 가로막지 않음 / .err = 오류는 --logo(붉은색) 배경 */
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
+#toast.on{display:block}#toast.err{background:var(--logo);color:#fff}
 /* ================================================================================
    [모바일] 화면 폭 760px 이하(스마트폰 세로)일 때만 적용되는 설정 - 위의 PC 설정을 아래 값으로 덮어씀
      · 760 이라는 기준 폭을 바꾸려면 위 @media(max-width:760px) 의 숫자를 수정
@@ -291,6 +304,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
   <article id="art"></article>
 </main>
 </div>
+<div id="toast" role="status" aria-live="polite"></div>
 <audio id="au"></audio>
 <script>
 // ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
@@ -299,7 +313,9 @@ const O=CFG.owner||location.hostname.split('.')[0];
 const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:sessionStorage.gk||'',admin:!!sessionStorage.gk,editTags:false,mOpen:false,cur:-1,playing:false,draft:null};
+// [로그인] 키는 기본적으로 sessionStorage(탭을 닫으면 삭제), '이 기기에서는 유지' 를 체크하면 localStorage(계속 유지)에 저장
+const KEY0=(()=>{try{return sessionStorage.gk||localStorage.gk||''}catch(e){return ''}})();
+const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:KEY0,admin:!!KEY0,mOpen:false,cur:-1,playing:false,draft:null};
 const au=$('#au');
 const WD=['일','월','화','수','목','금','토'];
 // [크기·컬러] 아이콘(SVG) 설정: 내부 좌표는 16x16(viewBox), 화면에 그려지는 크기는 width=17 / height=17(px)
@@ -328,7 +344,9 @@ const load=async(f,d)=>{
   try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
 };
 const reload=async()=>{S.full={};[S.posts,S.tags,S.music]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])])};
-const busy=async fn=>{try{await fn()}catch(e){alert('저장 실패: '+e.message)}};
+// [토스트] 화면 아래에 잠깐 떴다 사라지는 알림 (err 가 참이면 붉은색, 6초 / 아니면 3초)
+let toastT;const toast=(t,err)=>{const el=$('#toast');el.textContent=t;el.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{el.className=''},err?6000:3000)};
+const busy=async fn=>{try{await fn()}catch(e){toast('저장 실패: '+e.message,1)}};
 
 // ---- 데이터 계산 ----
 const vis=()=>S.posts.filter(p=>!p.hidden).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
@@ -337,6 +355,7 @@ function tagList(all){
   const c={};vis().forEach(p=>(p.tags||[]).forEach(t=>c[t]=(c[t]||0)+1));
   S.posts.forEach(p=>(p.tags||[]).forEach(t=>c[t]=c[t]||0));
   let names=Object.keys(c).sort((a,b)=>c[b]-c[a]);
+  if(!S.admin)names=names.filter(t=>c[t]>0); // 공개 글이 하나도 없는 태그(=숨김 글에만 달린 태그)는 방문자에게 노출하지 않음
   const o=S.tags.order.filter(t=>names.includes(t));
   names=[...o,...names.filter(t=>!o.includes(t))];
   return names.filter(t=>all||!S.tags.hidden.includes(t)).map(t=>[t,c[t]]);
@@ -345,44 +364,40 @@ function tagList(all){
 // ---- 렌더링 ----
 function renderCal(){
   const has=new Set(vis().map(p=>p.date));
-  const y0=Math.min(2026,S.y),y1=Math.max(2026,new Date().getFullYear(),S.y),yrs=[];
-  for(let y=y0;y<=y1;y++)yrs.push(y);
-  const pk=S.pick=='y'?`<div class="pk">${yrs.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`
-    :S.pick=='m'?`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`:'';
+  const hid=new Set(S.admin?S.posts.filter(p=>p.hidden&&!has.has(p.date)).map(p=>p.date):[]); // 관리자 전용: 숨김 글만 있는 날짜
   // [배치·정렬] 달력 맨 윗줄 버튼 순서: ‹(이전 달, data-a=prev) → 년도(data-a=py, 누르면 년도 선택) → 월(data-a=pm, 누르면 월 선택) → ›(다음 달, data-a=next)
   // 네 버튼이 한 줄에서 달력 가운데에 모이도록 정렬하는 값은 CSS 의 .ch (justify-content:center, gap:8px) 와 .ch>span (gap:6px)
   // 버튼 크기(터치 영역 44px 이상)는 CSS 의 .ch [data-a=py],.ch [data-a=pm] 와 .ch [data-a=prev],.ch [data-a=next] 에서 설정
   // 버튼을 누르면 아래 click 이벤트(data-a 값별 분기)가 처리하며, 이 순서를 바꿔도 동작에는 영향이 없음
   $('#calh').innerHTML=`<div class="ch"><button data-a="prev" aria-label="이전 달">‹</button><span><button data-a="py">${S.y}</button><button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
-  <button data-a="next" aria-label="다음 달">›</button></div>${pk}`;
+  <button data-a="next" aria-label="다음 달">›</button></div>`;
   const first=new Date(S.y,S.m,1).getDay(),n=new Date(S.y,S.m+1,0).getDate();
   let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>`<div class="w">${w}</div>`).join('');
   for(let i=0;i<first;i++)h+='<div></div>';
   for(let d=1;d<=n;d++){
     const ds=`${S.y}-${String(S.m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    h+=`<div class="d ${has.has(ds)?'has':''} ${S.date==ds?'sel':''}" ${has.has(ds)?`data-a="day" data-v="${ds}"`:''}><span>${d}</span></div>`;
+    const on=has.has(ds)||hid.has(ds);
+    h+=`<div class="d ${on?'has':''} ${hid.has(ds)?'hid':''} ${S.date==ds?'sel':''}" ${on?`data-a="day" data-v="${ds}"`:''}><span>${d}</span></div>`;
   }
   $('#cal').innerHTML=h;
 }
 function renderTags(){
-  let h=`<h4><span>Tags</span>${S.admin?`<button data-a="tedit">${S.editTags?'완료':'Edit'}</button>`:''}</h4>`;
-  const L=tagList(S.admin&&S.editTags);
-  h+=L.map(([t,n],i)=>S.editTags
-    ?`<div class="tag"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''} title="숨김"> # ${esc(t)} (${n})
-      <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`
-    :`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('');
+  let h=`<h4><span>Tags</span>${S.admin?'<button data-a="tedit">Edit</button>':''}</h4>`;
+  h+=tagList(false).map(([t,n])=>`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('');
   $('#tags').innerHTML=h||'<h4>Tags</h4>';
 }
 S.blob={};S.up=[];S.full={};
 async function loadPost(id){if(S.full[id])return S.full[id];const p=await load(`data/${id.slice(0,4)}/${id}.json`,null);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
 async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
+// 이미지 로딩 실패 시(관리자가 방금 올려 아직 배포 전인 이미지) 토큰으로 직접 받아오기 - error 는 버블링되지 않으므로 capture 로 수신 (인라인 onerror 는 CSP 때문에 사용 불가)
+document.addEventListener('error',e=>{if(e.target.tagName=='IMG'&&e.target.dataset.p)imgFix(e.target)},true);
 const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
 const purge=async(c,keep)=>{for(const p of new Set(c))if(!keep.has(p))await del(p).catch(()=>{})};
 function body(t){
   const parts=String(t).split(/(!\[[^\]]*\]\([^)]+\))/),last=parts.length-1;
   return parts.map((x,i)=>{
     const m=x.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
-    if(m)return `<img src="${S.blob[m[2]]||m[2]}" data-p="${esc(m[2])}" alt="${esc(m[1])}" onerror="imgFix(this)">`;
+    if(m)return `<img src="${esc(S.blob[m[2]]||m[2])}" data-p="${esc(m[2])}" alt="${esc(m[1])}">`;
     if(i>0)x=x.replace(/^\n/,'');if(i<last)x=x.replace(/\n$/,'');
     return x?`<div class="tx">${esc(x)}</div>`:'';
   }).join('');
@@ -446,8 +461,8 @@ function renderMusic(){
 function musicHTML(){
 // [크기] 음악 목록의 체크박스(.mck): inline style="width:auto" = CSS 의 폭 100% 를 해제해 체크박스 본래 크기(12px)로 표시
 // 곡 제목 줄 자체의 높이·간격·색은 CSS 의 #mbox .row (줄 높이 2px 안쪽 여백, 색 --mid, 재생 중 --ink 굵게) 에서 설정
-  return '<div class="mh">요즘 듣는 음악</div>'+S.music.map((t,i)=>`<div class="row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${S.admin?`<input type="checkbox" class="mck" data-i="${i}" style="width:auto" onclick="event.stopPropagation()">`:''}${esc(t.name)}</div>`).join('')+
-    `<div class="bar"><button data-a="mtoggle">[닫기]</button>${S.admin?`<label style="cursor:pointer">[업로드]<input type="file" id="m-up" accept="audio/*" multiple class="hide"></label><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button>`:''}</div>`;
+  return '<div class="mh">요즘 듣는 음악</div>'+S.music.map((t,i)=>`<div class="row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${S.admin?`<input type="checkbox" class="mck" data-i="${i}" style="width:auto">`:''}${esc(t.name)}</div>`).join('')+
+    `<div class="bar"><button data-a="mtoggle">[닫기]</button>${S.admin?`<label style="cursor:pointer">[업로드]<input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg" multiple class="hide"></label><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button>`:''}</div>`;
 }
 const render=()=>{renderCal();renderTags();renderArt();renderMusic();renderModal()};
 
@@ -462,6 +477,9 @@ au.onerror=async()=>{const f=S.music[S.cur]&&S.music[S.cur].file;
   if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
   S.playing=false;renderMusic()};
 
+// [이미지 위치] 글쓰기 칸(#e-body)에서 포커스가 빠질 때(이미지 관리 버튼 클릭 등) 커서 위치를 기억 → 이미지 업로드 시 그 위치에 삽입
+// 커서를 둔 적이 없으면(S.caret=null) 예전처럼 본문 맨 끝에 추가
+document.addEventListener('focusout',e=>{if(e.target.id=='e-body')S.caret=e.target.selectionStart});
 const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date').value,title:g('e-title').value,body:g('e-body').value,weather:g('e-wx').value.trim(),tags:g('e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:g('e-hid').checked})};
 function renderModal(){
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
@@ -507,11 +525,12 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
   await busy(saveMusic);S.lock=0;renderMusic();document.querySelectorAll('.mck').forEach((c,k)=>c.checked=k==j)};
 
 document.addEventListener('click',async e=>{
+  if(e.target.closest('.mck'))return; // 곡 선택 체크박스를 눌러도 재생되지 않게 (예전 인라인 onclick stopPropagation 대체)
   const el=e.target.closest('[data-a]');if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
   if(['day','tag','open','home'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
-  if(a=='menu'){S.modal='auth';S.mstep=S.admin?'out':'pw';renderModal()}
-  else if(a=='logout'){delete sessionStorage.gk;location.reload()}
+  if(a=='menu'){S.modal='auth';renderModal()}
+  else if(a=='logout'){try{delete sessionStorage.gk;delete localStorage.gk}catch(x){}location.reload()}
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
   else if(a=='sy')go(+v,S.m);
   else if(a=='sm')go(S.y,+v);
@@ -521,14 +540,14 @@ document.addEventListener('click',async e=>{
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
   else if(a=='tag'){pick({tag:v});render();toTop()}
   else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal();toTop()}
-  else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
-  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.caret=null;S.mode='edit';renderArt()}
+  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.caret=null;S.mode='edit';renderArt()}
   else if(a=='cancel'){if(!leave())return;dropDraft();await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
   else if(a=='rmimg'){syncDraft();S.draft.body=S.draft.body.replace(v,'');renderArt();renderModal()}
   else if(a=='save'){
     const d={...S.draft,date:$('#e-date').value,title:$('#e-title').value.trim(),weather:$('#e-wx').value.trim(),body:$('#e-body').value,
       tags:$('#e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:$('#e-hid').checked};
-    if(!d.title||!d.date||!d.tags.length){alert('날짜, 제목, Tags는 필수입니다.');return}
+    if(!d.title||!d.date||!d.tags.length){toast('날짜, 제목, Tags는 필수입니다.',1);return}
     const base=await load('data/index.json',S.posts),pre=d.date.replace(/-/g,'');
     if(!d.id){const n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+String(n).padStart(2,'0')}
     const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'';
@@ -537,14 +556,14 @@ document.addEventListener('click',async e=>{
       const arr=[...base],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;
       await saveJSON('data/index.json',arr);S.posts=arr;S.full[d.id]={...m,weather:d.weather||'',body:d.body};
       await purge([...imgsOf(old),...S.up],new Set(imgsOf(d.body)));
-    }catch(e){alert('저장 실패: '+e.message);return}
+    }catch(e){toast('저장 실패: '+e.message,1);return}
     dropDraft();S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
     const dt=new Date(d.date+'T00:00');S.y=dt.getFullYear();S.m=dt.getMonth();render();
   }
   else if(a=='delpost'){if(!confirm('이 글을 삭제할까요?'))return;
     const id=S.pid,fp=await loadPost(id),gone=imgsOf(fp&&fp.body);
     try{const arr=(await load('data/index.json',S.posts)).filter(x=>x.id!=id);await saveJSON('data/index.json',arr);S.posts=arr;delete S.full[id];
-      await del(`data/${id.slice(0,4)}/${id}.json`);await purge(gone,new Set())}catch(e){alert('삭제 실패: '+e.message);return}
+      await del(`data/${id.slice(0,4)}/${id}.json`);await purge(gone,new Set())}catch(e){toast('삭제 실패: '+e.message,1);return}
     pick({});render()}
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
@@ -574,17 +593,20 @@ document.addEventListener('click',async e=>{
 
 document.addEventListener('change',async e=>{
   const t=e.target;
-  if(t.dataset.c=='y')go(+t.value,S.m);
-  if(t.dataset.c=='m')go(S.y,+t.value);
   const rd=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
   if(t.id=='e-img'){
     syncDraft();
     await busy(async()=>{for(const f of t.files){const p='img/'+(S.draft.date||new Date().toISOString()).slice(0,4)+'/'+Date.now()+'-'+f.name.replace(/[^\w.\-]/g,'_');
-      S.blob[p]=URL.createObjectURL(f);S.up.push(p);await put(p,await rd(f));S.draft.body+=`\n![${f.name.replace(/\.[^.]+$/,'')}](${p})\n`}});
+      S.blob[p]=URL.createObjectURL(f);S.up.push(p);await put(p,await rd(f));
+      const b=S.draft.body,at=S.caret==null?b.length:Math.min(S.caret,b.length),pre=b.slice(0,at),tag=(pre&&!pre.endsWith('\n')?'\n':'')+`![${f.name.replace(/\.[^.]+$/,'')}](${p})\n`;
+      S.draft.body=pre+tag+b.slice(at);S.caret=at+tag.length}});
     renderArt();renderModal();
   }
   if(t.id=='m-up'){
-    await busy(async()=>{try{for(const f of t.files){const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
+    const okf=[...t.files].filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));
+    if(okf.length<t.files.length)toast('mp3 / m4a / ogg 파일만 올릴 수 있습니다.',1);
+    if(!okf.length)return;
+    await busy(async()=>{try{for(const f of okf){const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
       S.blob[p]=URL.createObjectURL(f);await put(p,await rd(f));
       const e={name:f.name.replace(/\.[^.]+$/,''),file:p},i=S.music.findIndex(m=>m.file==p);i<0?S.music.push(e):S.music[i]=e}}finally{await saveMusic()}});
     renderMusic();
@@ -598,7 +620,8 @@ async function authStep(){
   const pw=$('#pw'),gk=$('#gk');
   if(pw){
     if(await sha(pw.value.trim())!==CFG.gate){msg('코드가 맞지 않습니다.');return}
-    $('#krow').innerHTML='<span>관리자 모드</span><input id="gk" type="password" placeholder="GitHub 키(토큰)" autocomplete="off"><button data-a="authok">[확인]</button>';$('#gk').focus();
+    $('#krow').innerHTML='<span>관리자 모드</span><input id="gk" type="password" placeholder="GitHub 키(토큰)" autocomplete="off"><button data-a="authok">[확인]</button>';
+    $('#krow').insertAdjacentHTML('afterend','<label class="row2"><span></span><span><input type="checkbox" id="keep">이 기기에서는 유지</span></label>');$('#gk').focus();
   }else if(gk){
     const k=gk.value.replace(/\s/g,'');
     if(!k){msg('키를 입력하세요.');return}
@@ -608,7 +631,7 @@ async function authStep(){
       if(!r.ok){msg(`실패(${r.status}): 저장소 ${O}/${R} 또는 키 권한을 확인하세요. 주소가 다르면 코드 상단 CFG에 owner/repo를 적으세요.`);return}
       const j=await r.json();
       if(j.permissions&&j.permissions.push===false){msg('이 키에는 쓰기 권한이 없습니다. (Contents: Read and write 필요)');return}
-      S.key=k;sessionStorage.gk=k;S.admin=true;S.modal=null;renderModal();window['ga-disable-G-JC6PD25F8X']=true;await reload();render();
+      S.key=k;try{if($('#keep')&&$('#keep').checked){localStorage.gk=k;delete sessionStorage.gk}else{sessionStorage.gk=k;delete localStorage.gk}}catch(x){}S.admin=true;S.modal=null;renderModal();window['ga-disable-G-JC6PD25F8X']=true;await reload();render();
     }catch(err){msg('오류: '+err.message)}
   }
 }
@@ -627,6 +650,8 @@ setLogo();
 const track=p=>{if(S.lt!=p.id){S.lt=p.id;if(!S.admin)try{gtag('event','view_post',{post_id:p.id,post_title:p.title})}catch(e){}}};
 // ---- 시작 ----
 (async()=>{
+  if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'}});
+    if(r.status==401){try{delete sessionStorage.gk;delete localStorage.gk}catch(x){}S.key='';S.admin=false;toast('저장된 키가 만료되어 로그아웃되었습니다.',1)}}catch(e){}}
   await reload();
   const hv=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden)),v=hv||vis()[0],d=v?new Date(v.date+'T00:00'):new Date();
   S.y=d.getFullYear();S.m=d.getMonth();if(v){S.pid=v.id;S.date=v.date}
