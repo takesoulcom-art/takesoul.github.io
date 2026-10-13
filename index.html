@@ -3,9 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- [보안] CSP: 인라인 script 는 아래 sha256 해시와 일치하는 것만 실행됨. 스크립트(특히 맨 아래 메인 스크립트)를 고치면 해시가 바뀌므로
-     반드시 `python3 update-csp.py index.html` 을 다시 실행할 것 (안 하면 사이트가 동작하지 않음). 인라인 이벤트(onclick 등)는 쓰지 않음 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-PfCMKyJRrSJ7SUO2YVGI+zYCcjQ6Su7s7BAj24l84mw=' 'sha256-PJQDcx6wNiZc4ghLjsPuEcj0q2dr8XkQEVfvU7kLj1Q=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-S1XrTnXt2JbIsIpq+k81szSmKvXK1T7WUeBnWI+QQ2M=' 'sha256-0A5WUyiuTj/OXR9e1BKfHtHZ89jI2tb3x0V0CtNT0ZU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -20,231 +18,89 @@
 <meta property="og:url" content="https://takesoul.com/">
 <meta property="og:locale" content="ko_KR">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoul.com/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
-<!-- [컬러] 방문자가 마지막에 고른 톤(white / dark / note)을 localStorage 에서 읽어 html 태그의 data-tone 속성으로 먼저 적용
-     이 값에 따라 아래 CSS 의 :root[data-tone=...] 색상 세트가 선택됨 (페이지가 그려지기 전에 실행되므로 색 깜빡임이 없음)
-     저장된 값이 없으면 white 가 기본 -->
 <script>try{document.documentElement.dataset.tone=localStorage.tone||"note"}catch(e){}
 try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JC6PD25F8X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-JC6PD25F8X');
 </script>
 <style>
-/* ================================================================================
-   [빠른 찾기]  CSS 에서 크기 / 색 / 정렬을 바꾸고 싶을 때 이 목록의 줄을 찾아가세요
-     · 색상 세트(톤 3종) ........ 아래 :root 3줄 (white / dark / note)
-     · 기본 글자 크기·줄 간격 ... body                  (13px / 줄간격 1.7)
-     · 전체 폭·바깥 여백 ........ .wrap                  (최대 1100px, 안쪽 여백 24px 20px)
-     · 로고 크기/색 ............. #logo, #logo img       (글자 20px, 이미지 높이 27px)
-     · 음악 / ≡ 메뉴 ............ #music, #menu
-     · 설정 팝업(메뉴·음악 목록) . #modal, #mbox, .row, .bar
-     · 좌측(달력·Tags) 폭 ....... main 의 grid-template-columns  (왼쪽 320px)
-     · 달력 셀 크기 ............. .cal, .d, .d.sel span, .d.has::after
-     · Tags 목록 ................ .tags, .tag
-     · 본문(글) 영역 ............ article, .meta, h2, .body, .act
-     · 모바일(폭 760px 이하) .... 맨 아래 @media(max-width:760px)
-   ※ 색은 직접 쓰지 않고 var(--이름) 으로 가져다 쓰므로, 색을 바꾸려면 아래 :root 의 값만 고치면 전체에 반영됨
-   ================================================================================ */
-/* [컬러] 기본 톤 'white' 색상 변수 (:root)
-   --bg   : 페이지 전체 배경색 (#fafbfb, 거의 흰색)
-   --ink  : 가장 진한 글자색 - 제목, 선택된 항목, 글 있는 날짜 숫자 (#222)
-   --mid  : 중간 농도 글자색 - 본문, 일반 메뉴, 버튼, 글 없는 날짜 (#666)
-   --lo   : 가장 연한 글자색 - 요일, 글 날짜(meta), 보조 설명 (#737373, 작은 글씨 가독성을 위해 #999 에서 높임. 배경 #fafbfb 기준 명암비 약 4.6:1)
-   --line : 1px 선 색 - 헤더 아래선, 글 카드 테두리, 입력창 테두리, Tags 위 선 (#bbb)
-   --dot  : 글이 있는 날짜 아래의 푸른 점 색 (#5b95e8)
-   --hid  : [관리자 전용] 숨김 글만 있는 날짜 아래의 점 색, 주황 (#d9822b) - 일반 방문자에게는 이 점이 아예 만들어지지 않음
-   --sans / --serif : 글꼴 목록. 설치돼 있으면 Noto 를 쓰고, 없으면 Windows(맑은 고딕/바탕) → macOS·iOS(Apple SD Gothic Neo/AppleMyungjo) → Android(Noto CJK) 순으로 각 기기 기본 한글 폰트를 사용 (웹폰트는 불러오지 않음)
-   --sel  : 선택된 날짜 원 / 연·월 선택 버튼 배경색, 연한 파랑 (#cfe0fb)
-   --logo : 로고 이미지가 없을 때 대신 나오는 'LOGO' 글자색, 붉은색 (#a00014) */
 :root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#737373;--line:#bbb;--dot:#5b95e8;--hid:#d9822b;--sel:#cfe0fb;--logo:#a00014;
 --sans:"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
 --serif:"Noto Serif KR","Noto Serif CJK KR","AppleMyungjo","Batang","바탕",serif}
-/* [컬러] 'dark' 톤 색상 변수 - 항목 의미는 위 white 톤과 같고 값만 어두운 배경용으로 바뀜
-   color-scheme:dark = 스크롤바·입력창·체크박스 등 브라우저 기본 UI 도 어둡게
-   배경 #262624 / 진한글자 #faf9f5 / 중간글자 #c2c0b6 / 연한글자 #94928a(가독성 위해 #8a887f 에서 높임) / 선 #43423e / 점 #6fa3f2 / 숨김글 점 #e0a04a / 선택 #3b4a63 / 로고글자 #e5533d */
 :root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c2c0b6;--lo:#94928a;--line:#43423e;--dot:#6fa3f2;--hid:#e0a04a;--sel:#3b4a63;--logo:#e5533d}
-/* [컬러] 'note' 톤(노트 느낌) 색상 변수 - 항목 의미는 white 톤과 같음. 추가 변수 2개:
-   --paper : 글 카드·메뉴 상자·수정 버튼줄의 '종이' 배경색 (#fbf6e3)  ← 페이지 배경(--bg #f3ebd4)보다 한 단계 밝음
-   --rule  : 본문에 깔리는 노트 가로줄 색 (#e8dfc0)
-   나머지: 진한글자 #3b3226 / 중간글자 #6b5f4c / 연한글자 #726652(가독성 위해 #a09580 에서 높임) / 숨김글 점 #2e8b57(초록) / 선 #d2c6a6 / 점 #4f86d9 / 선택(노란 형광) #ecd99a
-   (--logo 는 여기 없으므로 white 톤의 #a00014 를 그대로 사용) */
 :root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#6b5f4c;--lo:#726652;--line:#d2c6a6;--rule:#e8dfc0;--dot:#654321;--hid:#2e8b57;--sel:#ecd99a}
-/* [컬러] note 톤에서만 글 카드(article), 수정 버튼줄(.act), 메뉴 상자(#mbox)의 배경을 --paper(종이색)로 바꿈 */
 :root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
-/* [폰트·높이] note 톤에서만 본문 글줄(.tx)에 노트 줄 무늬를 깖
-   line-height:26px = 한 줄의 높이 26px, repeating-linear-gradient 의 25px~26px 구간(두께 1px)이 --rule 색 가로줄
-   ※ 줄 무늬 간격(26px)과 line-height(26px)는 반드시 같은 값이어야 글자가 줄 위에 맞음 */
 :root[data-tone=note] .tx{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
-/* [컬러] dark 톤에서는 팝업 뒤 어두운 막(#modal)을 기본(.25)보다 진하게 rgba(0,0,0,.5) */
 :root[data-tone=dark] #modal{background:rgba(0,0,0,.5)}
-/* [정렬·높이] .row2 = 메뉴 팝업의 'Tone', '관리자 모드' 한 줄
-   display:flex + align-items:center = 가로 배치, 세로 가운데 맞춤 / gap:14px = 항목 사이 간격 / margin:6px 0 = 줄 위아래 바깥 여백 */
 .row2{display:flex;align-items:center;gap:14px;margin:6px 0}
-/* [폭·정렬·컬러] 줄의 첫 글자(라벨)는 폭 76px 로 고정(flex:none)해서 오른쪽 항목들의 시작 위치를 줄마다 같게 맞춤, 라벨 색은 --lo(연한 글자) */
 .row2>span:first-child{width:76px;flex:none;color:var(--lo)}
-/* [폭] 입력창은 flex:1 = 라벨 오른쪽의 남은 폭을 모두 차지, min-width:0 = 좁은 화면에서도 줄이 삐져나가지 않게 */
 .row2 input{flex:1;min-width:0}
-/* [컬러] 줄 안의 버튼 글자색 = --mid (중간 농도) */
 .row2 button{color:var(--mid)}
-/* [컬러·폰트] 현재 선택된 버튼(.on)은 --ink(진한 글자) + font-weight:600(굵게) */
 .row2 button.on{color:var(--ink);font-weight:600}
 *{box-sizing:border-box}
-/* [폰트] 모바일에서 가로/세로 전환 시 글자가 자동으로 커지는 것을 막음 (크기를 직접 지정한 대로 유지) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-/* [폰트·컬러] 사이트 기본 글자 설정 (body)
-   font:13px/1.7 ... = 기본 글자 크기 13px / 줄 간격 1.7배 / 글꼴 var(--sans) (Noto Sans KR → 각 OS 기본 한글 고딕)
-   background:var(--bg) = 페이지 배경색, color:var(--ink) = 기본 글자색
-   height:100dvh + overflow:hidden = 화면 높이에 딱 맞추고 body 자체는 스크롤하지 않음 (글·왼쪽 영역이 각자 안에서 스크롤)
-   ※ 13px 를 바꾸면 이 값을 상속하는 버튼·입력창·메뉴 글자 크기가 함께 바뀜 */
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 var(--sans);height:100dvh;overflow:hidden}
-/* [폰트·컬러] 버튼/입력창/글쓰기 칸이 브라우저 기본 글꼴 대신 body 의 글꼴·크기(13px)·글자색을 그대로 쓰도록 상속, 테두리·배경·안쪽 여백은 모두 제거 */
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
-/* [크기] 체크박스 크기 12px x 12px, 오른쪽 바깥 여백 4px(뒤따르는 글자와의 간격), 체크 색은 --mid */
 input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
-/* [컬러·크기] 입력창/글쓰기 칸 공통: 테두리 1px --line 색, 안쪽 여백 위아래 4px / 좌우 8px, 폭은 부모 폭 100% */
 input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
-/* [폭·정렬] 페이지 전체 틀(.wrap)
-   max-width:1100px = 화면이 아무리 커도 가로 최대 1100px / margin:0 auto = 좌우 가운데 정렬
-   padding:24px 20px = 안쪽 여백 위아래 24px, 좌우 20px / height:100dvh = 화면 높이만큼 */
 .wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
-/* [정렬·높이] 맨 위 헤더(로고 / 음악 / ≡)
-   display:flex + align-items:center = 가로 일렬 배치, 세로 가운데 / gap:16px = 로고·음악·메뉴 사이 간격
-   padding:12px 0 8px = 안쪽 위 12px, 아래 8px(좌우 0) / border-bottom:1px solid var(--line) = 아래 1px 선 */
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
-/* [정렬·폰트·컬러] 로고 영역
-   flex:1 = 헤더의 남는 폭을 전부 차지 → 로고는 왼쪽에 남고 음악·≡ 메뉴는 자연스럽게 오른쪽 끝으로 밀림 (좌/우 정렬의 핵심)
-   font-size:20px = 이미지가 없을 때 'LOGO' 글자 크기 / color:var(--logo) = 그 글자색 / letter-spacing:.5px = 글자 사이 간격 */
 #logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
-/* [높이] 로고 이미지(logo.gif 등) 높이 27px, 폭은 비율에 맞춰 자동 / display:block = 이미지 아래 불필요한 빈 줄 제거 */
 #logo img{height:27px;display:block}
 #logo a{display:inline-block;vertical-align:top;color:inherit;text-decoration:none}
 #logo a[data-t]::before{content:attr(data-t)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-/* [정렬·컬러] 음악 영역(♬ 곡명, ▶, ▶|): 가로 일렬·세로 가운데, 항목 간격 gap:10px, 글자색 --mid */
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
-/* [크기·컬러] 음악 버튼 클릭 영역: 안쪽 여백 위아래 6px / 좌우 4px (아이콘 자체 크기는 아래 JS 의 sv() 에서 17px) */
 #music button{color:var(--mid);display:flex;align-items:center;padding:6px 4px}
 #music svg{display:block}
-/* [폰트·컬러] 오른쪽 위 ≡ 메뉴 버튼: 글자 크기 20px, 색 --mid (헤더 맨 오른쪽에 위치) */
 #menu{font-size:20px;color:var(--mid)}
-/* [컬러·정렬] #modal = 메뉴/음악 목록/Tags 편집 등이 뜨는 전체 화면 반투명 막
-   background:rgba(0,0,0,.25) = 검정 25% 투명도(뒤 화면이 어둡게 비침)
-   align-items:center + justify-content:center = 팝업 상자를 화면 가운데(세로·가로)에 정렬 / z-index:9 = 다른 요소 위에 표시 */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
-/* [크기·컬러] #mbox = 팝업 상자 본체
-   width:min(340px,90vw) = 가로 340px, 단 화면이 좁으면 화면 폭의 90% / max-height:80vh = 높이는 화면의 80%까지(넘으면 스크롤)
-   padding:20px 24px = 안쪽 여백 위아래 20px, 좌우 24px / border:1px solid var(--line) = 1px 테두리 / background:var(--bg) = 배경색 */
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;overflow:auto}
-/* [정렬·컬러·높이] 팝업 안의 목록 한 줄(.row: 곡 목록, 이미지 목록, Tags 편집)
-   가로 배치(왼쪽부터), gap:8px = 체크박스·글자 사이 간격, padding:2px 0 = 줄 위아래 안쪽 여백 2px(줄 높이), 글자색 --mid */
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
-/* [컬러·폰트] 현재 재생 중인 곡 줄(.row.on): --ink(진한 글자) + font-weight:600(굵게) */
 #mbox .row.on{color:var(--ink);font-weight:600}
-/* [정렬·폰트·컬러] 음악 목록 제목('요즘 듣는 음악'): text-align:right = 오른쪽 정렬, 굵기 700, 색 --ink, 아래 간격 12px */
 #mbox .mh{text-align:right;font-weight:700;color:var(--ink);margin-bottom:12px}
-/* [정렬] 팝업 아래 버튼줄(.bar)에서 [닫기]/[접기]/[취소] 버튼만 오른쪽 끝으로 보냄
-   order:99 = 버튼 순서를 맨 뒤로 / margin-left:auto = 남는 왼쪽 공간을 모두 차지해 오른쪽 끝에 붙음
-   (나머지 [업로드] [삭제] ▲ ▼ 는 왼쪽부터 차례로 정렬) */
 #mbox .bar [data-a=mclose],#mbox .bar [data-a=mtoggle],#mbox .bar [data-a=tcancel]{order:99;margin-left:auto}
-/* [정렬] .pd = 글 상단 날짜(예: 2026년 5월 21일)를 오른쪽 정렬 */
 .pd{text-align:right}
-/* [정렬·간격·컬러] 팝업 아래 버튼줄(.bar): 가로 배치, 버튼 사이 gap:12px, 위쪽 바깥 여백 14px, 글자색 --mid */
 #mbox .bar{display:flex;gap:12px;margin-top:14px;color:var(--mid)}
-/* [간격] 관리자 코드 입력창(비밀번호) 아래 바깥 여백 4px (오류 메시지와 간격) */
 #mbox input[type=password]{margin-bottom:4px}
-/* [폭·높이·간격] 헤더 아래 본문 영역(main): 2단 배치
-   grid-template-columns:320px 1fr = 왼쪽 열(달력·Tags) 폭 320px 고정, 오른쪽 열(글)은 나머지 전부
-   gap:32px = 두 열 사이 간격 / margin-top:24px = 헤더와의 간격 / flex:1 = 헤더 아래 남은 높이 전부 차지 */
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
-/* [간격] 왼쪽 열(aside): 세로 배치, 달력과 Tags 사이 간격 gap:24px, 내용이 길면 이 열만 스크롤 */
 aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
-/* [폰트] 달력 제목줄(‹ 년 월 ›) 글자 크기 16px, 글자 사이 간격 1px (display 는 바로 아래 줄에서 block 으로 덮어씀, 실제 배치는 아래 .ch 가 담당) */
 .cal-h{display:flex;align-items:center;justify-content:space-between;font-size:16px;letter-spacing:1px}
 .cal-h{display:block}
-/* [정렬·간격] .ch = 달력 맨 윗줄 : '‹  년도  월  ›' 4개 버튼을 달력 폭 기준 '가운데'에 모아 정렬
-   (예전: 왼쪽 '년 월' + 오른쪽 '‹ ›' 양 끝 배치 → 변경: 이전달 / 년 / 월 / 다음달 순서로 가운데 한 묶음)
-   justify-content:center = 묶음 전체를 달력(왼쪽 열 320px, 모바일은 화면 폭) 가운데에 놓음
-   gap:8px = '‹' 버튼과 '년·월 묶음', '년·월 묶음'과 '›' 버튼 사이 간격
-   ※ 묶음을 양 끝으로 벌리고 싶으면 center 를 space-between 으로, 간격을 넓히고 싶으면 gap 값을 키움 */
 .ch{display:flex;align-items:center;justify-content:center;gap:8px}
-/* [정렬·간격] 가운데 '년도 월' 묶음(span): 두 버튼을 가로로 나란히, 세로 가운데 맞춤, 년도와 월 사이 gap:6px
-   ※ 예전에 있던 padding-right:12px(오른쪽 여백)과 margin-left:-8px(왼쪽 당김)는 가운데 정렬에 방해가 되어 제거함 */
 .ch>span{display:flex;align-items:center;gap:6px}
-/* [폰트] 년도·월·‹ › 버튼 공통 글자 크기 16px, 글자 사이 간격 1px (아래 ‹ › 는 26px 로 다시 덮어씀) */
 .ch button{font-size:16px;letter-spacing:1px}
-/* [크기·터치] 년도/월 버튼 터치 영역: 높이 최소 44px(스마트폰 권장 터치 크기), 안쪽 여백 위아래 10px / 좌우 12px
-   → 년도 버튼 폭은 글자 '2026'(약 40px) + 좌우 24px ≈ 64px, 월 버튼은 최소 약 44px
-   ※ 터치가 어려우면 min-height 와 padding 값을 키우고, 공간이 부족하면 줄임 */
 .ch [data-a=py],.ch [data-a=pm]{min-height:44px;padding:10px 12px}
-/* [폰트·크기·터치·세로정렬] ‹ › 이전/다음 달 버튼: 글자 크기 26px, line-height:1 = 글자 높이를 26px 로 고정
-   min-width:44px; min-height:44px = 가로·세로 최소 44px 터치 영역 확보, 안쪽 여백 위아래 6px / 좌우 12px, 글자 사이 간격 0
-   position:relative; top:-2px = ‹ › 글자 모양이 폰트상 년·월 숫자보다 아래로 처져 보여서 2px 위로 올려 세로 가운데를 맞춤(터치 영역은 그대로)
-   ※ 아직 아래로 보이면 top 값을 -3px, -4px 로 키우고, 위로 올라가 보이면 -1px 또는 0 으로 줄임 */
 .ch [data-a=prev],.ch [data-a=next]{min-width:44px;min-height:44px;font-size:26px;line-height:1;padding:6px 12px;letter-spacing:0;position:relative;top:-2px}
-/* [크기·정렬] 연/월 선택 판(.pk): 가로 3칸 균등 분할(repeat(3,1fr)), 칸 사이 gap:6px, 윗 간격 12px, 글자 가운데 정렬 */
 .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
-/* [크기·컬러] 선택 판의 각 버튼: 안쪽 여백 위아래 4px, 글자색 --mid */
 .pk button{padding:4px 0;color:var(--mid)}
-/* [컬러] 현재 선택된 연/월(.on): 글자 --ink, 배경 --sel (연한 파랑) */
 .pk .on{color:var(--ink);background:var(--sel)}
-/* [폭·높이·폰트] .cal = 달력 날짜 격자
-   grid-template-columns:repeat(7,1fr) = 일~토 7칸 균등 폭 (왼쪽 열 320px 를 7등분) / text-align:center = 숫자 가운데 정렬
-   margin-top:16px = 위 간격 / row-gap:10px = 주(행) 사이 간격 / font-size:12px = 날짜 숫자 크기 */
 .cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-top:16px;row-gap:10px;font-size:12px}
-/* [폰트·컬러] 요일 글자(Sun~Sat): 크기 11px, 색 --lo(연한 글자) */
 .cal .w{color:var(--lo);font-size:11px}
-/* [높이·폰트·컬러] .d = 날짜 한 칸(셀)
-   height:30px = 셀 높이 (폭은 위 7등분으로 자동) / line-height:24px = 숫자가 셀 안에서 위쪽 24px 줄에 세로 배치(아래 6px 은 푸른 점 자리) / 글자색 --mid */
 .d{height:30px;line-height:24px;position:relative;color:var(--mid)}
-/* [컬러] 글이 있는 날짜(.has): 글자색 --ink(진하게) + 클릭 가능 표시(pointer 커서) */
 .d.has{cursor:pointer;color:var(--ink)}
-/* [크기·컬러·정렬] 글 있는 날짜 아래 푸른 점
-   width:4px; height:4px; border-radius:50% = 지름 4px 원 / background:var(--dot) = 점 색
-   left:50% + margin-left:-2px = 셀 가로 가운데(점 폭 4px 의 절반만큼 보정) / bottom:0 = 셀 맨 아래 */
 .d.has::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dot)}
-/* [컬러] 관리자 전용: 숨김 글만 있는 날짜(.hid)는 점 색을 --hid(주황/초록)로 구분 (공개 글이 함께 있는 날은 기존 점 색) */
 .d.has.hid::after{background:var(--hid)}
-/* [크기·컬러] 선택된 날짜 숫자 뒤 원: 가로 26px x 세로 26px(line-height 도 26px 로 숫자를 원 가운데에), 완전한 원(border-radius:50%), 배경 --sel */
 .d.sel span{background:var(--sel);display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%}
-/* [컬러·간격] Tags 영역: 위쪽 1px 구분선(--line) + 선과 'Tags' 글자 사이 안쪽 여백 16px */
 .tags{border-top:1px solid var(--line);padding-top:16px}
-/* [정렬·폰트] 'Tags' 제목줄: 아래 간격 8px, 굵기 400(보통), 왼쪽 'Tags' / 오른쪽 'Edit' 버튼을 양 끝 정렬(space-between) */
 .tags h4{margin:0 0 8px;font-weight:400;display:flex;justify-content:space-between}
-/* [간격·컬러] Tags 한 줄(.tag): 가로 배치, '#'과 이름 사이 gap:6px, 줄 위아래 안쪽 여백 2px(줄 높이), 글자색 --mid */
 .tag{display:flex;gap:6px;color:var(--mid);padding:2px 0;cursor:pointer}
-/* [컬러·폰트] 선택된 Tag: --ink(진한 글자) + 굵게(600) */
 .tag.on{color:var(--ink);font-weight:600}
-/* [폰트·컬러·크기] 글 영역(article) 카드
-   font-family:Noto Serif KR = 글 영역은 명조(세리프) 글꼴, 글자 크기는 body 상속(13px) / border:1px solid var(--line) = 1px 테두리
-   padding:36px 40px = 안쪽 여백 위아래 36px, 좌우 40px / overflow-y:auto = 글이 길면 이 카드 안에서 스크롤 */
 article{font-family:var(--serif);border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
-/* [폰트·컬러] 글 위 날짜·태그줄(.meta): 크기 12px, 색 --lo(연한 글자), 글자 사이 1px */
 .meta{color:var(--lo);font-size:12px;letter-spacing:1px}
-/* [폰트·간격] 글 제목(h2): 크기 20px, 굵기 400(보통), 바깥 여백 위 12px / 좌우 0 / 아래 28px (제목과 본문 사이 간격) */
 h2{font-weight:400;font-size:20px;margin:12px 0 28px}
-/* [폰트·컬러] 글 본문(.body): 명조, 줄 간격 1.95배, 글자색 --mid, white-space:pre-wrap = 입력한 줄바꿈·공백 그대로 표시 (글자 크기는 body 의 13px 상속) */
 .body{white-space:pre-wrap;font-family:var(--serif);line-height:1.95;color:var(--mid)}
 .tx{white-space:pre-wrap}
-/* [크기] 본문 속 이미지: 최대 폭 100%(글 영역 폭을 넘지 않음), 위아래 바깥 여백 16px */
 .body img{display:block;max-width:100%;margin:16px 0}
-/* [정렬·간격·컬러] .act = 관리자의 [수정] [삭제] [글쓰기] 버튼줄
-   float:right = 오른쪽 정렬(글 카드 오른쪽 위에 붙임) / position:sticky; top:6px = 스크롤해도 위에서 6px 에 고정
-   margin:-28px -32px 0 0 = 위로 28px, 오른쪽으로 32px 끌어당겨 카드 안쪽 여백(36px/40px)을 뚫고 모서리 쪽에 배치
-   gap:10px = 버튼 사이 간격, 글자색 --mid, 배경 --bg(글자와 겹쳐도 가려지게) */
 .act{position:sticky;top:6px;float:right;margin:-28px -32px 0 0;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
-/* [높이·컬러] 글 목록(.plist: 날짜/태그 클릭 시 나오는 목록) 한 줄: 위아래 안쪽 여백 6px, 아래 1px 구분선 --line */
 .plist div{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
-/* [폰트·컬러] 목록 속 날짜(small): 색 --lo(연한 글자), 오른쪽 간격 10px (제목과 떨어뜨림), 크기는 small 기본값(본문보다 작게) */
 .plist small{color:var(--lo);margin-right:10px}
-/* [간격] 글쓰기 화면(.ed): 입력칸들을 세로로 쌓고 칸 사이 gap:8px, 위쪽 바깥 여백 20px */
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
-/* [이미지 첨부] 드롭존(.dz): 점선 상자, 파일을 끌어 놓으면 .over 로 배경 강조 / 썸네일(.thumbs): PC 4열, 모바일 3열 / .th 우상단 x 버튼 / 업로드 중 칸(.th.up) */
 .dz{border:1px dashed var(--mid);padding:22px 12px;text-align:center;cursor:pointer;color:var(--mid)}
 .dz small{display:block;color:var(--lo);font-size:11px;margin-top:4px}
 .dz.over{background:var(--sel);color:var(--ink)}
@@ -258,107 +114,56 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .th.up{cursor:default;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--mid);font-size:12px}
 .pbar{width:70%;height:2px;background:var(--line)}.pbar i{display:block;height:100%;background:var(--ink)}
 @media(max-width:760px){.thumbs{grid-template-columns:repeat(3,1fr)}}
-/* [크게 보기] 썸네일 클릭 팝업: 팝업 상자를 넓히고(.wide) 이미지는 화면 안에 맞춤 */
 #mbox.wide{width:min(880px,94vw)}
 #mbox .big{display:block;max-width:100%;max-height:70vh;margin:0 auto}
 #mbox .cap{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;color:var(--mid)}
-/* [높이·폰트] 글쓰기 본문 입력칸(textarea): 최소 높이 300px, 명조 글꼴 */
 .ed textarea{min-height:300px;font-family:var(--serif)}
-/* [간격·정렬] .wx = 글쓰기 화면의 날씨 이모지 선택줄: 날씨 입력칸 바로 아래에 가로로 나열, 한 줄에 다 안 들어가면 다음 줄로(flex-wrap), 이모지 사이 gap:4px */
 .wx{display:flex;flex-wrap:wrap;gap:4px}
-/* [폰트·크기·터치] 이모지 버튼: 글자(이모지) 크기 20px, 최소 40px x 40px 터치 영역, 안쪽 여백 6px, 평소엔 테두리 없음(투명 1px 테두리로 선택 시 크기 변화 방지) */
 .wx button{font-size:20px;line-height:1;min-width:40px;min-height:40px;padding:6px;border:1px solid transparent}
-/* [컬러] 마우스를 올리면 1px 테두리(--line), 이미 날씨 칸에 들어간 이모지(.on)는 배경 --sel (연한 파랑) 로 표시 */
 .wx button:hover{border-color:var(--line)}
 .wx button.on{background:var(--sel)}
-/* [간격·컬러] .chip: 글자 사이 4px, 오른쪽 간격 10px, 글자색 --mid */
 .chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
-/* ================================================================================
-   [음악 플레이어 팝업] 홈페이지 오른쪽 위 곡 제목을 누르면 뜨는 팝업 (앨범 커버 + 재생바 + 곡 목록)
-   ================================================================================ */
-/* [폭·크기] 음악 팝업일 때만 #mbox 를 넓힘: width:min(380px,92vw) = 가로 380px(좁은 화면은 92%), 안쪽 여백 위 18px / 좌우 22px / 아래 16px */
 #mbox.mp{width:min(380px,92vw);padding:18px 22px 16px}
-/* [정렬·폰트·컬러] .pl-h = 팝업 맨 윗줄(제목 · 곡 수 · 닫기 X): 가로 배치, 세로 가운데, 아래 1px 선(--line)
-   제목(b) : 명조 16px, 굵기 400, 색 --ink / 곡 수(small) : 11px, 색 --lo, margin-left:auto 로 오른쪽(닫기 X 바로 앞)으로 붙임 */
 .pl-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .pl-h b{font-family:var(--serif);font-weight:400;font-size:16px;color:var(--ink)}
 .pl-h small{margin-left:auto;font-size:11px;color:var(--lo)}
-/* [크기·터치] 닫기 X 버튼: 최소 36px x 36px 터치 영역, 색 --mid, 오른쪽 끝에 -8px 당겨 X 선이 팝업 오른쪽 선에 맞게 정렬 */
 .pl-x{min-width:36px;min-height:36px;margin-right:-8px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
-/* [크기·정렬·컬러] .pl-cover = 앨범 커버 칸: 가로·세로 150px 정사각형, margin:16px auto 10px = 가운데 정렬(위 16px / 아래 10px)
-   1px 테두리(--line), 둥근 모서리·그림자 없음. 커버가 없으면 가운데에 ♬ (크기 44px, 색 --lo) 표시 / 이미지는 칸을 꽉 채우고(object-fit:cover) 넘치는 부분은 잘림 */
 .pl-cover{width:150px;height:150px;margin:16px auto 10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:44px;line-height:1}
 .pl-cover img,.pl-th img,.pl-cv img{width:100%;height:100%;object-fit:cover;display:block}
-/* [폰트·정렬·컬러] 재생 중인 곡 제목(.pl-t): 가운데 정렬, 14px 굵게(600), 색 --ink, 길면 ... 으로 줄임 / 부제(.pl-s '2번째 곡 · 재생 중'): 가운데 정렬, 11px, 색 --lo */
 .pl-t{text-align:center;font-size:14px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pl-s{text-align:center;font-size:11px;color:var(--lo)}
-/* [간격·정렬] .pl-bar = 재생바 + 시간 줄: 가로 배치, 세로 가운데, 간격 10px, 위 14px / 아래 4px */
 .pl-bar{display:flex;align-items:center;gap:10px;margin:14px 0 4px}
-/* [폰트·컬러] 시간 글자 '1:42 / 4:27': 11px, 색 --lo, 줄바꿈 없음, 숫자 폭 고정(tabular-nums)으로 흔들림 방지 */
 .pl-time{font-size:11px;color:var(--lo);white-space:nowrap;font-variant-numeric:tabular-nums}
-/* [높이·컬러] .seek = 재생바(range): 눌러서 끌 수 있는 영역 높이 24px(터치용), 보이는 선은 1px
-   지나온 부분 --ink / 남은 부분 --line (지나온 비율은 JS 가 --p 값으로 넣어줌), 동그란 손잡이 9px x 9px 색 --ink
-   (input 공통 규칙의 테두리·여백·폭 100% 를 border:0; padding:0 으로 해제) */
 .seek{-webkit-appearance:none;appearance:none;flex:1;min-width:0;width:auto;height:24px;padding:0;border:0;background:transparent;cursor:pointer}
 .seek::-webkit-slider-runnable-track{height:1px;background:linear-gradient(to right,var(--ink) var(--p,0%),var(--line) var(--p,0%))}
 .seek::-moz-range-track{height:1px;background:var(--line)}
 .seek::-moz-range-progress{height:1px;background:var(--ink)}
 .seek::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;margin-top:-4px;border:0;border-radius:50%;background:var(--ink)}
 .seek::-moz-range-thumb{width:9px;height:9px;border:0;border-radius:50%;background:var(--ink)}
-/* [정렬·크기·터치] .pl-c = 이전 / 재생·정지 / 다음 버튼줄: 가운데 정렬, 버튼 사이 간격 18px, 각 버튼 최소 44px x 44px 터치 영역, 아이콘 22px, 색 --ink */
 .pl-c{display:flex;justify-content:center;gap:18px}
 .pl-c button{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .pl-c svg{width:22px;height:22px}
-/* [간격] .pl-list = 곡 목록: 위 12px 간격, 곡이 많으면 최대 높이 240px 에서 이 목록만 스크롤 */
 .pl-list{margin-top:12px;max-height:240px;overflow-y:auto}
-/* [높이·정렬·컬러] .pl-row = 곡 한 줄: 가로 배치(체크박스 · 번호 · 작은 커버 · 제목), 간격 10px, 줄 위아래 안쪽 여백 6px / 좌우 6px, 글자색 --mid
-   현재 곡(.on)은 배경 --sel, 글자 --ink, 굵게(600) */
 .pl-row{display:flex;align-items:center;gap:10px;padding:6px;color:var(--mid);cursor:pointer}
 .pl-row.on{background:var(--sel);color:var(--ink);font-weight:600}
-/* [크기·폰트] 곡 번호(.pl-n): 폭 16px 고정, 가운데 정렬, 11px, 색 --lo (재생 중인 곡은 번호 대신 막대 아이콘 13px) */
 .pl-n{flex:none;width:16px;text-align:center;font-size:11px;color:var(--lo)}
 .pl-n svg{width:13px;height:13px;display:block;margin:0 auto}
-/* [크기·컬러] 곡 목록의 작은 커버(.pl-th): 28px x 28px 정사각형, 1px 테두리(--line), 커버가 없으면 ♬ (13px, 색 --lo) */
 .pl-th{flex:none;width:28px;height:28px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:13px;line-height:1}
-/* [폭] 곡 제목(.pl-nm): 남는 폭을 모두 차지(flex:1), 길면 ... 으로 줄임 */
 .pl-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* [관리자 · 크기·컬러] .pl-add = 곡 추가 칸(점선 1px 테두리): 왼쪽 커버 선택 칸 56px x 56px + 오른쪽 [음악 파일 선택]/안내 글, 간격 12px, 안쪽 여백 10px, 위 간격 14px */
 .pl-add{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px;border:1px dashed var(--line)}
 .pl-cv{flex:none;width:56px;height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10.5px;line-height:1.3;text-align:center;color:var(--mid)}
 .pl-pick{color:var(--ink)}
-/* [관리자 · 폰트·컬러] 안내 글(.pl-hint): 11px, 색 --lo */
 .pl-hint{margin-top:2px;font-size:11px;line-height:1.5;color:var(--lo)}
-/* [관리자 · 정렬] [커버 변경] 버튼은 버튼줄(.bar)의 오른쪽 끝으로: margin-left:auto */
 .pl-r{margin-left:auto}
 .pl-empty{margin:16px 0 0;font-size:12px;color:var(--lo)}
 .hide{display:none!important}
-/* [정렬·컬러] 인라인 토스트(#toast): 화면 아래 가운데에 잠깐 떴다 사라지는 알림. 저장/삭제 실패 등 alert 대신 사용
-   z-index:20 = 팝업(#modal, 9) 위에 표시 / pointer-events:none = 클릭을 가로막지 않음 / .err = 오류는 --logo(붉은색) 배경 */
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
 #toast.on{display:block}#toast.err{background:var(--logo);color:#fff}
-/* ================================================================================
-   [모바일] 화면 폭 760px 이하(스마트폰 세로)일 때만 적용되는 설정 - 위의 PC 설정을 아래 값으로 덮어씀
-     · 760 이라는 기준 폭을 바꾸려면 위 @media(max-width:760px) 의 숫자를 수정
-   ================================================================================ */
 @media(max-width:760px){
-/* [모바일 높이·간격·정렬]
-   body : height:auto; overflow:auto = 화면 전체가 위아래로 스크롤 (PC 와 달리 안쪽 스크롤 없음)
-   .wrap : padding:8px 14px 48px = 안쪽 여백 위 8px, 좌우 14px, 아래 48px / display:block = 세로로 그냥 쌓음
-   header : sticky + top:0 = 스크롤해도 맨 위에 고정, 배경 --bg 로 아래 글이 비치지 않게
-   .act : margin:-12px -12px 0 0 = 수정 버튼줄을 위·오른쪽으로 12px 당김 (PC 는 -28px -32px) */
 body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{margin:-12px -12px 0 0}
-/* [모바일 폭·간격] main : 2단 → 1단(grid-template-columns:1fr = 폭 가득), 위·아래 블록 사이 gap:44px */
 main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
-/* [모바일 배치·간격]
-   article : order:1 = 글이 맨 위, 안쪽 여백 20px(PC 는 36px 40px), overflow:visible = 카드 안쪽 스크롤 대신 페이지 스크롤
-   aside : overflow:visible, gap:44px = 달력과 Tags 사이 간격(PC 는 24px) / .tags : 위 안쪽 여백 24px(PC 는 16px) */
 article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.tags{padding-top:24px}
-/* [모바일 배치] aside(달력·Tags) 는 order:2 = 글 아래에 표시 */
 aside{order:2}
-/* [모바일 정렬·폭]
-   header : flex-wrap:wrap = 한 줄에 안 들어가면 다음 줄로 넘김
-   #menu : order:2 / #music : order:3, flex-basis:100% = 음악 영역은 헤더 두 번째 줄 전체 폭, justify-content:flex-end = 오른쪽 정렬, padding-bottom:4px
-   #music [data-a=mtoggle] = 곡 제목 버튼: 폭이 모자라면 ... 으로 줄여 한 줄 유지 (ellipsis + nowrap) */
 header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
@@ -383,29 +188,22 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 <div id="toast" role="status" aria-live="polite"></div>
 <audio id="au"></audio>
 <script>
-// ---- 설정: 비워두면 주소(user.github.io/repo)에서 자동 추정 ----
 const CFG={owner:'takesoulcom-art',repo:'takesoul.github.io',branch:'',gate:'eb58deb26c6708ffd17ef704ea31045c177fccba638f133d70545847a708ac88'};
 const O=CFG.owner||location.hostname.split('.')[0];
 const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-// [로그인] 키는 기본적으로 sessionStorage(탭을 닫으면 삭제), '이 기기에서는 유지' 를 체크하면 localStorage(계속 유지)에 저장
 const KEY0=(()=>{try{return sessionStorage.gk||localStorage.gk||''}catch(e){return ''}})();
 const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:KEY0,admin:!!KEY0,mOpen:false,cur:-1,playing:false,draft:null};
 const au=$('#au');
 const WD=['일','월','화','수','목','금','토'];
-// [크기·컬러] 아이콘(SVG) 설정: 내부 좌표는 16x16(viewBox), 화면에 그려지는 크기는 width=17 / height=17(px)
-// fill=currentColor = 아이콘 색이 버튼의 글자색(--mid)을 그대로 따름 (색을 바꾸려면 CSS 의 #music button 의 color 수정)
 const sv=p=>`<svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={play:sv('M4 2.5v11l9-5.5z'),pause:sv('M4 2.5h3v11H4zM9 2.5h3v11H9z'),next:sv('M3 2.5v11l7-5.5zM11 2.5h2.2v11H11z')};
-// [아이콘 추가] 음악 팝업용: prev(이전곡) = next 를 좌우로 뒤집은 모양, eq(재생 중 막대 3개), x(닫기 X, 1px 선)
 IC.prev=sv('M13 2.5v11l-7-5.5zM5 2.5H2.8v11H5z');IC.eq=sv('M2 8h3v6H2zM6.5 3h3v11h-3zM11 6h3v8h-3z');
 IC.x='<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1"/></svg>';
-
-// ---- GitHub API ----
 const api=(p,o={})=>fetch(`https://api.github.com/repos/${O}/${R}/contents/${p}`+(CFG.branch&&!o.method?`?ref=${CFG.branch}`:''),{...o,headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'},cache:'no-store'});
 const b64=s=>btoa(unescape(encodeURIComponent(s)));
-async function put(p,content){ // content: base64
+async function put(p,content){
   const g=await api(p);const sha=g.ok?(await g.json()).sha:undefined;
   const r=await api(p,{method:'PUT',body:JSON.stringify({message:'update '+p,content,sha,branch:CFG.branch||undefined})});
   if(!r.ok)throw new Error((await r.json()).message);
@@ -423,31 +221,22 @@ const load=async(f,d)=>{
   try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
 };
 const reload=async()=>{S.full={};[S.posts,S.tags,S.music]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])])};
-// [토스트] 화면 아래에 잠깐 떴다 사라지는 알림 (err 가 참이면 붉은색, 6초 / 아니면 3초)
 let toastT;const toast=(t,err)=>{const el=$('#toast');el.textContent=t;el.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{el.className=''},err?6000:3000)};
 const busy=async fn=>{try{await fn()}catch(e){toast('저장 실패: '+e.message,1)}};
-
-// ---- 데이터 계산 ----
 const vis=()=>S.posts.filter(p=>!p.hidden).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
 const list=()=>S.admin?[...S.posts].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)):vis();
 function tagList(all){
   const c={};vis().forEach(p=>(p.tags||[]).forEach(t=>c[t]=(c[t]||0)+1));
   S.posts.forEach(p=>(p.tags||[]).forEach(t=>c[t]=c[t]||0));
   let names=Object.keys(c).sort((a,b)=>c[b]-c[a]);
-  if(!S.admin)names=names.filter(t=>c[t]>0); // 공개 글이 하나도 없는 태그(=숨김 글에만 달린 태그)는 방문자에게 노출하지 않음
+  if(!S.admin)names=names.filter(t=>c[t]>0);
   const o=S.tags.order.filter(t=>names.includes(t));
   names=[...o,...names.filter(t=>!o.includes(t))];
   return names.filter(t=>all||!S.tags.hidden.includes(t)).map(t=>[t,c[t]]);
 }
-
-// ---- 렌더링 ----
 function renderCal(){
   const has=new Set(vis().map(p=>p.date));
-  const hid=new Set(S.admin?S.posts.filter(p=>p.hidden&&!has.has(p.date)).map(p=>p.date):[]); // 관리자 전용: 숨김 글만 있는 날짜
-  // [배치·정렬] 달력 맨 윗줄 버튼 순서: ‹(이전 달, data-a=prev) → 년도(data-a=py, 누르면 년도 선택) → 월(data-a=pm, 누르면 월 선택) → ›(다음 달, data-a=next)
-  // 네 버튼이 한 줄에서 달력 가운데에 모이도록 정렬하는 값은 CSS 의 .ch (justify-content:center, gap:8px) 와 .ch>span (gap:6px)
-  // 버튼 크기(터치 영역 44px 이상)는 CSS 의 .ch [data-a=py],.ch [data-a=pm] 와 .ch [data-a=prev],.ch [data-a=next] 에서 설정
-  // 버튼을 누르면 아래 click 이벤트(data-a 값별 분기)가 처리하며, 이 순서를 바꿔도 동작에는 영향이 없음
+  const hid=new Set(S.admin?S.posts.filter(p=>p.hidden&&!has.has(p.date)).map(p=>p.date):[]);
   $('#calh').innerHTML=`<div class="ch"><button data-a="prev" aria-label="이전 달">‹</button><span><button data-a="py">${S.y}</button><button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
   <button data-a="next" aria-label="다음 달">›</button></div>`;
   const first=new Date(S.y,S.m,1).getDay(),n=new Date(S.y,S.m+1,0).getDate();
@@ -468,9 +257,6 @@ function renderTags(){
 S.blob={};S.up=[];S.full={};
 async function loadPost(id){if(S.full[id])return S.full[id];const p=await load(`data/${id.slice(0,4)}/${id}.json`,null);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
 async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
-// 이미지 로딩 실패 시(관리자가 방금 올려 아직 배포 전인 이미지) 토큰으로 직접 받아오기 - error 는 버블링되지 않으므로 capture 로 수신 (인라인 onerror 는 CSP 때문에 사용 불가)
-// 이미지 로딩 실패 처리 (error 는 버블링되지 않아 capture 로 수신, 인라인 onerror 는 CSP 때문에 사용 불가)
-// 관리자: 방금 올려 아직 배포 전인 이미지/커버를 토큰으로 직접 받아옴(imgFix) / 그 외 팝업 안 커버: ♬ 로 대체
 document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!='IMG'||!i.dataset.p)return;if(S.admin&&!i.dataset.f)imgFix(i);else if(i.closest('#mbox'))i.replaceWith('♬')},true);
 const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
 const purge=async(c,keep)=>{for(const p of new Set(c))if(!keep.has(p))await del(p).catch(()=>{})};
@@ -483,15 +269,12 @@ function body(t){
     return x?`<div class="tx">${esc(x)}</div>`:'';
   }).join('');
 }
-// [날씨 이모지 목록] 글쓰기 화면의 날씨 선택줄에 표시되는 이모지들 - 빼거나 추가하려면 이 배열의 따옴표 항목을 지우거나 넣으면 됨
 const WX=['☀️','🌞','☁️','🌤️','🌥️','🌦️','🌧️','🌩️','🌪️','🌨️','🌀','🌈','☔','❄️'];
 function renderArt(){
   const a=$('#art');
   const acts=S.admin?`<div class="act">${S.mode=='view'&&S.pid?'<button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button>':''}${S.mode=='view'?'<button data-a="new">[글쓰기]</button>':''}</div>`:'';
   if(S.mode=='edit'){
     const d=S.draft;
-// [크기] 글쓰기 화면의 입력칸들은 CSS 의 input,textarea{width:100%} 로 폭을 가득 채움
-// 숨김 체크박스(#e-hid)만 inline style="width:auto" 로 100% 를 해제해 체크박스 본래 크기(12px)로 표시
     a.innerHTML=`<div class="ed">
       <input id="e-date" type="date" value="${d.date}">
       <input id="e-wx" placeholder="날씨 (선택) - 아래 이모지를 눌러 추가/해제, 직접 입력도 가능" value="${esc(d.weather||'')}">
@@ -511,7 +294,6 @@ function renderArt(){
   }
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
   if(S.tag&&!S.pid){
-// [간격] 목록 상자(.plist) 위쪽 바깥 여백 16px 을 style="margin-top:16px" 로 직접 지정 (태그 클릭 시 글 목록)
     a.innerHTML=acts+`<div class="meta"># ${esc(S.tag)}</div><div class="plist" style="margin-top:16px">`+
       (posts.map(p=>`<div data-a="open" data-v="${p.id}"><small>${p.date}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
     return;
@@ -520,7 +302,6 @@ function renderArt(){
   if(!p){
     const day=S.date?list().filter(x=>x.date==S.date):list();
     if(day.length>1&&S.date){
-// [간격] 같은 날 글이 여러 개일 때의 목록도 위쪽 바깥 여백 16px (style="margin-top:16px")
       a.innerHTML=acts+`<div class="meta">${S.date}</div><div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${x.id}">${esc(x.title)}</div>`).join('')+'</div>';return;
     }
     p=day[0];
@@ -544,10 +325,6 @@ function renderMusic(){
   }
   if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
 }
-// ---- 음악 팝업 화면 만들기 ----
-// 구조(위→아래): 헤더(제목·곡 수·X) → 앨범 커버(150px) → 곡명/부제 → 재생바+시간 → 이전/재생·정지/다음 → 곡 목록 → (관리자) 곡 추가 칸 + 버튼줄
-// 데이터: S.music = [{name, file, cover?}]  ← cover 는 앨범 이미지 경로(music/cover/xxx.jpg), 없으면 ♬ 표시
-// 관리자 업로드 대기 상태: S.pend = {files:[고른 음악 파일들], cover:고른 커버 파일, url:커버 미리보기 주소}
 S.pend={files:[],cover:null,url:''};
 function musicHTML(){
   const T=S.music,n=T.length,ci=S.cur>=0?S.cur:0,t=T[ci]||{},A=S.admin,P=S.pend;
@@ -567,7 +344,6 @@ function musicHTML(){
   }
   return h;
 }
-// ---- 재생바 / 시간 갱신 (팝업 전체를 다시 그리지 않고 막대와 글자만 바꿈) ----
 const fmt=s=>isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
 function updProg(){
   const sk=$('#pl-seek');if(!sk)return;
@@ -576,16 +352,12 @@ function updProg(){
   $('#pl-time').textContent=fmt(ok?t:0)+' / '+(ok?fmt(d):'0:00');
 }
 ['timeupdate','loadedmetadata','durationchange'].forEach(ev=>au.addEventListener(ev,updProg));
-// 재생바를 끌면 그 위치로 이동 (재생 중인 곡이 있을 때만)
 document.addEventListener('input',e=>{
   const sk=e.target;if(sk.id!='pl-seek')return;
   const d=au.duration;S.seekT=Date.now();sk.style.setProperty('--p',sk.value/10+'%');
   if(S.cur>=0&&isFinite(d)&&d>0){au.currentTime=sk.value/1000*d;$('#pl-time').textContent=fmt(au.currentTime)+' / '+fmt(d)}
 });
-// 커버 이미지가 못 불러와질 때: 관리자는 저장소에서 직접 받아 보고(imgFix), 그래도 안 되면 ♬ 로 대체
-// ---- 파일 → base64 ----
 const fileB64=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
-// ---- 커버 이미지 저장: 긴 변 480px 이하 JPEG 로 줄여서 music/cover/ 에 올리고 경로를 돌려줌 ----
 async function putCover(src){
   const bmp=await createImageBitmap(src),sc=Math.min(1,480/Math.max(bmp.width,bmp.height));
   const c=document.createElement('canvas');c.width=Math.max(1,Math.round(bmp.width*sc));c.height=Math.max(1,Math.round(bmp.height*sc));
@@ -594,12 +366,11 @@ async function putCover(src){
   const p='music/cover/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.jpg';
   S.blob[p]=URL.createObjectURL(bl);await put(p,await fileB64(bl));return p;
 }
-// ---- mp3 에 들어 있는 앨범 이미지(ID3v2 APIC) 꺼내기. 없거나 읽기 실패하면 null (m4a/ogg 는 지원 안 함 → 직접 지정) ----
 async function embCover(f){
   if(!/\.mp3$/i.test(f.name))return null;
   try{
     const h=new Uint8Array(await f.slice(0,10).arrayBuffer());
-    if(h[0]!=73||h[1]!=68||h[2]!=51)return null;                         // 'ID3' 로 시작하지 않으면 태그 없음
+    if(h[0]!=73||h[1]!=68||h[2]!=51)return null;
     const ver=h[3],size=(h[6]<<21)|(h[7]<<14)|(h[8]<<7)|h[9];
     const b=new Uint8Array(await f.slice(0,10+size).arrayBuffer());
     let o=10;
@@ -612,9 +383,9 @@ async function embCover(f){
       const d=o+hl;if(fs<=0||d+fs>b.length)break;
       if(id=='APIC'||id=='PIC'){
         const enc=b[d];let i=d+1;
-        if(v2)i+=3;else{while(i<d+fs&&b[i]!=0)i++;i++}                   // 이미지 형식(mime) 건너뜀
-        i++;                                                              // 그림 종류 1바이트
-        if(enc==0||enc==3){while(i<d+fs&&b[i]!=0)i++;i++}else{while(i+1<d+fs&&!(b[i]==0&&b[i+1]==0))i+=2;i+=2}  // 설명 글 건너뜀
+        if(v2)i+=3;else{while(i<d+fs&&b[i]!=0)i++;i++}
+        i++;
+        if(enc==0||enc==3){while(i<d+fs&&b[i]!=0)i++;i++}else{while(i+1<d+fs&&!(b[i]==0&&b[i+1]==0))i+=2;i+=2}
         const data=b.slice(i,d+fs);
         if(data.length>100)return new Blob([data],{type:data[0]==0xFF?'image/jpeg':data[0]==0x89?'image/png':'application/octet-stream'});
       }
@@ -623,7 +394,6 @@ async function embCover(f){
   }catch(e){}
   return null;
 }
-// ---- [업로드]: 고른 음악 파일들을 올리고, 커버(직접 고른 것 → 없으면 mp3 내장 이미지)를 함께 저장 ----
 async function upMusic(){
   const P=S.pend,M=S.music;
   if(S.lock)return;
@@ -631,7 +401,7 @@ async function upMusic(){
   S.lock=1;let ok=0;
   try{
     msg('업로드 준비 중…');
-    const shared=P.cover?await putCover(P.cover):null;                  // 직접 고른 커버는 한 번만 올려 이번에 올리는 모든 곡이 같이 사용
+    const shared=P.cover?await putCover(P.cover):null;
     for(const f of P.files){
       msg(`업로드 중 (${ok+1}/${P.files.length}) ${f.name}`+(f.size>25e6?' - 큰 파일이라 오래 걸려요':''));
       const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
@@ -645,7 +415,6 @@ async function upMusic(){
   finally{try{if(ok)await saveMusic()}catch(err){msg('목록 저장 실패: '+err.message)}S.lock=0}
   if(ok){if(S.pend.url)URL.revokeObjectURL(S.pend.url);S.pend={files:[],cover:null,url:''};renderMusic();msg(ok+'곡을 올렸습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.')}
 }
-// ---- [커버 변경]: 체크한 곡들의 커버를 새 이미지로 교체 (더 이상 안 쓰는 옛 커버 파일은 저장소에서 삭제) ----
 async function chgCover(file){
   const ix=[...document.querySelectorAll('.mck')].map((c,i)=>c.checked?i:-1).filter(i=>i>=0);
   if(!ix.length){msg('커버를 바꿀 곡을 먼저 체크하세요.');return}
@@ -661,8 +430,6 @@ async function chgCover(file){
   }catch(err){S.music=bak;S.lock=0;renderMusic();msg('커버 변경 실패: '+err.message)}
 }
 const render=()=>{renderCal();renderTags();renderArt();renderMusic();renderModal()};
-
-// ---- 음악 ----
 function playIdx(i){
   if(!S.music.length)return;
   S.cur=(i+S.music.length)%S.music.length;
@@ -672,14 +439,9 @@ au.onended=()=>playIdx(S.cur+1);
 au.onerror=async()=>{const f=S.music[S.cur]&&S.music[S.cur].file;
   if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
   S.playing=false;renderMusic()};
-
-// ===== 이미지 첨부 (드롭존 / 붙여넣기 / 커서 위치 삽입 / 썸네일 / 크게 보기 / 800px 축소) =====
 const mkCanvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
 const toBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
 const b64blob=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
-// 가로 800px 초과 시 축소. 한 번에 확 줄이면 앨리어싱(계단·모아레)이 생기므로
-// 절반씩 줄여가며(2:1 은 박스 평균과 같음) 마지막 1~2배 구간만 브라우저 고품질 보간(imageSmoothingQuality=high)을 사용.
-// 회전 정보(EXIF)는 반영, GIF/SVG 는 원본 유지(움직임·벡터 보존), 800px 이하는 재압축 없이 원본 그대로 업로드.
 async function shrink(file){
   const MAX=800,keep={blob:file,name:file.name};
   if(/gif|svg/.test(file.type))return keep;
@@ -693,14 +455,12 @@ async function shrink(file){
   const blob=await toBlob(c,png?'image/png':'image/jpeg',.88);if(!blob)throw new Error('이미지 변환 실패: '+file.name);
   return {blob,name:file.name.replace(/\.[^.]+$/,'')+(png?'.png':'.jpg')};
 }
-// 커서 위치에 ![제목](경로) 삽입 (텍스트칸을 한 번도 누르지 않았다면 맨 끝). 앞뒤가 글자면 줄바꿈을 넣어 한 줄을 차지하게 함
 function insertTok(ta,tok){
   const v=ta.value,pos=ta.dataset.t?ta.selectionStart:v.length;
   const pre=pos>0&&v[pos-1]!='\n'?'\n':'',post=pos<v.length&&v[pos]!='\n'?'\n':'';
   ta.setRangeText(pre+tok+post,pos,pos,'end');ta.dataset.t=1;
   ta.dispatchEvent(new Event('input',{bubbles:true}));renderThumbs();
 }
-// i 번째 이미지 표시를 본문에서 지움(앞뒤 줄바꿈 하나 포함). 저장소의 실제 파일은 [저장] 때 정리됨
 function rmTok(i){
   const ta=$('#e-body');if(!ta)return;const m=[...ta.value.matchAll(/!\[[^\]]*\]\([^)]+\)/g)][i];if(!m)return;
   let a=m.index,b=a+m[0].length;if(ta.value[b]=='\n')b++;else if(a>0&&ta.value[a-1]=='\n')a--;
@@ -734,12 +494,10 @@ async function addFiles(list){
   }
   S.upl=null;S.upBusy=0;renderThumbs();
 }
-// 드래그앤드롭: 파일을 끌고 있을 때만 가로채서(글자 끌기는 그대로) 브라우저가 이미지를 열어버리는 것을 막음
 const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
 document.addEventListener('dragover',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.toggle('over',!!e.target.closest('#dz'))});
 document.addEventListener('dragleave',e=>{const z=$('#dz');if(z&&e.target.closest&&e.target.closest('#dz'))z.classList.remove('over')});
 document.addEventListener('drop',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.remove('over');addFiles(e.dataTransfer.files)});
-// Ctrl+V 붙여넣기: 클립보드에 이미지가 있을 때만 처리(글자 붙여넣기는 그대로)
 document.addEventListener('paste',e=>{if(S.mode!='edit'||S.modal)return;const fs=[...(e.clipboardData?e.clipboardData.files:[])].filter(f=>/^image\//.test(f.type));if(!fs.length)return;e.preventDefault();addFiles(fs)});
 document.addEventListener('focusin',e=>{if(e.target.id=='e-body')e.target.dataset.t=1});
 document.addEventListener('input',e=>{if(e.target.id=='e-body')renderThumbs()});
@@ -748,20 +506,17 @@ const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date')
 function renderModal(){
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
   w.style.display=k?'flex':'none';if(!k)return;
-  b.className=k=='music'?'mp':'';   // 음악 팝업만 폭 380px (CSS #mbox.mp)
+  b.className=k=='music'?'mp':'';
   const X='<button data-a="mclose">[닫기]</button>';let h='';
-// [크기·정렬·컬러] ≡ 메뉴 팝업의 Tone / 관리자 모드 줄은 CSS 의 .row2 (라벨 폭 76px, 항목 간격 14px, 선택된 톤은 --ink 굵게)를 사용
-// Tone 버튼 문구는 white / dark / note 를 첫 글자만 대문자로 표시
   if(k=='auth'){const cur=document.documentElement.dataset.tone;
     h=`<div class="row2"><span>Tone</span>${['white','dark','note'].map(t=>`<button class="${t==cur?'on':''}" data-a="tone" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div><div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar"><button data-a="mclose">[닫기]</button></div>`}
-// [크기] 연·월 선택 팝업도 CSS 의 .pk (3칸 균등 격자, 칸 간격 6px, 선택된 값은 --sel 배경)를 그대로 사용
   else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
   else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tcancel">[닫기]</button><button data-a="tdone">[완료]</button></div>';
   else if(k=='imgview'){const v=S.view||{};h=`<img class="big" src="${esc(S.blob[v.p]||v.p)}" data-p="${esc(v.p)}" alt=""><div class="cap"><span>${esc(v.name)}</span><span><button data-a="imgdel">[삭제]</button> <button data-a="mclose">[닫기]</button></span></div>`}
   else if(k=='music')h=musicHTML();
-  const ck=k=='music'?[...b.querySelectorAll('.mck')].map(c=>c.checked):[];   // 다시 그려도 체크 상태 유지 (곡 수가 같을 때만)
+  const ck=k=='music'?[...b.querySelectorAll('.mck')].map(c=>c.checked):[];
   b.innerHTML=h;b.classList.toggle('wide',k=='imgview');
   if(k=='music'){const bx=b.querySelectorAll('.mck');if(bx.length==ck.length)bx.forEach((c,i)=>c.checked=ck[i]);updProg()}
   const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range])');if(f)f.focus();
@@ -776,12 +531,10 @@ const leave=()=>!dirty()||confirm('저장하지 않은 내용이 있습니다. �
 const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:history.replaceState).call(history,null,'','#'+id);S.hs=1};
 window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
 document.addEventListener('input',e=>{if(S.mode=='edit'&&e.target.closest('.ed')){try{syncDraft();localStorage.draft=JSON.stringify(S.draft)}catch(x){}}});
-// [날씨 이모지 선택] 이모지 버튼(data-w)을 누르면 날씨 입력칸(#e-wx)에 추가, 이미 들어 있으면 제거(토글) → input 이벤트를 발생시켜 임시저장(draft)에도 반영
 document.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const i=$('#e-wx'),w=b.dataset.w;
   i.value=i.value.includes(w)?i.value.replace(w,''):i.value+w;b.classList.toggle('on',i.value.includes(w));i.dispatchEvent(new Event('input',{bubbles:true}))});
 window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
   Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()});
-// ---- 이벤트 ----
 const go=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth();S.modal=null;renderCal();renderModal()};
 const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
 const mvt=(i,d)=>{const L=tagList(true).map(x=>x[0]);const j=i+d;if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];S.tags.order=L;renderModal()};
@@ -789,9 +542,8 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
   S.lock=1;const cf=S.cur>=0?S.music[S.cur].file:null;
   [S.music[i],S.music[j]]=[S.music[j],S.music[i]];if(cf)S.cur=S.music.findIndex(t=>t.file==cf);
   await busy(saveMusic);S.lock=0;renderMusic();document.querySelectorAll('.mck').forEach((c,k)=>c.checked=k==j)};
-
 document.addEventListener('click',async e=>{
-  if(e.target.classList&&e.target.classList.contains('mck'))return;   // 곡 체크박스를 눌렀을 땐 곡이 재생되지 않게
+  if(e.target.classList&&e.target.classList.contains('mck'))return;
   const el=e.target.closest('[data-a]');if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
   if(['day','tag','open','home'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
@@ -858,36 +610,33 @@ document.addEventListener('click',async e=>{
     renderMusic()}
   else if(a=='mup')mvm(-1);
   else if(a=='mdn')mvm(1);
-  else if(a=='prevm'){if(S.cur>=0&&au.currentTime>3)au.currentTime=0;else playIdx(S.cur>=0?S.cur-1:0)}   // 3초 넘게 들었으면 처음으로, 아니면 이전곡
+  else if(a=='prevm'){if(S.cur>=0&&au.currentTime>3)au.currentTime=0;else playIdx(S.cur>=0?S.cur-1:0)}
   else if(a=='pickmusic'){const i=$('#m-up');if(i)i.click()}
   else if(a=='pickcover'){const i=$('#m-cover');if(i)i.click()}
   else if(a=='upmusic')upMusic();
   else if(a=='covchg'){if(![...document.querySelectorAll('.mck')].some(c=>c.checked)){msg('커버를 바꿀 곡을 먼저 체크하세요.');return}const i=$('#m-cover-chg');if(i)i.click()}
 });
-
 document.addEventListener('change',async e=>{
   const t=e.target;
   const rd=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
   if(t.id=='e-img'){const fs=[...t.files];t.value='';addFiles(fs)}
-  if(t.id=='m-up'){   // 음악 파일 고르기 (mp3 / m4a / ogg 만 허용) - 실제 업로드는 [업로드] 버튼
+  if(t.id=='m-up'){
     const all=[...t.files],good=all.filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));
     t.value='';S.pend.files=good;renderModal();
     if(good.length<all.length)msg('mp3 · m4a · ogg 파일만 올릴 수 있습니다. (제외 '+(all.length-good.length)+'개)');
   }
-  if(t.id=='m-cover'){   // 새로 올릴 곡들의 커버 이미지 고르기
+  if(t.id=='m-cover'){
     const f=t.files[0];t.value='';if(!f)return;
     if(!/^image\//.test(f.type)){msg('이미지 파일을 골라 주세요.');return}
     if(S.pend.url)URL.revokeObjectURL(S.pend.url);
     S.pend.cover=f;S.pend.url=URL.createObjectURL(f);renderModal();
   }
-  if(t.id=='m-cover-chg'){   // 체크한 곡의 커버 바꾸기
+  if(t.id=='m-cover-chg'){
     const f=t.files[0];t.value='';if(!f)return;
     if(!/^image\//.test(f.type)){msg('이미지 파일을 골라 주세요.');return}
     await chgCover(f);
   }
 });
-
-// [컬러] 안내/오류 메시지 글자색: var(--logo) 즉 로고와 같은 붉은색 (톤에 따라 #a00014 또는 dark 톤의 #e5533d)
 const msg=t=>{let m=$('#amsg');if(!m){m=document.createElement('span');m.id='amsg';m.style.color='var(--logo)';$('#mbox').appendChild(m)}m.textContent=t};
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 async function authStep(){
@@ -911,18 +660,14 @@ async function authStep(){
 }
 document.addEventListener('keydown',e=>{if(e.key=='Escape'&&S.modal){S.modal=null;renderModal()}if(e.key=='Enter'&&e.target.closest('#mbox')){e.preventDefault();authStep()}});
 document.addEventListener('click',e=>{if(e.target.closest('[data-a="authok"]'))authStep();if(e.target.id=='modal'){S.modal=null;renderModal()}});
-
 function setLogo(){
   const i=$('#logoimg'),L=$('#logo a'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
   delete L.dataset.t;i.style.display='';
-// [크기] 로고 이미지(i)는 CSS 의 #logo img{height:27px} 크기로 표시. 이미지 로딩에 실패하면 display:none 으로 숨기고 'LOGO' 글자(20px, --logo 색)로 대체
   i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='TAKESOUL'}};
   i.src=f;
 }
 setLogo();
-// ---- 글을 열 때마다 조회 기록 (GA 코드는 <head>에 있음) ----
 const track=p=>{if(S.lt!=p.id){S.lt=p.id;if(!S.admin)try{gtag('event','view_post',{post_id:p.id,post_title:p.title})}catch(e){}}};
-// ---- 시작 ----
 (async()=>{
   if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'}});
     if(r.status==401){try{delete sessionStorage.gk;delete localStorage.gk}catch(x){}S.key='';S.admin=false;toast('저장된 키가 만료되어 로그아웃되었습니다.',1)}}catch(e){}}
