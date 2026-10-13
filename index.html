@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- [보안] CSP: 인라인 script 는 아래 sha256 해시와 일치하는 것만 실행됨. 스크립트(특히 맨 아래 메인 스크립트)를 고치면 해시가 바뀌므로
      반드시 `python3 update-csp.py index.html` 을 다시 실행할 것 (안 하면 사이트가 동작하지 않음). 인라인 이벤트(onclick 등)는 쓰지 않음 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-PfCMKyJRrSJ7SUO2YVGI+zYCcjQ6Su7s7BAj24l84mw=' 'sha256-7UUoUl1Sxh7DvOOCQwnzerxaV/coCUdNfxLG3ck+gDg=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-PfCMKyJRrSJ7SUO2YVGI+zYCcjQ6Su7s7BAj24l84mw=' 'sha256-PJQDcx6wNiZc4ghLjsPuEcj0q2dr8XkQEVfvU7kLj1Q=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -244,6 +244,24 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .plist small{color:var(--lo);margin-right:10px}
 /* [간격] 글쓰기 화면(.ed): 입력칸들을 세로로 쌓고 칸 사이 gap:8px, 위쪽 바깥 여백 20px */
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+/* [이미지 첨부] 드롭존(.dz): 점선 상자, 파일을 끌어 놓으면 .over 로 배경 강조 / 썸네일(.thumbs): PC 4열, 모바일 3열 / .th 우상단 x 버튼 / 업로드 중 칸(.th.up) */
+.dz{border:1px dashed var(--mid);padding:22px 12px;text-align:center;cursor:pointer;color:var(--mid)}
+.dz small{display:block;color:var(--lo);font-size:11px;margin-top:4px}
+.dz.over{background:var(--sel);color:var(--ink)}
+#dzmsg{font-size:12px;color:var(--logo)}
+.thh{display:flex;justify-content:space-between;color:var(--lo);font-size:12px}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.th{position:relative;border:1px solid var(--line);cursor:pointer;min-width:0}
+.th img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.th>span{display:block;padding:2px 6px;font-size:11px;color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th .x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:12px;line-height:22px;text-align:center}
+.th.up{cursor:default;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--mid);font-size:12px}
+.pbar{width:70%;height:2px;background:var(--line)}.pbar i{display:block;height:100%;background:var(--ink)}
+@media(max-width:760px){.thumbs{grid-template-columns:repeat(3,1fr)}}
+/* [크게 보기] 썸네일 클릭 팝업: 팝업 상자를 넓히고(.wide) 이미지는 화면 안에 맞춤 */
+#mbox.wide{width:min(880px,94vw)}
+#mbox .big{display:block;max-width:100%;max-height:70vh;margin:0 auto}
+#mbox .cap{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;color:var(--mid)}
 /* [높이·폰트] 글쓰기 본문 입력칸(textarea): 최소 높이 300px, 명조 글꼴 */
 .ed textarea{min-height:300px;font-family:var(--serif)}
 /* [간격·정렬] .wx = 글쓰기 화면의 날씨 이모지 선택줄: 날씨 입력칸 바로 아래에 가로로 나열, 한 줄에 다 안 들어가면 다음 줄로(flex-wrap), 이모지 사이 gap:4px */
@@ -255,6 +273,64 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .wx button.on{background:var(--sel)}
 /* [간격·컬러] .chip: 글자 사이 4px, 오른쪽 간격 10px, 글자색 --mid */
 .chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
+/* ================================================================================
+   [음악 플레이어 팝업] 홈페이지 오른쪽 위 곡 제목을 누르면 뜨는 팝업 (앨범 커버 + 재생바 + 곡 목록)
+   ================================================================================ */
+/* [폭·크기] 음악 팝업일 때만 #mbox 를 넓힘: width:min(380px,92vw) = 가로 380px(좁은 화면은 92%), 안쪽 여백 위 18px / 좌우 22px / 아래 16px */
+#mbox.mp{width:min(380px,92vw);padding:18px 22px 16px}
+/* [정렬·폰트·컬러] .pl-h = 팝업 맨 윗줄(제목 · 곡 수 · 닫기 X): 가로 배치, 세로 가운데, 아래 1px 선(--line)
+   제목(b) : 명조 16px, 굵기 400, 색 --ink / 곡 수(small) : 11px, 색 --lo, margin-left:auto 로 오른쪽(닫기 X 바로 앞)으로 붙임 */
+.pl-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.pl-h b{font-family:var(--serif);font-weight:400;font-size:16px;color:var(--ink)}
+.pl-h small{margin-left:auto;font-size:11px;color:var(--lo)}
+/* [크기·터치] 닫기 X 버튼: 최소 36px x 36px 터치 영역, 색 --mid, 오른쪽 끝에 -8px 당겨 X 선이 팝업 오른쪽 선에 맞게 정렬 */
+.pl-x{min-width:36px;min-height:36px;margin-right:-8px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
+/* [크기·정렬·컬러] .pl-cover = 앨범 커버 칸: 가로·세로 150px 정사각형, margin:16px auto 10px = 가운데 정렬(위 16px / 아래 10px)
+   1px 테두리(--line), 둥근 모서리·그림자 없음. 커버가 없으면 가운데에 ♬ (크기 44px, 색 --lo) 표시 / 이미지는 칸을 꽉 채우고(object-fit:cover) 넘치는 부분은 잘림 */
+.pl-cover{width:150px;height:150px;margin:16px auto 10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:44px;line-height:1}
+.pl-cover img,.pl-th img,.pl-cv img{width:100%;height:100%;object-fit:cover;display:block}
+/* [폰트·정렬·컬러] 재생 중인 곡 제목(.pl-t): 가운데 정렬, 14px 굵게(600), 색 --ink, 길면 ... 으로 줄임 / 부제(.pl-s '2번째 곡 · 재생 중'): 가운데 정렬, 11px, 색 --lo */
+.pl-t{text-align:center;font-size:14px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-s{text-align:center;font-size:11px;color:var(--lo)}
+/* [간격·정렬] .pl-bar = 재생바 + 시간 줄: 가로 배치, 세로 가운데, 간격 10px, 위 14px / 아래 4px */
+.pl-bar{display:flex;align-items:center;gap:10px;margin:14px 0 4px}
+/* [폰트·컬러] 시간 글자 '1:42 / 4:27': 11px, 색 --lo, 줄바꿈 없음, 숫자 폭 고정(tabular-nums)으로 흔들림 방지 */
+.pl-time{font-size:11px;color:var(--lo);white-space:nowrap;font-variant-numeric:tabular-nums}
+/* [높이·컬러] .seek = 재생바(range): 눌러서 끌 수 있는 영역 높이 24px(터치용), 보이는 선은 1px
+   지나온 부분 --ink / 남은 부분 --line (지나온 비율은 JS 가 --p 값으로 넣어줌), 동그란 손잡이 9px x 9px 색 --ink
+   (input 공통 규칙의 테두리·여백·폭 100% 를 border:0; padding:0 으로 해제) */
+.seek{-webkit-appearance:none;appearance:none;flex:1;min-width:0;width:auto;height:24px;padding:0;border:0;background:transparent;cursor:pointer}
+.seek::-webkit-slider-runnable-track{height:1px;background:linear-gradient(to right,var(--ink) var(--p,0%),var(--line) var(--p,0%))}
+.seek::-moz-range-track{height:1px;background:var(--line)}
+.seek::-moz-range-progress{height:1px;background:var(--ink)}
+.seek::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;margin-top:-4px;border:0;border-radius:50%;background:var(--ink)}
+.seek::-moz-range-thumb{width:9px;height:9px;border:0;border-radius:50%;background:var(--ink)}
+/* [정렬·크기·터치] .pl-c = 이전 / 재생·정지 / 다음 버튼줄: 가운데 정렬, 버튼 사이 간격 18px, 각 버튼 최소 44px x 44px 터치 영역, 아이콘 22px, 색 --ink */
+.pl-c{display:flex;justify-content:center;gap:18px}
+.pl-c button{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.pl-c svg{width:22px;height:22px}
+/* [간격] .pl-list = 곡 목록: 위 12px 간격, 곡이 많으면 최대 높이 240px 에서 이 목록만 스크롤 */
+.pl-list{margin-top:12px;max-height:240px;overflow-y:auto}
+/* [높이·정렬·컬러] .pl-row = 곡 한 줄: 가로 배치(체크박스 · 번호 · 작은 커버 · 제목), 간격 10px, 줄 위아래 안쪽 여백 6px / 좌우 6px, 글자색 --mid
+   현재 곡(.on)은 배경 --sel, 글자 --ink, 굵게(600) */
+.pl-row{display:flex;align-items:center;gap:10px;padding:6px;color:var(--mid);cursor:pointer}
+.pl-row.on{background:var(--sel);color:var(--ink);font-weight:600}
+/* [크기·폰트] 곡 번호(.pl-n): 폭 16px 고정, 가운데 정렬, 11px, 색 --lo (재생 중인 곡은 번호 대신 막대 아이콘 13px) */
+.pl-n{flex:none;width:16px;text-align:center;font-size:11px;color:var(--lo)}
+.pl-n svg{width:13px;height:13px;display:block;margin:0 auto}
+/* [크기·컬러] 곡 목록의 작은 커버(.pl-th): 28px x 28px 정사각형, 1px 테두리(--line), 커버가 없으면 ♬ (13px, 색 --lo) */
+.pl-th{flex:none;width:28px;height:28px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:13px;line-height:1}
+/* [폭] 곡 제목(.pl-nm): 남는 폭을 모두 차지(flex:1), 길면 ... 으로 줄임 */
+.pl-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* [관리자 · 크기·컬러] .pl-add = 곡 추가 칸(점선 1px 테두리): 왼쪽 커버 선택 칸 56px x 56px + 오른쪽 [음악 파일 선택]/안내 글, 간격 12px, 안쪽 여백 10px, 위 간격 14px */
+.pl-add{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px;border:1px dashed var(--line)}
+.pl-cv{flex:none;width:56px;height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10.5px;line-height:1.3;text-align:center;color:var(--mid)}
+.pl-pick{color:var(--ink)}
+/* [관리자 · 폰트·컬러] 안내 글(.pl-hint): 11px, 색 --lo */
+.pl-hint{margin-top:2px;font-size:11px;line-height:1.5;color:var(--lo)}
+/* [관리자 · 정렬] [커버 변경] 버튼은 버튼줄(.bar)의 오른쪽 끝으로: margin-left:auto */
+.pl-r{margin-left:auto}
+.pl-empty{margin:16px 0 0;font-size:12px;color:var(--lo)}
 .hide{display:none!important}
 /* [정렬·컬러] 인라인 토스트(#toast): 화면 아래 가운데에 잠깐 떴다 사라지는 알림. 저장/삭제 실패 등 alert 대신 사용
    z-index:20 = 팝업(#modal, 9) 위에 표시 / pointer-events:none = 클릭을 가로막지 않음 / .err = 오류는 --logo(붉은색) 배경 */
@@ -322,6 +398,9 @@ const WD=['일','월','화','수','목','금','토'];
 // fill=currentColor = 아이콘 색이 버튼의 글자색(--mid)을 그대로 따름 (색을 바꾸려면 CSS 의 #music button 의 color 수정)
 const sv=p=>`<svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={play:sv('M4 2.5v11l9-5.5z'),pause:sv('M4 2.5h3v11H4zM9 2.5h3v11H9z'),next:sv('M3 2.5v11l7-5.5zM11 2.5h2.2v11H11z')};
+// [아이콘 추가] 음악 팝업용: prev(이전곡) = next 를 좌우로 뒤집은 모양, eq(재생 중 막대 3개), x(닫기 X, 1px 선)
+IC.prev=sv('M13 2.5v11l-7-5.5zM5 2.5H2.8v11H5z');IC.eq=sv('M2 8h3v6H2zM6.5 3h3v11h-3zM11 6h3v8h-3z');
+IC.x='<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1"/></svg>';
 
 // ---- GitHub API ----
 const api=(p,o={})=>fetch(`https://api.github.com/repos/${O}/${R}/contents/${p}`+(CFG.branch&&!o.method?`?ref=${CFG.branch}`:''),{...o,headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'},cache:'no-store'});
@@ -390,7 +469,9 @@ S.blob={};S.up=[];S.full={};
 async function loadPost(id){if(S.full[id])return S.full[id];const p=await load(`data/${id.slice(0,4)}/${id}.json`,null);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
 async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
 // 이미지 로딩 실패 시(관리자가 방금 올려 아직 배포 전인 이미지) 토큰으로 직접 받아오기 - error 는 버블링되지 않으므로 capture 로 수신 (인라인 onerror 는 CSP 때문에 사용 불가)
-document.addEventListener('error',e=>{if(e.target.tagName=='IMG'&&e.target.dataset.p)imgFix(e.target)},true);
+// 이미지 로딩 실패 처리 (error 는 버블링되지 않아 capture 로 수신, 인라인 onerror 는 CSP 때문에 사용 불가)
+// 관리자: 방금 올려 아직 배포 전인 이미지/커버를 토큰으로 직접 받아옴(imgFix) / 그 외 팝업 안 커버: ♬ 로 대체
+document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!='IMG'||!i.dataset.p)return;if(S.admin&&!i.dataset.f)imgFix(i);else if(i.closest('#mbox'))i.replaceWith('♬')},true);
 const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
 const purge=async(c,keep)=>{for(const p of new Set(c))if(!keep.has(p))await del(p).catch(()=>{})};
 function body(t){
@@ -408,7 +489,7 @@ function renderArt(){
   const a=$('#art');
   const acts=S.admin?`<div class="act">${S.mode=='view'&&S.pid?'<button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button>':''}${S.mode=='view'?'<button data-a="new">[글쓰기]</button>':''}</div>`:'';
   if(S.mode=='edit'){
-    const d=S.draft,imgs=[...d.body.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)];
+    const d=S.draft;
 // [크기] 글쓰기 화면의 입력칸들은 CSS 의 input,textarea{width:100%} 로 폭을 가득 채움
 // 숨김 체크박스(#e-hid)만 inline style="width:auto" 로 100% 를 해제해 체크박스 본래 크기(12px)로 표시
     a.innerHTML=`<div class="ed">
@@ -417,10 +498,15 @@ function renderArt(){
       <div class="wx">${WX.map(w=>`<button type="button" class="${(d.weather||'').includes(w)?'on':''}" data-w="${w}" aria-label="날씨 ${w}">${w}</button>`).join('')}</div>
       <input id="e-title" placeholder="제목" value="${esc(d.title)}">
       <input id="e-tags" placeholder="Tags (쉼표로 구분, 예: 일상, 생각)" value="${esc((d.tags||[]).join(', '))}">
-      <textarea id="e-body" placeholder="본문">${esc(d.body)}</textarea>
-      <div><button data-a="imgs">[이미지 관리 (${imgs.length})]</button></div>
+      <textarea id="e-body" placeholder="본문 … (커서 위치에 이미지 삽입)">${esc(d.body)}</textarea>
+      <div class="dz" id="dz" data-a="pick" role="button" tabindex="0"><div>이미지를 여기로 끌어다 놓거나 클릭해서 선택</div><small>Ctrl+V 붙여넣기 가능 · 여러 장 동시 선택 가능 · 가로 800px 초과 시 자동 축소</small></div>
+      <input type="file" id="e-img" accept="image/*" multiple class="hide">
+      <div id="dzmsg" role="status"></div>
+      <div class="thh"><span id="thc"></span><span>썸네일 클릭 = 크게 보기</span></div>
+      <div class="thumbs" id="thumbs"></div>
       <label><input type="checkbox" id="e-hid" style="width:auto" ${d.hidden?'checked':''}> 숨김</label>
       <div><button data-a="save">[저장]</button> <button data-a="cancel">[취소]</button></div></div>`;
+    renderThumbs();
     return;
   }
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
@@ -458,11 +544,121 @@ function renderMusic(){
   }
   if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
 }
+// ---- 음악 팝업 화면 만들기 ----
+// 구조(위→아래): 헤더(제목·곡 수·X) → 앨범 커버(150px) → 곡명/부제 → 재생바+시간 → 이전/재생·정지/다음 → 곡 목록 → (관리자) 곡 추가 칸 + 버튼줄
+// 데이터: S.music = [{name, file, cover?}]  ← cover 는 앨범 이미지 경로(music/cover/xxx.jpg), 없으면 ♬ 표시
+// 관리자 업로드 대기 상태: S.pend = {files:[고른 음악 파일들], cover:고른 커버 파일, url:커버 미리보기 주소}
+S.pend={files:[],cover:null,url:''};
 function musicHTML(){
-// [크기] 음악 목록의 체크박스(.mck): inline style="width:auto" = CSS 의 폭 100% 를 해제해 체크박스 본래 크기(12px)로 표시
-// 곡 제목 줄 자체의 높이·간격·색은 CSS 의 #mbox .row (줄 높이 2px 안쪽 여백, 색 --mid, 재생 중 --ink 굵게) 에서 설정
-  return '<div class="mh">요즘 듣는 음악</div>'+S.music.map((t,i)=>`<div class="row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${S.admin?`<input type="checkbox" class="mck" data-i="${i}" style="width:auto">`:''}${esc(t.name)}</div>`).join('')+
-    `<div class="bar"><button data-a="mtoggle">[닫기]</button>${S.admin?`<label style="cursor:pointer">[업로드]<input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg" multiple class="hide"></label><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button>`:''}</div>`;
+  const T=S.music,n=T.length,ci=S.cur>=0?S.cur:0,t=T[ci]||{},A=S.admin,P=S.pend;
+  const cov=c=>c?`<img src="${esc(S.blob[c]||c)}" data-p="${esc(c)}" alt="" loading="lazy">`:'♬';
+  let h=`<div class="pl-h"><b>요즘 듣는 음악</b><small>${n}곡</small><button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button></div>`;
+  if(n){
+    h+=`<div class="pl-cover">${cov(t.cover)}</div><div class="pl-t">${esc(t.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':(S.cur<0?'정지':'일시정지')}</div>`
+      +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
+      +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
+      +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${A?`<input type="checkbox" class="mck" data-i="${i}" aria-label="${esc(x.name)} 선택">`:''}<span class="pl-n">${i==S.cur&&S.playing?IC.eq:i+1}</span><span class="pl-th">${cov(x.cover)}</span><span class="pl-nm">${esc(x.name)}</span></div>`).join('')+'</div>';
+  }else if(A)h+='<p class="pl-empty">업로드된 곡이 없습니다. 아래에서 음악 파일을 골라 올려 보세요.</p>';
+  if(A){
+    const fn=P.files.length?esc(P.files[0].name)+(P.files.length>1?' 외 '+(P.files.length-1)+'개':'')+' 선택됨':'mp3 선택 시 내장 앨범 이미지를 자동 사용, 없으면 왼쪽 칸에서 직접 지정 (mp3 · m4a · ogg)';
+    h+=`<div class="pl-add"><button class="pl-cv" data-a="pickcover" aria-label="커버 이미지 선택">${P.url?`<img src="${esc(P.url)}" alt="">`:'커버<br>(선택)'}</button><div><button class="pl-pick" data-a="pickmusic">[음악 파일 선택]</button><div class="pl-hint">${fn}</div></div></div>`
+      +`<div class="bar"><button data-a="upmusic">[업로드]</button><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button><button class="pl-r" data-a="covchg">[커버 변경]</button></div>`
+      +`<input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/ogg" multiple class="hide"><input type="file" id="m-cover" accept="image/*" class="hide"><input type="file" id="m-cover-chg" accept="image/*" class="hide">`;
+  }
+  return h;
+}
+// ---- 재생바 / 시간 갱신 (팝업 전체를 다시 그리지 않고 막대와 글자만 바꿈) ----
+const fmt=s=>isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
+function updProg(){
+  const sk=$('#pl-seek');if(!sk)return;
+  const d=au.duration,t=au.currentTime||0,ok=S.cur>=0&&isFinite(d)&&d>0;
+  if(!(Date.now()-(S.seekT||0)<400)){const v=ok?Math.round(t/d*1000):0;sk.value=v;sk.style.setProperty('--p',v/10+'%')}
+  $('#pl-time').textContent=fmt(ok?t:0)+' / '+(ok?fmt(d):'0:00');
+}
+['timeupdate','loadedmetadata','durationchange'].forEach(ev=>au.addEventListener(ev,updProg));
+// 재생바를 끌면 그 위치로 이동 (재생 중인 곡이 있을 때만)
+document.addEventListener('input',e=>{
+  const sk=e.target;if(sk.id!='pl-seek')return;
+  const d=au.duration;S.seekT=Date.now();sk.style.setProperty('--p',sk.value/10+'%');
+  if(S.cur>=0&&isFinite(d)&&d>0){au.currentTime=sk.value/1000*d;$('#pl-time').textContent=fmt(au.currentTime)+' / '+fmt(d)}
+});
+// 커버 이미지가 못 불러와질 때: 관리자는 저장소에서 직접 받아 보고(imgFix), 그래도 안 되면 ♬ 로 대체
+// ---- 파일 → base64 ----
+const fileB64=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
+// ---- 커버 이미지 저장: 긴 변 480px 이하 JPEG 로 줄여서 music/cover/ 에 올리고 경로를 돌려줌 ----
+async function putCover(src){
+  const bmp=await createImageBitmap(src),sc=Math.min(1,480/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=Math.max(1,Math.round(bmp.width*sc));c.height=Math.max(1,Math.round(bmp.height*sc));
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);
+  const bl=await new Promise(r=>c.toBlob(r,'image/jpeg',.86));
+  const p='music/cover/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.jpg';
+  S.blob[p]=URL.createObjectURL(bl);await put(p,await fileB64(bl));return p;
+}
+// ---- mp3 에 들어 있는 앨범 이미지(ID3v2 APIC) 꺼내기. 없거나 읽기 실패하면 null (m4a/ogg 는 지원 안 함 → 직접 지정) ----
+async function embCover(f){
+  if(!/\.mp3$/i.test(f.name))return null;
+  try{
+    const h=new Uint8Array(await f.slice(0,10).arrayBuffer());
+    if(h[0]!=73||h[1]!=68||h[2]!=51)return null;                         // 'ID3' 로 시작하지 않으면 태그 없음
+    const ver=h[3],size=(h[6]<<21)|(h[7]<<14)|(h[8]<<7)|h[9];
+    const b=new Uint8Array(await f.slice(0,10+size).arrayBuffer());
+    let o=10;
+    if(h[5]&0x40)o+=ver==4?((b[10]<<21)|(b[11]<<14)|(b[12]<<7)|b[13]):(((b[10]<<24)|(b[11]<<16)|(b[12]<<8)|b[13])+4);
+    const v2=ver==2,hl=v2?6:10;
+    while(o+hl<=b.length){
+      const id=String.fromCharCode(...b.slice(o,o+(v2?3:4)));
+      if(!/^[A-Z0-9]+$/.test(id))break;
+      const fs=v2?((b[o+3]<<16)|(b[o+4]<<8)|b[o+5]):ver==4?((b[o+4]<<21)|(b[o+5]<<14)|(b[o+6]<<7)|b[o+7]):(((b[o+4]<<24)|(b[o+5]<<16)|(b[o+6]<<8)|b[o+7])>>>0);
+      const d=o+hl;if(fs<=0||d+fs>b.length)break;
+      if(id=='APIC'||id=='PIC'){
+        const enc=b[d];let i=d+1;
+        if(v2)i+=3;else{while(i<d+fs&&b[i]!=0)i++;i++}                   // 이미지 형식(mime) 건너뜀
+        i++;                                                              // 그림 종류 1바이트
+        if(enc==0||enc==3){while(i<d+fs&&b[i]!=0)i++;i++}else{while(i+1<d+fs&&!(b[i]==0&&b[i+1]==0))i+=2;i+=2}  // 설명 글 건너뜀
+        const data=b.slice(i,d+fs);
+        if(data.length>100)return new Blob([data],{type:data[0]==0xFF?'image/jpeg':data[0]==0x89?'image/png':'application/octet-stream'});
+      }
+      o=d+fs;
+    }
+  }catch(e){}
+  return null;
+}
+// ---- [업로드]: 고른 음악 파일들을 올리고, 커버(직접 고른 것 → 없으면 mp3 내장 이미지)를 함께 저장 ----
+async function upMusic(){
+  const P=S.pend,M=S.music;
+  if(S.lock)return;
+  if(!P.files.length){msg('음악 파일을 먼저 선택하세요. ([음악 파일 선택])');return}
+  S.lock=1;let ok=0;
+  try{
+    msg('업로드 준비 중…');
+    const shared=P.cover?await putCover(P.cover):null;                  // 직접 고른 커버는 한 번만 올려 이번에 올리는 모든 곡이 같이 사용
+    for(const f of P.files){
+      msg(`업로드 중 (${ok+1}/${P.files.length}) ${f.name}`+(f.size>25e6?' - 큰 파일이라 오래 걸려요':''));
+      const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
+      S.blob[p]=URL.createObjectURL(f);await put(p,await fileB64(f));
+      let cv=shared;if(!cv){const eb=await embCover(f);if(eb)cv=await putCover(eb).catch(()=>null)}
+      const e={name:f.name.replace(/\.[^.]+$/,''),file:p};if(cv)e.cover=cv;
+      const i=M.findIndex(m=>m.file==p);if(i<0)M.push(e);else{if(M[i].cover&&!cv)e.cover=M[i].cover;M[i]=e}
+      ok++;
+    }
+  }catch(err){msg('업로드 실패: '+err.message)}
+  finally{try{if(ok)await saveMusic()}catch(err){msg('목록 저장 실패: '+err.message)}S.lock=0}
+  if(ok){if(S.pend.url)URL.revokeObjectURL(S.pend.url);S.pend={files:[],cover:null,url:''};renderMusic();msg(ok+'곡을 올렸습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.')}
+}
+// ---- [커버 변경]: 체크한 곡들의 커버를 새 이미지로 교체 (더 이상 안 쓰는 옛 커버 파일은 저장소에서 삭제) ----
+async function chgCover(file){
+  const ix=[...document.querySelectorAll('.mck')].map((c,i)=>c.checked?i:-1).filter(i=>i>=0);
+  if(!ix.length){msg('커버를 바꿀 곡을 먼저 체크하세요.');return}
+  if(S.lock)return;S.lock=1;msg('커버 업로드 중…');
+  const bak=S.music.map(m=>({...m}));
+  try{
+    const np=await putCover(file),olds=new Set();
+    ix.forEach(i=>{if(S.music[i].cover)olds.add(S.music[i].cover);S.music[i].cover=np});
+    await saveMusic();
+    const used=new Set(S.music.map(m=>m.cover));
+    for(const o of olds)if(!used.has(o))await del(o).catch(()=>{});
+    S.lock=0;renderMusic();msg('커버를 바꿨습니다.');
+  }catch(err){S.music=bak;S.lock=0;renderMusic();msg('커버 변경 실패: '+err.message)}
 }
 const render=()=>{renderCal();renderTags();renderArt();renderMusic();renderModal()};
 
@@ -477,13 +673,82 @@ au.onerror=async()=>{const f=S.music[S.cur]&&S.music[S.cur].file;
   if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
   S.playing=false;renderMusic()};
 
-// [이미지 위치] 글쓰기 칸(#e-body)에서 포커스가 빠질 때(이미지 관리 버튼 클릭 등) 커서 위치를 기억 → 이미지 업로드 시 그 위치에 삽입
-// 커서를 둔 적이 없으면(S.caret=null) 예전처럼 본문 맨 끝에 추가
-document.addEventListener('focusout',e=>{if(e.target.id=='e-body')S.caret=e.target.selectionStart});
+// ===== 이미지 첨부 (드롭존 / 붙여넣기 / 커서 위치 삽입 / 썸네일 / 크게 보기 / 800px 축소) =====
+const mkCanvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+const toBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
+const b64blob=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+// 가로 800px 초과 시 축소. 한 번에 확 줄이면 앨리어싱(계단·모아레)이 생기므로
+// 절반씩 줄여가며(2:1 은 박스 평균과 같음) 마지막 1~2배 구간만 브라우저 고품질 보간(imageSmoothingQuality=high)을 사용.
+// 회전 정보(EXIF)는 반영, GIF/SVG 는 원본 유지(움직임·벡터 보존), 800px 이하는 재압축 없이 원본 그대로 업로드.
+async function shrink(file){
+  const MAX=800,keep={blob:file,name:file.name};
+  if(/gif|svg/.test(file.type))return keep;
+  let src;try{src=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){throw new Error('이미지를 열 수 없습니다: '+file.name)}
+  if(src.width<=MAX){if(src.close)src.close();return keep}
+  const png=file.type=='image/png',H=Math.round(src.height*MAX/src.width);let cw=src.width,ch=src.height;
+  while(cw/2>=MAX){const nw=Math.floor(cw/2),nh=Math.floor(ch/2),c=mkCanvas(nw,nh),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,nw,nh);if(src.close)src.close();src=c;cw=nw;ch=nh}
+  const c=mkCanvas(MAX,H),x=c.getContext('2d');
+  if(!png){x.fillStyle='#fff';x.fillRect(0,0,MAX,H)}
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(src,0,0,MAX,H);if(src.close)src.close();
+  const blob=await toBlob(c,png?'image/png':'image/jpeg',.88);if(!blob)throw new Error('이미지 변환 실패: '+file.name);
+  return {blob,name:file.name.replace(/\.[^.]+$/,'')+(png?'.png':'.jpg')};
+}
+// 커서 위치에 ![제목](경로) 삽입 (텍스트칸을 한 번도 누르지 않았다면 맨 끝). 앞뒤가 글자면 줄바꿈을 넣어 한 줄을 차지하게 함
+function insertTok(ta,tok){
+  const v=ta.value,pos=ta.dataset.t?ta.selectionStart:v.length;
+  const pre=pos>0&&v[pos-1]!='\n'?'\n':'',post=pos<v.length&&v[pos]!='\n'?'\n':'';
+  ta.setRangeText(pre+tok+post,pos,pos,'end');ta.dataset.t=1;
+  ta.dispatchEvent(new Event('input',{bubbles:true}));renderThumbs();
+}
+// i 번째 이미지 표시를 본문에서 지움(앞뒤 줄바꿈 하나 포함). 저장소의 실제 파일은 [저장] 때 정리됨
+function rmTok(i){
+  const ta=$('#e-body');if(!ta)return;const m=[...ta.value.matchAll(/!\[[^\]]*\]\([^)]+\)/g)][i];if(!m)return;
+  let a=m.index,b=a+m[0].length;if(ta.value[b]=='\n')b++;else if(a>0&&ta.value[a-1]=='\n')a--;
+  ta.setRangeText('',a,b,'end');ta.dispatchEvent(new Event('input',{bubbles:true}));renderThumbs();
+}
+function renderThumbs(){
+  const ta=$('#e-body'),box=$('#thumbs');if(!ta||!box)return;
+  const L=[...ta.value.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)],key=JSON.stringify([L.map(m=>m[0]),S.upl]);
+  if(box.dataset.k===key)return;box.dataset.k=key;
+  $('#thc').textContent=`첨부된 이미지 (${L.length})`;
+  box.innerHTML=L.map((m,i)=>`<div class="th" data-a="thumb" data-p="${esc(m[2])}"><button type="button" class="x" data-a="thx" data-i="${i}" aria-label="이미지 삭제">✕</button><img src="${esc(S.blob[m[2]]||m[2])}" data-p="${esc(m[2])}" alt=""><span>${esc(m[1])}</span></div>`).join('')
+    +(S.upl?`<div class="th up"><span>업로드 중… (${S.upl.i}/${S.upl.n})</span><div class="pbar"><i></i></div></div>`:'');
+  const pb=box.querySelector('.pbar i');if(pb)pb.style.width=S.upl.pct+'%';
+}
+async function addFiles(list){
+  const ta=$('#e-body'),say=t=>{const m=$('#dzmsg');if(m)m.textContent=t||''};if(!ta)return;
+  if(S.upBusy){say('이전 업로드가 끝난 뒤 다시 시도해 주세요.');return}
+  const fs=[...list].filter(f=>/^image\//.test(f.type));
+  if(!fs.length){say('이미지 파일만 올릴 수 있습니다.');return}
+  S.upBusy=1;say('');
+  for(let i=0;i<fs.length;i++){
+    S.upl={i:i+1,n:fs.length,pct:10};renderThumbs();
+    try{
+      let f=fs[i];if(!f.name||f.name=='image.png')f=new File([f],'paste-'+Date.now()+'.png',{type:f.type});
+      const r=await shrink(f);S.upl.pct=45;renderThumbs();
+      const yr=($('#e-date').value||today()).slice(0,4),p=`img/${yr}/${Date.now()}-${r.name.replace(/[^\w.\-]/g,'_')}`;
+      S.blob[p]=URL.createObjectURL(r.blob);S.up.push(p);
+      await put(p,await b64blob(r.blob));S.upl.pct=100;
+      insertTok(ta,`![${r.name.replace(/\.[^.]+$/,'').replace(/[\[\]()]/g,'')}](${p})`);
+    }catch(e){say('업로드 실패: '+e.message)}
+  }
+  S.upl=null;S.upBusy=0;renderThumbs();
+}
+// 드래그앤드롭: 파일을 끌고 있을 때만 가로채서(글자 끌기는 그대로) 브라우저가 이미지를 열어버리는 것을 막음
+const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
+document.addEventListener('dragover',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.toggle('over',!!e.target.closest('#dz'))});
+document.addEventListener('dragleave',e=>{const z=$('#dz');if(z&&e.target.closest&&e.target.closest('#dz'))z.classList.remove('over')});
+document.addEventListener('drop',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.remove('over');addFiles(e.dataTransfer.files)});
+// Ctrl+V 붙여넣기: 클립보드에 이미지가 있을 때만 처리(글자 붙여넣기는 그대로)
+document.addEventListener('paste',e=>{if(S.mode!='edit'||S.modal)return;const fs=[...(e.clipboardData?e.clipboardData.files:[])].filter(f=>/^image\//.test(f.type));if(!fs.length)return;e.preventDefault();addFiles(fs)});
+document.addEventListener('focusin',e=>{if(e.target.id=='e-body')e.target.dataset.t=1});
+document.addEventListener('input',e=>{if(e.target.id=='e-body')renderThumbs()});
+document.addEventListener('keydown',e=>{if((e.key=='Enter'||e.key==' ')&&e.target.id=='dz'){e.preventDefault();$('#e-img').click()}});
 const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date').value,title:g('e-title').value,body:g('e-body').value,weather:g('e-wx').value.trim(),tags:g('e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:g('e-hid').checked})};
 function renderModal(){
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
   w.style.display=k?'flex':'none';if(!k)return;
+  b.className=k=='music'?'mp':'';   // 음악 팝업만 폭 380px (CSS #mbox.mp)
   const X='<button data-a="mclose">[닫기]</button>';let h='';
 // [크기·정렬·컬러] ≡ 메뉴 팝업의 Tone / 관리자 모드 줄은 CSS 의 .row2 (라벨 폭 76px, 항목 간격 14px, 선택된 톤은 --ink 굵게)를 사용
 // Tone 버튼 문구는 white / dark / note 를 첫 글자만 대문자로 표시
@@ -494,11 +759,12 @@ function renderModal(){
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
   else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tcancel">[닫기]</button><button data-a="tdone">[완료]</button></div>';
-// [크기] 이미지 관리 팝업의 업로드 라벨도 inline style 로 클릭 가능 표시(cursor:pointer)만 지정, 크기는 기본값
-  else if(k=='img')h='<div class="meta">x로 지운 이미지는 [저장] 시 저장소에서도 삭제됩니다</div><label style="cursor:pointer">[이미지 업로드]<input type="file" id="e-img" accept="image/*" multiple class="hide"></label>'+[...S.draft.body.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)].map(m=>`<div class="row">${esc(m[1])} <button data-a="rmimg" data-v="${esc(m[0])}">x</button></div>`).join('')+`<div class="bar">${X}</div>`;
+  else if(k=='imgview'){const v=S.view||{};h=`<img class="big" src="${esc(S.blob[v.p]||v.p)}" data-p="${esc(v.p)}" alt=""><div class="cap"><span>${esc(v.name)}</span><span><button data-a="imgdel">[삭제]</button> <button data-a="mclose">[닫기]</button></span></div>`}
   else if(k=='music')h=musicHTML();
-  b.innerHTML=h;
-  const f=b.querySelector('input:not([type=checkbox]):not([type=file])');if(f)f.focus();
+  const ck=k=='music'?[...b.querySelectorAll('.mck')].map(c=>c.checked):[];   // 다시 그려도 체크 상태 유지 (곡 수가 같을 때만)
+  b.innerHTML=h;b.classList.toggle('wide',k=='imgview');
+  if(k=='music'){const bx=b.querySelectorAll('.mck');if(bx.length==ck.length)bx.forEach((c,i)=>c.checked=ck[i]);updProg()}
+  const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range])');if(f)f.focus();
 }
 const toTop=()=>{$('#art').scrollTop=0;window.scrollTo(0,0)};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -525,7 +791,7 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
   await busy(saveMusic);S.lock=0;renderMusic();document.querySelectorAll('.mck').forEach((c,k)=>c.checked=k==j)};
 
 document.addEventListener('click',async e=>{
-  if(e.target.closest('.mck'))return; // 곡 선택 체크박스를 눌러도 재생되지 않게 (예전 인라인 onclick stopPropagation 대체)
+  if(e.target.classList&&e.target.classList.contains('mck'))return;   // 곡 체크박스를 눌렀을 땐 곡이 재생되지 않게
   const el=e.target.closest('[data-a]');if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
   if(['day','tag','open','home'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
@@ -540,11 +806,15 @@ document.addEventListener('click',async e=>{
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
   else if(a=='tag'){pick({tag:v});render();toTop()}
   else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal();toTop()}
-  else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.caret=null;S.mode='edit';renderArt()}
-  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.caret=null;S.mode='edit';renderArt()}
+  else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='pick'){$('#e-img').click()}
+  else if(a=='thx'){rmTok(+el.dataset.i)}
+  else if(a=='thumb'){const L=[...$('#e-body').value.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)],i=[...document.querySelectorAll('#thumbs .th[data-p]')].indexOf(el);
+    if(L[i]){S.vi=i;S.view={p:L[i][2],name:L[i][1]};S.modal='imgview';renderModal()}}
+  else if(a=='imgdel'){rmTok(S.vi);S.modal=null;renderModal()}
   else if(a=='cancel'){if(!leave())return;dropDraft();await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
-  else if(a=='rmimg'){syncDraft();S.draft.body=S.draft.body.replace(v,'');renderArt();renderModal()}
-  else if(a=='save'){
+  else if(a=='save'){if(S.upBusy){const m=$('#dzmsg');if(m)m.textContent='이미지 업로드가 끝난 뒤 저장해 주세요.';return}
     const d={...S.draft,date:$('#e-date').value,title:$('#e-title').value.trim(),weather:$('#e-wx').value.trim(),body:$('#e-body').value,
       tags:$('#e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:$('#e-hid').checked};
     if(!d.title||!d.date||!d.tags.length){toast('날짜, 제목, Tags는 필수입니다.',1);return}
@@ -571,7 +841,6 @@ document.addEventListener('click',async e=>{
   else if(a=='tone'){document.documentElement.dataset.tone=v;try{localStorage.tone=v}catch(e){}setLogo();renderModal()}
   else if(a=='kinput'){$('#krow').innerHTML='<span>관리자 모드</span><input id="pw" type="password" placeholder="관리자 코드" autocomplete="off"><button data-a="authok">[확인]</button>';$('#pw').focus()}
   else if(a=='mclose'){S.modal=null;renderModal()}
-  else if(a=='imgs'){syncDraft();S.modal='img';renderModal()}
   else if(a=='tup')mvt(+v,-1);
   else if(a=='tdn')mvt(+v,1);
   else if(a=='thide'){const h=S.tags.hidden;e.target.checked?h.push(v):S.tags.hidden=h.filter(x=>x!=v)}
@@ -581,35 +850,40 @@ document.addEventListener('click',async e=>{
   else if(a=='song')playIdx(+v);
   else if(a=='mdel'){if(S.lock)return;const ix=[...document.querySelectorAll('.mck')].filter(c=>c.checked).map(c=>+c.dataset.i);
     if(!ix.length||!confirm('선택한 곡을 삭제할까요?'))return;
-    S.lock=1;const gone=ix.map(i=>S.music[i].file),cf=S.cur>=0?S.music[S.cur].file:null;
+    S.lock=1;const gone=ix.map(i=>S.music[i].file),goneC=ix.map(i=>S.music[i].cover).filter(Boolean),cf=S.cur>=0?S.music[S.cur].file:null;
     S.music=S.music.filter((_,i)=>!ix.includes(i));
-    await busy(async()=>{await saveMusic();for(const f of gone)await del(f).catch(()=>{})});
+    await busy(async()=>{await saveMusic();for(const f of gone)await del(f).catch(()=>{});const used=new Set(S.music.map(m=>m.cover));for(const c of new Set(goneC))if(!used.has(c))await del(c).catch(()=>{})});
     S.lock=0;
     if(cf&&gone.includes(cf)){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}else S.cur=cf?S.music.findIndex(t=>t.file==cf):-1;
     renderMusic()}
   else if(a=='mup')mvm(-1);
   else if(a=='mdn')mvm(1);
+  else if(a=='prevm'){if(S.cur>=0&&au.currentTime>3)au.currentTime=0;else playIdx(S.cur>=0?S.cur-1:0)}   // 3초 넘게 들었으면 처음으로, 아니면 이전곡
+  else if(a=='pickmusic'){const i=$('#m-up');if(i)i.click()}
+  else if(a=='pickcover'){const i=$('#m-cover');if(i)i.click()}
+  else if(a=='upmusic')upMusic();
+  else if(a=='covchg'){if(![...document.querySelectorAll('.mck')].some(c=>c.checked)){msg('커버를 바꿀 곡을 먼저 체크하세요.');return}const i=$('#m-cover-chg');if(i)i.click()}
 });
 
 document.addEventListener('change',async e=>{
   const t=e.target;
   const rd=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
-  if(t.id=='e-img'){
-    syncDraft();
-    await busy(async()=>{for(const f of t.files){const p='img/'+(S.draft.date||new Date().toISOString()).slice(0,4)+'/'+Date.now()+'-'+f.name.replace(/[^\w.\-]/g,'_');
-      S.blob[p]=URL.createObjectURL(f);S.up.push(p);await put(p,await rd(f));
-      const b=S.draft.body,at=S.caret==null?b.length:Math.min(S.caret,b.length),pre=b.slice(0,at),tag=(pre&&!pre.endsWith('\n')?'\n':'')+`![${f.name.replace(/\.[^.]+$/,'')}](${p})\n`;
-      S.draft.body=pre+tag+b.slice(at);S.caret=at+tag.length}});
-    renderArt();renderModal();
+  if(t.id=='e-img'){const fs=[...t.files];t.value='';addFiles(fs)}
+  if(t.id=='m-up'){   // 음악 파일 고르기 (mp3 / m4a / ogg 만 허용) - 실제 업로드는 [업로드] 버튼
+    const all=[...t.files],good=all.filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));
+    t.value='';S.pend.files=good;renderModal();
+    if(good.length<all.length)msg('mp3 · m4a · ogg 파일만 올릴 수 있습니다. (제외 '+(all.length-good.length)+'개)');
   }
-  if(t.id=='m-up'){
-    const okf=[...t.files].filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));
-    if(okf.length<t.files.length)toast('mp3 / m4a / ogg 파일만 올릴 수 있습니다.',1);
-    if(!okf.length)return;
-    await busy(async()=>{try{for(const f of okf){const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
-      S.blob[p]=URL.createObjectURL(f);await put(p,await rd(f));
-      const e={name:f.name.replace(/\.[^.]+$/,''),file:p},i=S.music.findIndex(m=>m.file==p);i<0?S.music.push(e):S.music[i]=e}}finally{await saveMusic()}});
-    renderMusic();
+  if(t.id=='m-cover'){   // 새로 올릴 곡들의 커버 이미지 고르기
+    const f=t.files[0];t.value='';if(!f)return;
+    if(!/^image\//.test(f.type)){msg('이미지 파일을 골라 주세요.');return}
+    if(S.pend.url)URL.revokeObjectURL(S.pend.url);
+    S.pend.cover=f;S.pend.url=URL.createObjectURL(f);renderModal();
+  }
+  if(t.id=='m-cover-chg'){   // 체크한 곡의 커버 바꾸기
+    const f=t.files[0];t.value='';if(!f)return;
+    if(!/^image\//.test(f.type)){msg('이미지 파일을 골라 주세요.');return}
+    await chgCover(f);
   }
 });
 
