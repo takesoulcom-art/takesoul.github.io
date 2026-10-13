@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-S1XrTnXt2JbIsIpq+k81szSmKvXK1T7WUeBnWI+QQ2M=' 'sha256-0A5WUyiuTj/OXR9e1BKfHtHZ89jI2tb3x0V0CtNT0ZU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-U+GsYXqrXmc/K8HlL2ZKCWcvIu0h34ELh56xsTuQLYY=' 'sha256-S1XrTnXt2JbIsIpq+k81szSmKvXK1T7WUeBnWI+QQ2M=' 'sha256-oAVlsTcsZg+Yssw8TR0hu16636HrYh870ekvql2b1bY=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -96,7 +96,7 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .body{white-space:pre-wrap;font-family:var(--sans);line-height:1.95;color:var(--mid)}
 .tx{white-space:pre-wrap}
 .body img{display:block;max-width:100%;margin:16px 0}
-.act{position:sticky;top:6px;float:right;margin:-28px -32px 0 0;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
+.act{position:sticky;top:6px;width:fit-content;margin:6px 0 0 auto;padding:2px 0 2px 8px;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
 .plist div{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
 .plist small{color:var(--lo);margin-right:10px}
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
@@ -159,7 +159,7 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
 #toast.on{display:block}#toast.err{background:var(--logo);color:#fff}
 @media(max-width:760px){
-body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{margin:-12px -12px 0 0}
+body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{top:calc(var(--hh,0px) + 4px)}
 main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
 article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.tags{padding-top:24px}
 aside{order:2}
@@ -293,7 +293,7 @@ function renderArt(){
   }
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
   if(S.tag&&!S.pid){
-    a.innerHTML=acts+`<div class="meta"># ${esc(S.tag)}</div><div class="plist" style="margin-top:16px">`+
+    a.innerHTML=`<div class="meta"># ${esc(S.tag)}</div>${acts}<div class="plist" style="margin-top:16px">`+
       (posts.map(p=>`<div data-a="open" data-v="${p.id}"><small>${p.date}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
     return;
   }
@@ -301,18 +301,19 @@ function renderArt(){
   if(!p){
     const day=S.date?list().filter(x=>x.date==S.date):list();
     if(day.length>1&&S.date){
-      a.innerHTML=acts+`<div class="meta">${S.date}</div><div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${x.id}">${esc(x.title)}</div>`).join('')+'</div>';return;
+      a.innerHTML=`<div class="meta">${S.date}</div>${acts}<div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${x.id}">${esc(x.title)}</div>`).join('')+'</div>';return;
     }
     p=day[0];
   }
-  if(!p){a.innerHTML=acts+'<div class="meta">아직 작성된 글이 없습니다.</div>';return}
+  if(!p){a.innerHTML='<div class="meta">아직 작성된 글이 없습니다.</div>'+acts;return}
   S.pid=p.id;setHash(p.id);
   const fp=S.full[p.id];
   if(!fp){a.innerHTML='<div class="meta">불러오는 중…</div>';loadPost(p.id).then(()=>{if(S.pid==p.id&&S.mode=='view')renderArt()});return}
   p={...p,body:fp.body,weather:fp.weather};track(p);
   const dt=new Date(p.date+'T00:00');
-  a.innerHTML=(S.admin?`<div class="act"><button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button><button data-a="new">[글쓰기]</button></div>`:'')+
-    `<div class="meta pd">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일${p.weather?', '+esc(p.weather):''}${p.hidden?' · 숨김':''}</div><h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
+  a.innerHTML=`<div class="meta pd">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일${p.weather?', '+esc(p.weather):''}${p.hidden?' · 숨김':''}</div>`+
+    (S.admin?`<div class="act"><button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button><button data-a="new">[글쓰기]</button></div>`:'')+
+    `<h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
 }
 function renderMusic(){
   const m=$('#music');
@@ -520,16 +521,15 @@ function renderModal(){
   if(k=='music'){const bx=b.querySelectorAll('.mck');if(bx.length==ck.length)bx.forEach((c,i)=>c.checked=ck[i]);updProg()}
   const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range])');if(f)f.focus();
 }
+if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px')).observe(document.querySelector('header'));
 const toTop=()=>{$('#art').scrollTop=0;window.scrollTo(0,0)};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fld=d=>JSON.stringify([d.date,d.weather||'',d.title,d.body,(d.tags||[]).join(','),!!d.hidden]);
-const getDraft=()=>{try{return JSON.parse(localStorage.draft||'null')}catch(e){return null}};
-const dropDraft=()=>{try{localStorage.removeItem('draft')}catch(e){}};
+try{localStorage.removeItem('draft')}catch(e){}
 const dirty=()=>{if(S.mode!='edit'||!$('#e-body'))return false;syncDraft();return fld(S.draft)!=S.snap};
 const leave=()=>!dirty()||confirm('저장하지 않은 내용이 있습니다. 나갈까요?');
 const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:history.replaceState).call(history,null,'','#'+id);S.hs=1};
 window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
-document.addEventListener('input',e=>{if(S.mode=='edit'&&e.target.closest('.ed')){try{syncDraft();localStorage.draft=JSON.stringify(S.draft)}catch(x){}}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const i=$('#e-wx'),w=b.dataset.w;
   i.value=i.value.includes(w)?i.value.replace(w,''):i.value+w;b.classList.toggle('on',i.value.includes(w));i.dispatchEvent(new Event('input',{bubbles:true}))});
 window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
@@ -557,28 +557,28 @@ document.addEventListener('click',async e=>{
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
   else if(a=='tag'){pick({tag:v});render();toTop()}
   else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal();toTop()}
-  else if(a=='new'){let d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);const sv=getDraft();if(sv&&!sv.id&&confirm('작성 중이던 글이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
-  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);const sv=getDraft();if(sv&&sv.id==f.id&&confirm('저장하지 않은 수정 내용이 있습니다. 이어서 쓸까요?'))d=sv;S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='new'){const d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()}
   else if(a=='pick'){$('#e-img').click()}
   else if(a=='thx'){rmTok(+el.dataset.i)}
   else if(a=='thumb'){const L=[...$('#e-body').value.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)],i=[...document.querySelectorAll('#thumbs .th[data-p]')].indexOf(el);
     if(L[i]){S.vi=i;S.view={p:L[i][2],name:L[i][1]};S.modal='imgview';renderModal()}}
   else if(a=='imgdel'){rmTok(S.vi);S.modal=null;renderModal()}
-  else if(a=='cancel'){if(!leave())return;dropDraft();await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
+  else if(a=='cancel'){if(!leave())return;await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
   else if(a=='save'){if(S.upBusy){const m=$('#dzmsg');if(m)m.textContent='이미지 업로드가 끝난 뒤 저장해 주세요.';return}
     const d={...S.draft,date:$('#e-date').value,title:$('#e-title').value.trim(),weather:$('#e-wx').value.trim(),body:$('#e-body').value,
       tags:$('#e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:$('#e-hid').checked};
     if(!d.title||!d.date||!d.tags.length){toast('날짜, 제목, Tags는 필수입니다.',1);return}
-    const base=await load('data/index.json',S.posts),pre=d.date.replace(/-/g,'');
-    if(!d.id){const n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+String(n).padStart(2,'0')}
-    const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'';
+    let base=null;
+    if(!d.id){base=await load('data/index.json',S.posts);const pre=d.date.replace(/-/g,''),n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+String(n).padStart(2,'0')}
+    const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'',pv=S.posts.find(x=>x.id==d.id),same=!!pv&&pv.date==m.date&&pv.title==m.title&&!!pv.hidden==m.hidden&&(pv.tags||[]).join(',')==m.tags.join(',');
     try{
       await put(`data/${d.id.slice(0,4)}/${d.id}.json`,b64(JSON.stringify({...m,weather:d.weather||'',body:d.body},null,1)));
-      const arr=[...base],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;
-      await saveJSON('data/index.json',arr);S.posts=arr;S.full[d.id]={...m,weather:d.weather||'',body:d.body};
+      if(!same){const arr=[...(base||await load('data/index.json',S.posts))],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;await saveJSON('data/index.json',arr);S.posts=arr}
+      S.full[d.id]={...m,weather:d.weather||'',body:d.body};
       await purge([...imgsOf(old),...S.up],new Set(imgsOf(d.body)));
     }catch(e){toast('저장 실패: '+e.message,1);return}
-    dropDraft();S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
+    S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
     const dt=new Date(d.date+'T00:00');S.y=dt.getFullYear();S.m=dt.getMonth();render();
   }
   else if(a=='delpost'){if(!confirm('이 글을 삭제할까요?'))return;
