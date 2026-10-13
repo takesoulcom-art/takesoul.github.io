@@ -18,7 +18,7 @@
 <meta property="og:url" content="https://takesoul.com/">
 <meta property="og:locale" content="ko_KR">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoul.com/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
-<script>try{document.documentElement.dataset.tone=localStorage.tone||"note"}catch(e){}
+<script>(function(){var h=new Date().getHours(),t=(h>=22||h<6)?"dark":h<14?"white":"note";try{t=sessionStorage.tone||t}catch(e){}document.documentElement.dataset.tone=t})();
 try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JC6PD25F8X"></script>
 <script>
@@ -589,7 +589,7 @@ document.addEventListener('click',async e=>{
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
   else if(a=='tdone'){await busy(saveTags);S.modal=null;render()}
-  else if(a=='tone'){document.documentElement.dataset.tone=v;try{localStorage.tone=v}catch(e){}setLogo();renderModal()}
+  else if(a=='tone'){document.documentElement.dataset.tone=v;try{sessionStorage.tone=v}catch(e){}setLogo();renderModal()}
   else if(a=='kinput'){$('#krow').innerHTML='<span>관리자 모드</span><input id="pw" type="password" placeholder="관리자 코드" autocomplete="off"><button data-a="authok">[확인]</button>';$('#pw').focus()}
   else if(a=='mclose'){S.modal=null;renderModal()}
   else if(a=='tup')mvt(+v,-1);
