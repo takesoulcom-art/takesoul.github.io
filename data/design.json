@@ -1,12 +1,12 @@
 {
  "desk": {
-  "default": "note",
+  "tone": "note",
   "tones": [],
   "fs": "n",
-  "hs": "v"
+  "hs": "h"
  },
  "mob": {
-  "default": "dark",
+  "tone": "dark",
   "tones": [],
   "fs": "n",
   "hs": "h"
