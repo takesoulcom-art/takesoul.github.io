@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- [보안] CSP(콘텐츠 보안 정책)
+ ※ 인라인 스크립트가 수정되었으므로 원활한 동작을 위해 script-src에 'unsafe-inline'을 허용했습니다.
+ 엄격한 해시(sha256) 정책을 원하실 경우 수정된 스크립트 내용의 해시값을 재계산하여 넣어주시면 됩니다. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>takesoul</title>
+<meta name="description" content="변재신, takesoul, janners">
+<meta name="keywords" content="변재신, takesoul, janners">
+<meta name="author" content="변재신">
+<!-- 파비콘 / 애플 터치 아이콘 / 대표 주소(canonical) / 공유용 OG 메타 - 도메인이 바뀌면 canonical, og:url 수정 -->
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://takesoul.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="takesoul">
+<meta property="og:description" content="변재신, takesoul, janners">
+<meta property="og:url" content="https://takesoul.com/">
+<meta property="og:locale" content="ko_KR">
+<!-- 검색엔진용 구조화 데이터(사이트 이름·별칭·작성자) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoul.com/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
+<script>
+// [초기 톤 및 디자인 결정] 페이지가 그려지기 전에 실행(깜빡임 방지).
+// 우선순위: 방문자가 메뉴에서 직접 고른 톤(localStorage.tone) > 관리자가 설정한 기본 톤(ui.def, 기본값 'note')
+// 관리자가 저장한 사이트 디자인 설정(data/ui.json)은 방문 시 브라우저(localStorage.ui)에 캐시되어 즉시 반영됩니다.
+function uiRead(){var s='';try{s=localStorage.ui||sessionStorage.ui||''}catch(e){try{s=sessionStorage.ui||''}catch(e2){}}
+try{var o=JSON.parse(s);return o&&typeof o=='object'&&!Array.isArray(o)?o:{}}catch(e){return {}}}
+function uiWrite(o){var s=JSON.stringify(o);try{localStorage.ui=s;try{sessionStorage.removeItem('ui')}catch(e){}return true}catch(e){try{try{localStorage.removeItem('ui')}catch(e3){}sessionStorage.ui=s;return true}catch(e2){return false}}}
+function userToneGet(){try{return localStorage.tone||sessionStorage.tone||''}catch(e){try{return sessionStorage.tone||''}catch(e2){return ''}}}
+function userToneSet(v){try{if(v)localStorage.tone=v;else localStorage.removeItem('tone');try{sessionStorage.removeItem('tone')}catch(e){}}catch(e){try{if(v)sessionStorage.tone=v;else sessionStorage.removeItem('tone')}catch(e2){}}}
+function activeToneId(o,forceId){
+  o=o||{};var tones=Array.isArray(o.tones)?o.tones:[];
+  var valid=function(id){return /^(white|dark|note)$/.test(id)||tones.some(function(t){return t&&t.id===id})};
+  if(forceId&&valid(forceId))return forceId;
+  var ut=userToneGet();if(ut&&valid(ut))return ut;
+  if(o.def&&valid(o.def))return o.def;
+  return 'note';
+}
+function uiApply(o,forceId){
+  o=o||{};var r=document.documentElement,s=r.style,H=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,
+  ok=function(v){return typeof v=='string'&&H.test(v)?v:''},
+  set=function(k,v){if(v)s.setProperty(k,v);else s.removeProperty(k)},
+  tid=activeToneId(o,forceId),c=null,i,bg='',pb='',fc='',
+  tones=Array.isArray(o.tones)?o.tones:[],
+  mix=!!(window.CSS&&CSS.supports&&CSS.supports('color','color-mix(in srgb,red 50%,blue)'));
+  if(!/^(white|dark|note)$/.test(tid)){
+    for(i=0;i<tones.length;i++)if(tones[i]&&tones[i].id===tid)c=tones[i];
+    if(c){bg=ok(c.bg);pb=ok(c.pbg);fc=ok(c.fc);if(!(bg&&pb&&fc)){c=null;bg=pb=fc='';tid='note'}}else tid='note';
+  }
+  r.setAttribute('data-tone',c?'custom':tid);
+  r.setAttribute('data-tid',tid);
+  set('--bg',bg);set('--paper',pb);set('--ink',fc);set('--mid',fc);
+  set('--lo',c&&mix?'color-mix(in srgb,'+fc+' 72%,var(--bg))':fc);
+  set('--sel',c&&mix?'color-mix(in srgb,var(--ink) 16%,var(--bg))':'');
+  set('--line',c&&mix?'color-mix(in srgb,var(--ink) 24%,var(--bg))':'');
+  if(pb)r.setAttribute('data-ubody','');else r.removeAttribute('data-ubody');
+  var cs='';if(bg){var h=bg.slice(1);if(h.length==3)h=h.replace(/./g,'$&$&');cs=(parseInt(h.slice(0,2),16)*299+parseInt(h.slice(2,4),16)*587+parseInt(h.slice(4,6),16)*114)/1000<128?'dark':'light'}
+  set('color-scheme',cs);
+  r.setAttribute('data-fs',/^[ls]$/.test(o.fs)?o.fs:'n');
+  r.setAttribute('data-hs',o.hs=='h'?'h':'v');
+}
+uiApply(uiRead());
+// 관리자 키가 저장돼 있으면 GA 수집 비활성화 (본인 방문 제외)
+try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
+<!-- Google Analytics (측정 ID: G-JC6PD25F8X). 관리자 로그인 상태에서는 수집이 꺼져 본인 방문은 집계되지 않음 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JC6PD25F8X"></script>
+<script>
+  // Google Analytics 기본 초기화 코드
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JC6PD25F8X');
+</script>
+<style>
+/* ===================================================================
+    [1] 디자인 토큰 (색 · 폰트) - 색/글꼴은 여기서만 바꾸면 사이트 전체에 반영
+      --bg 배경 / --ink 본문 글자 / --mid 보조 글자 / --lo 연한 글자(날짜·힌트)
+      --line 테두리 / --dot 캘린더 글 있는 날 점 / --hid 숨김글 점(관리자만 보임)
+      --sel 선택 강조 배경 / --logo 로고·오류 메시지 색
+      --sans 전체 글꼴 순서 (앞에서부터 설치된 것 사용). 글꼴 변경은 이 한 줄만 수정
+      기본 3개 톤: white, dark, note (초기 기본값은 note이며 관리자가 변경 가능)
+    =================================================================== */
+:root{--bg:#fafbfb;--ink:#222;--mid:#666;--lo:#737373;--line:#bbb;--dot:#5b95e8;--hid:#d9822b;--sel:#cfe0fb;--logo:#a00014;
+--sans:"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;}
+/* 톤 2: dark */
+:root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c2c0b6;--lo:#94928a;--line:#43423e;--dot:#6fa3f2;--hid:#e0a04a;--sel:#3b4a63;--logo:#e5533d}
+/* 톤 3: note (공책 느낌). --paper=종이색, --rule=줄 색. 아래 .tx 가 26px 간격 줄무늬 배경을 그림(줄간격 26px과 반드시 같이 바꿀 것) */
+:root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#6b5f4c;--lo:#726652;--line:#d2c6a6;--rule:#e8dfc0;--dot:#654321;--hid:#2e8b57;--sel:#ecd99a}
+:root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
+:root[data-tone=note] .tx{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
+:root[data-tone=dark] #modal{background:rgba(0,0,0,.5)}
+/* ===== [디자인 설정] 관리자가 구성한 추가 톤 + 기본 톤 + 글자 크기 + 해시 정렬 (data/ui.json 에 저장되어 사이트 전체 적용)
+    방문자는 메뉴(≡)에서 관리자가 등록해 둔 톤(기본 3종 + 추가 톤) 중 원하는 톤을 선택해 볼 수 있음.
+    --fs 글자 크기 증감: 기본 0 / 크게 +2pt / 작게 -2pt
+    data-ubody 추가 톤(본문 배경 색 지정)일 때 붙음 → 글 영역(article)·버튼줄·팝업 배경에 --paper 적용
+    data-hs=h 해시(Tags)를 가로 나열 + 콤마 구분. 기본(v)은 세로 목록 ===== */
+:root{--fs:0pt}
+:root[data-fs=l]{--fs:2pt}
+:root[data-fs=s]{--fs:-2pt}
+:root[data-ubody] article,:root[data-ubody] .act,:root[data-ubody] #mbox{background:var(--paper)}
+.tl{display:block}
+.row2.tn{flex-wrap:wrap;row-gap:4px}
+:root[data-hs=h] .tl{display:flex;flex-wrap:wrap}
+:root[data-hs=h] .tag{display:block;padding:2px 0;margin-right:.45em}
+:root[data-hs=h] .tag:not(:last-child)::after{content:",";font-weight:400}
+/* 설정 모달 안: 색 코드 입력칸 + 색상 선택기 / 구분선 / 안내·경고 문구 */
+.row2 input[type=color]{flex:none;width:34px;height:28px;padding:0;border:1px solid var(--line);background:none;cursor:pointer}
+.ud{border-top:1px solid var(--line);margin:12px 0 6px}
+.uh,.uw{margin:2px 0 6px;font-size:calc(11px + var(--fs));line-height:1.5}
+.uh{color:var(--lo)}.uw{color:var(--logo)}.uw:empty{display:none}
+/* [설정 모달] 메뉴(≡) 안의 한 줄 행(Tone, 관리자 모드). */
+.row2{display:flex;align-items:center;gap:12px;margin:6px 0}
+.row2>span:first-child{width:84px;flex:none;color:var(--lo)}
+.row2 input{flex:1;min-width:0}
+.row2 button{color:var(--mid)}
+.row2 button.on{color:var(--ink);font-weight:600}
+.def-mark{font-size:calc(10px + var(--fs));color:var(--lo);margin-left:2px;font-weight:400}
+/* [2] 기본 리셋 / 전체 글자 크기 - body 기본 13px, 줄간격 1.7. 사이트 기본 글자 크기를 바꾸려면 body의 13px 수정 */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 var(--sans);font-size:calc(13px + var(--fs));height:100dvh;overflow:hidden}
+button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
+button{cursor:pointer}
+input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
+input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
+/* ===== [3] 전체 레이아웃 =====
+    .wrap : 사이트 최대 폭 1100px, 바깥 여백 24px 20px
+    header : 로고 + 음악 미니플레이어 + 메뉴(≡) 한 줄 */
+.wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
+header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
+/* 로고 영역: 이미지 높이 27px(#logo img). 이미지가 없으면 data-t 문구(TAKESOUL)를 글자 20px로 표시 */
+#logo{flex:1;color:var(--logo);font-size:calc(20px + var(--fs));letter-spacing:.5px}
+#logo img{height:27px;display:block}
+#logo img.uc{width:auto;max-width:min(240px,60vw);object-fit:contain;object-position:left center}
+#logo a{display:inline-block;vertical-align:top;color:inherit;text-decoration:none}
+#logo a[data-t]::before{content:attr(data-t)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* [음악] 헤더의 미니 플레이어(♬ 곡명, 재생/다음 버튼) */
+#music{display:flex;align-items:center;gap:10px;color:var(--mid)}
+#music button{color:var(--mid);display:flex;align-items:center;padding:6px 4px}
+#music svg{display:block}
+#menu{font-size:calc(20px + var(--fs));color:var(--mid)}
+/* [모달 공통] 전체 화면 어두운 막(#modal) + 가운데 상자(#mbox, 폭 360px). 설정/연도·월 선택/태그 편집/이미지 크게 보기/음악 플레이어가 모두 이 상자를 재사용 */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
+#mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(360px,92vw);max-height:82vh;overflow:auto}
+#mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
+#mbox .row.on{color:var(--ink);font-weight:600}
+#mbox .mh{text-align:right;font-weight:700;color:var(--ink);margin-bottom:12px}
+#mbox .bar [data-a=mclose],#mbox .bar [data-a=mtoggle],#mbox .bar [data-a=tcancel]{order:99;margin-left:auto}
+.pd{text-align:right}
+#mbox .bar{display:flex;gap:12px;margin-top:14px;color:var(--mid)}
+#mbox input[type=password]{margin-bottom:4px}
+/* [본문 2단 그리드] 왼쪽 aside(캘린더+태그) 폭 320px / 오른쪽 article(글) 나머지. 칸 사이 간격 32px */
+main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
+aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
+/* [캘린더] 머리(‹ 2026 10 ›) / 날짜 격자(7열). 버튼 터치 영역 44px 이상 유지(모바일 접근성) */
+.cal-h{display:block;font-size:calc(16px + var(--fs));letter-spacing:1px}
+.ch{display:flex;align-items:center;justify-content:center;gap:8px}
+.ch>span{display:flex;align-items:center;gap:6px}
+.ch button{font-size:calc(16px + var(--fs));letter-spacing:1px}
+.ch [data-a=py],.ch [data-a=pm]{min-height:44px;padding:10px 12px}
+.ch [data-a=prev],.ch [data-a=next]{min-width:44px;min-height:44px;font-size:calc(26px + var(--fs));line-height:1;padding:6px 12px;letter-spacing:0;position:relative;top:-2px}
+/* 연도·월 선택 팝업의 3열 버튼 */
+.pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
+.pk button{padding:4px 0;color:var(--mid)}
+.pk .on{color:var(--ink);background:var(--sel)}
+/* 날짜 격자: 글자 12px, 요일 11px, 행 간격 10px / .d = 날짜 셀 높이 30px / .has = 글이 있는 날(점 4px) / .sel = 선택된 날(원 26px) */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-top:16px;row-gap:10px;font-size:calc(12px + var(--fs))}
+.cal .w{color:var(--lo);font-size:calc(11px + var(--fs))}
+.d{height:30px;line-height:24px;position:relative;color:var(--mid)}
+.d.has{cursor:pointer;color:var(--ink)}
+.d.has::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dot)}
+.d.has.hid::after{background:var(--hid)}
+.d.sel span{background:var(--sel);display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%}
+/* [태그] 왼쪽 하단 태그 목록 (.tag.on = 선택된 태그) */
+.tags{border-top:1px solid var(--line);padding-top:16px}
+.tags h4{margin:0 0 8px;font-weight:400;display:flex;justify-content:space-between}
+.tag{display:flex;gap:6px;color:var(--mid);padding:2px 0;cursor:pointer}
+.tag.on{color:var(--ink);font-weight:600}
+/* [글 본문 영역] 테두리 상자, 안쪽 여백 36px 40px. 제목 h2 = 20px / 본문 .body 줄간격 1.95 / 본문 이미지는 최대 폭 100% */
+article{font-family:var(--sans);border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
+.meta{color:var(--lo);font-size:calc(12px + var(--fs));letter-spacing:1px}
+h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
+.body{white-space:pre-wrap;font-family:var(--sans);line-height:1.95;color:var(--mid)}
+.tx{white-space:pre-wrap}
+.body img{display:block;max-width:100%;margin:16px 0}
+/* [관리자 버튼줄] [수정][삭제][글쓰기] - 스크롤해도 위에 붙어 있음(sticky) */
+.act{position:sticky;top:6px;width:fit-content;margin:6px 0 0 auto;padding:2px 0 2px 8px;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
+/* 글 목록(태그 선택 / 같은 날 여러 글일 때) */
+.plist div{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.plist small{color:var(--lo);margin-right:10px}
+/* ===== [글쓰기/수정 화면] =====
+    .ed 폼 / .dz 이미지 끌어놓기 영역 / .thumbs 첨부 이미지 썸네일 격자(PC 4열, 모바일 3열) / .wx 날씨 이모지 버튼
+    .ed textarea 최소 높이 300px */
+.ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.dz{border:1px dashed var(--mid);padding:22px 12px;text-align:center;cursor:pointer;color:var(--mid)}
+.dz small{display:block;color:var(--lo);font-size:calc(11px + var(--fs));margin-top:4px}
+.dz.over{background:var(--sel);color:var(--ink)}
+#dzmsg{font-size:calc(12px + var(--fs));color:var(--logo)}
+.thh{display:flex;justify-content:space-between;color:var(--lo);font-size:calc(12px + var(--fs))}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.th{position:relative;border:1px solid var(--line);cursor:pointer;min-width:0}
+.th img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.th>span{display:block;padding:2px 6px;font-size:calc(11px + var(--fs));color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th .x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:calc(12px + var(--fs));line-height:22px;text-align:center}
+.th.up{cursor:default;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--mid);font-size:calc(12px + var(--fs))}
+.pbar{width:70%;height:2px;background:var(--line)}.pbar i{display:block;height:100%;background:var(--ink)}
+@media(max-width:760px){.thumbs{grid-template-columns:repeat(3,1fr)}}
+/* 이미지 크게 보기 모달(폭 880px, 이미지 최대 높이 70vh) */
+#mbox.wide{width:min(880px,94vw)}
+#mbox .big{display:block;max-width:100%;max-height:70vh;margin:0 auto}
+#mbox .cap{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;color:var(--mid)}
+.ed textarea{min-height:300px;font-family:var(--sans)}
+/* 날씨 이모지 버튼 (최소 40px 터치 영역) */
+.wx{display:flex;flex-wrap:wrap;gap:4px}
+.wx button{font-size:calc(20px + var(--fs));line-height:1;min-width:40px;min-height:40px;padding:6px;border:1px solid transparent}
+.wx button:hover{border-color:var(--line)}
+.wx button.on{background:var(--sel)}
+.chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
+/* ===== [음악 플레이어 팝업] =====
+    .pl-* 클래스는 전부 이 팝업 전용. 폭 380px / 앨범 커버 150px / 목록 최대 높이 240px(넘으면 스크롤)
+    .pl-add = 관리자용 업로드 영역(커버 칸 56px) / .seek = 재생 위치 슬라이더(선 1px, 동그라미 9px) */
+#mbox.mp{width:min(380px,92vw);padding:18px 22px 16px}
+.pl-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.pl-h b{font-family:var(--sans);font-weight:400;font-size:calc(16px + var(--fs));color:var(--ink)}
+.pl-h small{margin-left:auto;font-size:calc(11px + var(--fs));color:var(--lo)}
+.pl-x{min-width:36px;min-height:36px;margin-right:-8px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
+.pl-cover{width:150px;height:150px;margin:16px auto 10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(44px + var(--fs));line-height:1}
+.pl-cover img,.pl-th img,.pl-cv img{width:100%;height:100%;object-fit:cover;display:block}
+.pl-t{text-align:center;font-size:calc(14px + var(--fs));font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-s{text-align:center;font-size:calc(11px + var(--fs));color:var(--lo)}
+.pl-bar{display:flex;align-items:center;gap:10px;margin:14px 0 4px}
+.pl-time{font-size:calc(11px + var(--fs));color:var(--lo);white-space:nowrap;font-variant-numeric:tabular-nums}
+.seek{-webkit-appearance:none;appearance:none;flex:1;min-width:0;width:auto;height:24px;padding:0;border:0;background:transparent;cursor:pointer}
+.seek::-webkit-slider-runnable-track{height:1px;background:linear-gradient(to right,var(--ink) var(--p,0%),var(--line) var(--p,0%))}
+.seek::-moz-range-track{height:1px;background:var(--line)}
+.seek::-moz-range-progress{height:1px;background:var(--ink)}
+.seek::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;margin-top:-4px;border:0;border-radius:50%;background:var(--ink)}
+.seek::-moz-range-thumb{width:9px;height:9px;border:0;border-radius:50%;background:var(--ink)}
+.pl-c{display:flex;justify-content:center;gap:18px}
+.pl-c button{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.pl-c svg{width:22px;height:22px}
+.pl-list{margin-top:12px;max-height:240px;overflow-y:auto}
+.pl-row{display:flex;align-items:center;gap:10px;padding:6px;color:var(--mid);cursor:pointer}
+.pl-row.on{background:var(--sel);color:var(--ink);font-weight:600}
+.pl-n{flex:none;width:16px;text-align:center;font-size:calc(11px + var(--fs));color:var(--lo)}
+.pl-n svg{width:13px;height:13px;display:block;margin:0 auto}
+.pl-th{flex:none;width:28px;height:28px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(13px + var(--fs));line-height:1}
+.pl-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-add{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px;border:1px dashed var(--line)}
+.pl-cv{flex:none;width:56px;height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:calc(10.5px + var(--fs));line-height:1.3;text-align:center;color:var(--mid)}
+.pl-pick{color:var(--ink)}
+.pl-hint{margin-top:2px;font-size:calc(11px + var(--fs));line-height:1.5;color:var(--lo)}
+.pl-r{margin-left:auto}
+.pl-empty{margin:16px 0 0;font-size:calc(12px + var(--fs));color:var(--lo)}
+/* [유틸] .hide 숨김 / #toast 화면 아래 알림 메시지(표시 시간은 JS toast()에서 설정) */
+.hide{display:none!important}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
+#toast.on{display:block}#toast.err{background:var(--logo);color:#fff}
+/* ===== [모바일 레이아웃] 화면 폭 760px 이하 =====
+    PC는 화면 고정+영역별 스크롤 / 모바일은 세로 한 줄 배치(글 → 캘린더/태그 순). 헤더는 위에 고정, 음악은 헤더 둘째 줄 */
+@media(max-width:760px){
+body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{top:calc(var(--hh,0px) + 4px)}
+main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
+article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.tags{padding-top:24px}
+aside{order:2}
+header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<!-- ===== 화면 뼈대 (실제 내용은 아래 스크립트가 채움) =====
+ #logo 로고 / #music 미니 플레이어 / #menu 설정 메뉴 / #modal 팝업 / #cal 캘린더 / #tags 태그 / #art 글 본문 / #toast 알림 / #au 음악 재생기(audio) -->
+<div class="wrap">
+<!-- 화면에는 안 보이고 검색엔진·스크린리더용으로만 읽히는 제목 -->
+<h1 class="sr">takesoul · 변재신 · janners</h1>
+<header>
+  <div id="logo"><a href="./" data-a="home"><img id="logoimg" alt="LOGO"></a></div>
+  <div id="music"></div>
+  <button id="menu" data-a="menu" aria-label="menu">≡</button>
+</header>
+<div id="modal"><div id="mbox"></div></div>
+<main>
+  <aside>
+    <section><div class="cal-h" id="calh"></div><div class="cal" id="cal"></div></section>
+    <section class="tags" id="tags"></section>
+  </aside>
+  <article id="art"></article>
+</main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<audio id="au"></audio>
+<script>
+// =====================================================================
+//  takesoul 개인 홈페이지 - 메인 스크립트 (GitHub Pages 정적 사이트 + GitHub API로 글/디자인 저장)
+//  데이터 구조 (모두 GitHub 저장소 안의 파일):
+//    data/index.json            글 목록(id,date,title,tags,hidden) - 캘린더/태그/목록용 가벼운 정보
+//    data/YYYY/YYYYMMDDNN.json  글 본문 파일 (id 규칙: 날짜8자리+당일 순번2자리)
+//    data/tags.json             태그 순서(order)·숨김(hidden)
+//    data/music.json            음악 목록(name,file,cover)
+//    data/ui.json               [관리자 전용] 사이트 기본 톤(def), 추가 톤 목록(tones), 글자 크기(fs), 해시 정렬(hs)
+//    img/YYYY/...  글 이미지 / img/logo/... 추가 톤 로고 / music/... 음악 파일 / music/cover/... 커버
+//  =====================================================================
+//  [설정 CFG]
+//    owner/repo : 저장소 주소. 비우면 접속 주소에서 자동 추정 / branch : 비우면 기본 브랜치
+//    gate : 관리자 코드의 SHA-256 해시 (코드 자체는 저장 안 됨). 코드 변경 시 이 값 교체
+const CFG={owner:'takesoulcom-art',repo:'takesoul.github.io',branch:'',gate:'eb58deb26c6708ffd17ef704ea31045c177fccba638f133d70545847a708ac88'};
+// O=소유자, R=저장소 이름 (API 주소 조립에 사용)
+const O=CFG.owner||location.hostname.split('.')[0];
+const R=CFG.repo||location.pathname.split('/')[1]||O+'.github.io';
+// [유틸] $=querySelector 줄임 / esc=HTML 특수문자 이스케이프(글 내용을 화면에 넣을 때 필수, XSS 방지)
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// 저장된 관리자 키(GitHub 토큰) 읽기: 탭 단위(sessionStorage) 또는 이 기기 유지(localStorage)
+const KEY0=(()=>{try{return sessionStorage.gk||localStorage.gk||''}catch(e){return ''}})();
+// [전역 상태 S] 화면의 모든 상태를 한곳에서 관리
+const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:KEY0,admin:!!KEY0,mOpen:false,cur:-1,playing:false,draft:null};
+// 음악 재생기(audio 태그)
+const au=$('#au');
+// 요일 이름(일~토)
+const WD=['일','월','화','수','목','금','토'];
+// [아이콘] 재생/정지/다음/이전/이퀄라이저/닫기 SVG
+const sv=p=>`<svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
+const IC={play:sv('M4 2.5v11l9-5.5z'),pause:sv('M4 2.5h3v11H4zM9 2.5h3v11H9z'),next:sv('M3 2.5v11l7-5.5zM11 2.5h2.2v11H11z')};
+IC.prev=sv('M13 2.5v11l-7-5.5zM5 2.5H2.8v11H5z');IC.eq=sv('M2 8h3v6H2zM6.5 3h3v11h-3zM11 6h3v8h-3z');
+IC.x='<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1"/></svg>';
+// === [GitHub 저장 함수] ===
+const api=(p,o={})=>fetch(`https://api.github.com/repos/${O}/${R}/contents/${p}`+(CFG.branch&&!o.method?`?ref=${CFG.branch}`:''),{...o,headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'},cache:'no-store'});
+const b64=s=>btoa(unescape(encodeURIComponent(s)));
+async function put(p,content){
+  const g=await api(p);const sha=g.ok?(await g.json()).sha:undefined;
+  const r=await api(p,{method:'PUT',body:JSON.stringify({message:'update '+p,content,sha,branch:CFG.branch||undefined})});
+  if(!r.ok)throw new Error((await r.json()).message);
+}
+async function del(p){
+  const g=await api(p);if(!g.ok)return;
+  await api(p,{method:'DELETE',body:JSON.stringify({message:'delete '+p,sha:(await g.json()).sha,branch:CFG.branch||undefined})});
+}
+const saveJSON=(p,o)=>put(p,b64(JSON.stringify(o,null,1)));
+const savePosts=()=>saveJSON('data/index.json',S.posts);
+const saveTags=()=>saveJSON('data/tags.json',S.tags);
+const saveMusic=()=>saveJSON('data/music.json',S.music);
+const saveUI=()=>saveJSON('data/ui.json',{def:UI.def||'note',tones:UI.tones||[],fs:UI.fs||'n',hs:UI.hs||'v'});
+// [데이터 읽기] 관리자: GitHub API로 최신본 직접 읽기 / 방문자: 사이트 파일 읽기(?t=로 캐시 회피). 실패하면 기본값 d 반환
+const load=async(f,d)=>{
+  if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok)return JSON.parse(await r.text());if(r.status==404)return d}catch(e){}}
+  try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
+};
+// 글목록·태그·음악·UI설정 4개 파일을 동시에 불러옴
+const reload=async()=>{
+  S.full={};
+  const [posts,tags,music,uiData]=await Promise.all([
+    load('data/index.json',[]),
+    load('data/tags.json',{order:[],hidden:[]}),
+    load('data/music.json',[]),
+    load('data/ui.json',null)
+  ]);
+  S.posts=posts;S.tags=tags;S.music=music;
+  if(uiData&&typeof uiData=='object'){
+    UI.def=uiData.def||'note';
+    UI.tones=(Array.isArray(uiData.tones)?uiData.tones:[]).filter(t=>t&&typeof t.id=='string'&&/^[\w-]+$/.test(t.id)&&typeof t.name=='string').slice(0,5);
+    UI.fs=/^[ls]$/.test(uiData.fs)?uiData.fs:'n';
+    UI.hs=uiData.hs=='h'?'h':'v';
+    uiWrite(UI);
+  }
+  uiRun();setLogo();
+};
+// [알림] toast(메시지, 오류여부): 화면 아래 알림(성공 3초/오류 6초). busy(): 저장 중 오류를 알림으로 보여주는 래퍼
+let toastT;const toast=(t,err)=>{const el=$('#toast');el.textContent=t;el.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{el.className=''},err?6000:3000)};
+const busy=async fn=>{try{await fn()}catch(e){toast('저장 실패: '+e.message,1)}};
+// 목록 정렬: vis=방문자에게 보이는 글(숨김 제외), list=관리자는 숨김글 포함
+const vis=()=>S.posts.filter(p=>!p.hidden).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+const list=()=>S.admin?[...S.posts].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)):vis();
+// 태그 목록 계산
+function tagList(all){
+  const c={};vis().forEach(p=>(p.tags||[]).forEach(t=>c[t]=(c[t]||0)+1));
+  S.posts.forEach(p=>(p.tags||[]).forEach(t=>c[t]=c[t]||0));
+  let names=Object.keys(c).sort((a,b)=>c[b]-c[a]);
+  if(!S.admin)names=names.filter(t=>c[t]>0);
+  const o=S.tags.order.filter(t=>names.includes(t));
+  names=[...o,...names.filter(t=>!o.includes(t))];
+  return names.filter(t=>all||!S.tags.hidden.includes(t)).map(t=>[t,c[t]]);
+}
+// === [디자인 설정]
+//   - 방문자: 관리자가 설정한 기본 톤(UI.def, 초기 'note')에 먼저 노출되며, 메뉴(≡)에서 기본 3개 톤(White/Dark/Note) + 관리자가 만든 추가 톤 중 원하는 톤을 선택만 가능(본인 브라우저에 기억).
+//   - 관리자: 톤 추가(최대 5개) / 추가 톤 편집·삭제(기본 3개 톤은 삭제·수정 불가) / 모든 톤 중 하나를 사이트 기본값(UI.def)으로 지정 / 글자 크기(UI.fs) / 해시 정렬(UI.hs)을 제어하며 [디자인 저장] 시 data/ui.json 에 저장됨.
+const UI=uiRead();
+UI.def=UI.def||'note';
+UI.tones=(Array.isArray(UI.tones)?UI.tones:[]).filter(t=>t&&typeof t.id=='string'&&/^[\w-]+$/.test(t.id)&&typeof t.name=='string').slice(0,5);
+UI.fs=/^[ls]$/.test(UI.fs)?UI.fs:'n';
+UI.hs=UI.hs=='h'?'h':'v';
+const HX=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+const hex6=h=>{h=String(h||'').trim();if(!HX.test(h))return '#000000';h=h.slice(1);if(h.length==3)h=h.replace(/./g,'$&$&');return '#'+h.toLowerCase()};
+const uiLum=h=>{const n=parseInt(hex6(h).slice(1),16);return [n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)};
+const uiCR=(a,b)=>{const x=uiLum(a),y=uiLum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const uiCS=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+const uiPaper=()=>{const r=document.documentElement;return r.dataset.tone=='note'||r.hasAttribute('data-ubody')?uiCS('--paper'):uiCS('--bg')};
+const uiEff=k=>k=='bg'?uiCS('--bg'):k=='fc'?uiCS('--ink'):uiPaper();
+function uiBad(){const bgs=[uiCS('--bg'),uiPaper()],fgs=[uiCS('--ink'),uiCS('--mid')];
+  return bgs.some(b=>HX.test(b)&&fgs.some(f=>HX.test(f)&&uiCR(f,b)<2))}
+// 현재 선택된 톤 ID ('white'|'dark'|'note' 또는 추가 톤 id)
+const curTid=()=>activeToneId(UI);
+// 현재 선택된 톤이 추가 톤이면 그 객체를 반환 (기본 3개 톤이면 undefined)
+const uiTone=()=>UI.tones.find(t=>t.id===curTid());
+let WK=null;
+const uiView=()=>WK?{...UI,tones:UI.tones.map(t=>t.id==WK.id?{...t,bg:WK.bg,pbg:WK.pbg,fc:WK.fc}:t)}:UI;
+const uiRun=forceId=>uiApply(uiView(),forceId);
+const uiSaveLocal=()=>{uiWrite(UI)};
+function uiClose(){
+  if(WK){WK=null;uiRun()}
+  if(uiTone()&&uiBad()){
+    userToneSet('note');uiRun('note');setLogo();
+    toast('글자색과 배경색이 너무 비슷한 톤이라 기본 톤으로 되돌렸습니다.',1);
+  }
+}
+const uiWarn=()=>{const w=$('#uwarn');if(w)w.textContent=uiBad()?'글자색과 배경색이 너무 비슷해 저장되지 않았어요. 색을 더 다르게 해 주세요.':''};
+function uiSync(sk,ss){['bg','pbg','fc'].forEach(k=>{const v=hex6(uiEff(k));
+  document.querySelectorAll(`#mbox [data-ui="${k}"]`).forEach(el=>{if(k==sk&&el.dataset.ik==ss)return;el.value=v})});uiWarn()}
+// 관리자 전용: 추가 톤 이름/색상 실시간 편집
+function uiColor(k,raw,src){
+  if(!S.admin)return;
+  const t=uiTone();if(!t)return;
+  if(k=='name'){const n=String(raw).trim().slice(0,12);if(!n)return;t.name=n;uiSaveLocal();const b=document.querySelector(`#mbox [data-a="utone"][data-v="${t.id}"]`);if(b)b.innerHTML=esc(n)+(UI.def==t.id?'<span class="def-mark">(기본)</span>':'');return}
+  let v=String(raw).trim();if(v&&v[0]!='#')v='#'+v;if(!HX.test(v))return;
+  if(!WK||WK.id!=t.id)WK={id:t.id,bg:t.bg,pbg:t.pbg,fc:t.fc};
+  WK[k]=hex6(v);uiRun();
+  if(!uiBad()){t.bg=WK.bg;t.pbg=WK.pbg;t.fc=WK.fc;uiSaveLocal()}
+  uiSync(k,src);
+}
+// 추가 톤 전용 로고 변경 (관리자만 가능, 저장소 img/logo/ 또는 data URL로 저장하여 방문자 모두에게 노출)
+const dURL=b=>new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=()=>no(new Error('파일을 읽을 수 없습니다.'));fr.readAsDataURL(b)});
+async function uiLogo(f){
+  if(!S.admin)return;
+  const t=uiTone();if(!t){toast('기본 3개 톤의 로고는 바꿀 수 없습니다. 추가 톤을 선택해 주세요.',1);return}
+  if(!/^image\//.test(f.type)){toast('이미지 파일을 골라 주세요.',1);return}
+  try{
+    const svg=f.type=='image/svg+xml',gif=f.type=='image/gif';let url,note='';
+    if((svg&&f.size<=5e5)||(gif&&f.size<=3e5))url=await dURL(f);
+    else{
+      let src;try{src=await createImageBitmap(f)}catch(e){throw new Error('이미지를 열 수 없습니다.')}
+      const sc=Math.min(1,54/src.height,480/src.width),tw=Math.max(1,Math.round(src.width*sc)),th=Math.max(1,Math.round(src.height*sc));let cw=src.width,ch=src.height;
+      while(cw/2>=tw&&ch/2>=th){const nw=Math.floor(cw/2),nh=Math.floor(ch/2),c=mkCanvas(nw,nh),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,nw,nh);if(src.close)src.close();src=c;cw=nw;ch=nh}
+      const c=mkCanvas(tw,th),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,tw,th);if(src.close)src.close();
+      url=c.toDataURL('image/png');if(gif)note=' (GIF가 커서 정지 이미지로 변환했습니다)';
+    }
+    if(url.length>1.5e6)throw new Error('이미지가 너무 큽니다.');
+    t.logo=url;uiSaveLocal();
+    setLogo();renderModal();toast('로고를 바꿨습니다. [디자인 저장]을 눌러 반영하세요.'+note);
+  }catch(e){toast('로고 변경 실패: '+e.message,1)}
+}
+// Tone 줄에 붙는 추가 톤 버튼들 (관리자 화면에서는 기본값 표시 포함)
+const toneBtns=()=>{
+  const tid=curTid(),def=UI.def||'note';
+  return UI.tones.map(t=>`<button class="${t.id==tid?'on':''}" data-a="utone" data-v="${esc(t.id)}">${esc(t.name)}${S.admin&&def==t.id?'<span class="def-mark">(기본)</span>':''}</button>`).join('');
+};
+// 관리자 전용 디자인 설정 HTML (방문자에게는 노출되지 않음)
+function designHTML(){
+  if(!S.admin)return '';
+  const r=document.documentElement,fs=r.dataset.fs||'n',hs=r.dataset.hs||'v',tid=curTid(),t=uiTone(),isDef=(UI.def||'note')===tid;
+  const tName=t?t.name:({white:'White',dark:'Dark',note:'Note'}[tid]||'Note');
+  const rw=(k,lb)=>{const v=hex6(uiEff(k));return `<div class="row2"><span>${lb}</span><input data-ui="${k}" data-ik="t" value="${v}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="${lb} 코드 (예: #ffffff)"><input type="color" data-ui="${k}" data-ik="c" value="${v}" aria-label="${lb} 선택"></div>`};
+  const op=(a,cur,L)=>L.map(([v,x])=>`<button class="${v==cur?'on':''}" data-a="${a}" data-v="${v}">${x}</button>`).join('');
+  let h=`<div class="ud"></div><div class="row2"><span>기본 톤 설정</span>${isDef?`<span style="color:var(--ink);font-weight:600">${esc(tName)} (현재 기본값)</span>`:`<button data-a="tsetdefault">[현재 톤(${esc(tName)})을 기본값으로]</button>`}</div>`;
+  h+=`<div class="row2"><span>톤 관리</span><button data-a="tnew">[+ 새 톤 추가]</button>${t?'<button data-a="tdelc">[현재 톤 삭제]</button>':''}</div>`;
+  if(t)h+=`<div class="row2"><span>이름</span><input data-ui="name" data-ik="t" value="${esc(t.name)}" maxlength="12" autocomplete="off" aria-label="톤 이름"></div>`
+    +rw('bg','배경 색')+rw('pbg','본문 배경')+rw('fc','글자 색')
+    +`<div class="uh">색 코드는 #ffffff 형식으로 입력하거나 오른쪽 색상 선택기를 쓰세요.</div><div class="uw" id="uwarn" role="status">${uiBad()?'글자색과 배경색이 너무 비슷해 저장되지 않았어요. 색을 더 다르게 해 주세요.':''}</div>`
+    +`<div class="row2"><span>로고</span><button data-a="ulogo">[변경]</button>${t.logo?'<button data-a="ulogo0">[기본]</button>':''}<input type="file" id="u-logo" data-ui="logo" accept="image/*" class="hide"></div>`;
+  else h+=`<div class="uh">기본 3개 톤(White · Dark · Note)은 삭제 및 색상 수정이 불가합니다. [+ 새 톤 추가]로 추가 톤을 만들거나 기본값을 변경할 수 있어요.</div>`;
+  return h+`<div class="ud"></div><div class="row2"><span>글자 크기</span>${op('ufs',fs,[['s','작게'],['n','기본'],['l','크게']])}</div>`
+    +`<div class="row2"><span>해시 정렬</span>${op('uhs',hs,[['v','세로'],['h','가로']])}</div>`
+    +`<div class="row2"><span>사이트 반영</span><button data-a="uisave" class="on">[디자인 저장]</button></div>`;
+}
+// 색·이름 입력 중: 관리자일 때만 동작
+document.addEventListener('input',e=>{if(!S.admin)return;const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.type=='file'||k=='logo')return;uiColor(k,t.value,t.dataset.ik)});
+document.addEventListener('change',e=>{if(!S.admin)return;const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.dataset.ik!='t')return;
+  if(k=='name'){const o=uiTone();if(o&&!t.value.trim())t.value=o.name}else uiSync()});
+// === [캘린더] 글 있는 날에 점(.has), 관리자 전용 숨김글만 있는 날은 주황 점(.hid) ===
+function renderCal(){
+  const has=new Set(vis().map(p=>p.date));
+  const hid=new Set(S.admin?S.posts.filter(p=>p.hidden&&!has.has(p.date)).map(p=>p.date):[]);
+  $('#calh').innerHTML=`<div class="ch"><button data-a="prev" aria-label="이전 달">‹</button><span><button data-a="py">${S.y}</button><button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
+  <button data-a="next" aria-label="다음 달">›</button></div>`;
+  const first=new Date(S.y,S.m,1).getDay(),n=new Date(S.y,S.m+1,0).getDate();
+  let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>`<div class="w">${w}</div>`).join('');
+  for(let i=0;i<first;i++)h+='<div></div>';
+  for(let d=1;d<=n;d++){
+    const ds=`${S.y}-${String(S.m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const on=has.has(ds)||hid.has(ds);
+    h+=`<div class="d ${on?'has':''} ${hid.has(ds)?'hid':''} ${S.date==ds?'sel':''}" ${on?`data-a="day" data-v="${ds}"`:''}><span>${d}</span></div>`;
+  }
+  $('#cal').innerHTML=h;
+}
+// === [태그 목록] 왼쪽 하단 (관리자는 Edit 버튼으로 순서/숨김 편집) ===
+function renderTags(){
+  let h=`<h4><span>Tags</span>${S.admin?'<button data-a="tedit">Edit</button>':''}</h4>`;
+  h+='<div class="tl">'+tagList(false).map(([t,n])=>`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('')+'</div>';
+  $('#tags').innerHTML=h||'<h4>Tags</h4>';
+}
+S.blob={};S.up=[];S.full={};
+async function loadPost(id){if(S.full[id])return S.full[id];const p=await load(`data/${id.slice(0,4)}/${id}.json`,null);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
+async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${i.dataset.p}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[i.dataset.p]=URL.createObjectURL(await r.blob());i.src=S.blob[i.dataset.p]}}catch(e){}}
+document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!='IMG'||!i.dataset.p)return;if(S.admin&&!i.dataset.f)imgFix(i);else if(i.closest('#mbox'))i.replaceWith('♬')},true);
+const imgsOf=b=>[...String(b||'').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m=>m[1]);
+const purge=async(c,keep)=>{for(const p of new Set(c))if(!keep.has(p))await del(p).catch(()=>{})};
+function body(t){
+  const parts=String(t).split(/(!\[[^\]]*\]\([^)]+\))/),last=parts.length-1;
+  return parts.map((x,i)=>{
+    const m=x.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if(m)return `<img src="${esc(S.blob[m[2]]||m[2])}" data-p="${esc(m[2])}" alt="${esc(m[1])}">`;
+    if(i>0)x=x.replace(/^\n/,'');if(i<last)x=x.replace(/\n$/,'');
+    return x?`<div class="tx">${esc(x)}</div>`:'';
+  }).join('');
+}
+const WX=['☀️','🌞','☁️','🌤️','🌥️','🌦️','🌧️','🌩️','🌪️','🌨️','🌀','🌈','☔','❄️'];
+// === [글 본문 영역 렌더링] ===
+function renderArt(){
+  const a=$('#art');
+  const acts=S.admin?`<div class="act">${S.mode=='view'&&S.pid?'<button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button>':''}${S.mode=='view'?'<button data-a="new">[글쓰기]</button>':''}</div>`:'';
+  if(S.mode=='edit'){
+    const d=S.draft;
+    a.innerHTML=`<div class="ed">
+      <input id="e-date" type="date" value="${d.date}">
+      <input id="e-wx" placeholder="날씨 (선택) - 아래 이모지를 눌러 추가/해제, 직접 입력도 가능" value="${esc(d.weather||'')}">
+      <div class="wx">${WX.map(w=>`<button type="button" class="${(d.weather||'').includes(w)?'on':''}" data-w="${w}" aria-label="날씨 ${w}">${w}</button>`).join('')}</div>
+      <input id="e-title" placeholder="제목" value="${esc(d.title)}">
+      <input id="e-tags" placeholder="Tags (쉼표로 구분, 예: 일상, 생각)" value="${esc((d.tags||[]).join(', '))}">
+      <textarea id="e-body" placeholder="본문 … (커서 위치에 이미지 삽입)">${esc(d.body)}</textarea>
+      <div class="dz" id="dz" data-a="pick" role="button" tabindex="0"><div>이미지를 여기로 끌어다 놓거나 클릭해서 선택</div><small>Ctrl+V 붙여넣기 가능 · 여러 장 동시 선택 가능 · 가로 800px 초과 시 자동 축소</small></div>
+      <input type="file" id="e-img" accept="image/*" multiple class="hide">
+      <div id="dzmsg" role="status"></div>
+      <div class="thh"><span id="thc"></span><span>썸네일 클릭 = 크게 보기</span></div>
+      <div class="thumbs" id="thumbs"></div>
+      <label><input type="checkbox" id="e-hid" style="width:auto" ${d.hidden?'checked':''}> 숨김</label>
+      <div><button data-a="save">[저장]</button> <button data-a="cancel">[취소]</button></div></div>`;
+    renderThumbs();
+    return;
+  }
+  let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
+  if(S.tag&&!S.pid){
+    a.innerHTML=`<div class="meta"># ${esc(S.tag)}</div>${acts}<div class="plist" style="margin-top:16px">`+
+      (posts.map(p=>`<div data-a="open" data-v="${p.id}"><small>${p.date}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
+    return;
+  }
+  let p=S.posts.find(x=>x.id==S.pid);
+  if(!p){
+    const day=S.date?list().filter(x=>x.date==S.date):list();
+    if(day.length>1&&S.date){
+      a.innerHTML=`<div class="meta">${S.date}</div>${acts}<div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${x.id}">${esc(x.title)}</div>`).join('')+'</div>';return;
+    }
+    p=day[0];
+  }
+  if(!p){a.innerHTML='<div class="meta">아직 작성된 글이 없습니다.</div>'+acts;return}
+  S.pid=p.id;setHash(p.id);
+  const fp=S.full[p.id];
+  if(!fp){a.innerHTML='<div class="meta">불러오는 중…</div>';loadPost(p.id).then(()=>{if(S.pid==p.id&&S.mode=='view')renderArt()});return}
+  p={...p,body:fp.body,weather:fp.weather};track(p);
+  const dt=new Date(p.date+'T00:00');
+  a.innerHTML=`<div class="meta pd">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일${p.weather?', '+esc(p.weather):''}${p.hidden?' · 숨김':''}</div>`+
+    (S.admin?`<div class="act"><button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button><button data-a="new">[글쓰기]</button></div>`:'')+
+    `<h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
+}
+// === [음악] 헤더 미니 플레이어 그리기 ===
+function renderMusic(){
+  const m=$('#music');
+  if(!S.music.length){
+    m.innerHTML=S.admin?'<button data-a="mtoggle">음악 관리</button>':'';
+  }else{
+    const t=S.music[S.cur>=0?S.cur:0].name;
+    m.innerHTML=`<button data-a="mtoggle">♬ ${esc(t)}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button>`;
+  }
+  if(S.modal=='music'){const ck=[...document.querySelectorAll('.mck')].map(c=>c.checked);renderModal();document.querySelectorAll('.mck').forEach((c,i)=>c.checked=!!ck[i])}
+}
+S.pend={files:[],cover:null,url:''};
+function musicHTML(){
+  const T=S.music,n=T.length,ci=S.cur>=0?S.cur:0,t=T[ci]||{},A=S.admin,P=S.pend;
+  const cov=c=>c?`<img src="${esc(S.blob[c]||c)}" data-p="${esc(c)}" alt="" loading="lazy">`:'♬';
+  let h=`<div class="pl-h"><b>요즘 듣는 음악</b><small>${n}곡</small><button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button></div>`;
+  if(n){
+    h+=`<div class="pl-cover">${cov(t.cover)}</div><div class="pl-t">${esc(t.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':(S.cur<0?'정지':'일시정지')}</div>`
+      +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
+      +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
+      +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==S.cur?'on':''}" data-a="song" data-v="${i}">${A?`<input type="checkbox" class="mck" data-i="${i}" aria-label="${esc(x.name)} 선택">`:''}<span class="pl-n">${i==S.cur&&S.playing?IC.eq:i+1}</span><span class="pl-th">${cov(x.cover)}</span><span class="pl-nm">${esc(x.name)}</span></div>`).join('')+'</div>';
+  }else if(A)h+='<p class="pl-empty">업로드된 곡이 없습니다. 아래에서 음악 파일을 골라 올려 보세요.</p>';
+  if(A){
+    const fn=P.files.length?esc(P.files[0].name)+(P.files.length>1?' 외 '+(P.files.length-1)+'개':'')+' 선택됨':'mp3 선택 시 내장 앨범 이미지를 자동 사용, 없으면 왼쪽 칸에서 직접 지정 (mp3 · m4a · ogg)';
+    h+=`<div class="pl-add"><button class="pl-cv" data-a="pickcover" aria-label="커버 이미지 선택">${P.url?`<img src="${esc(P.url)}" alt="">`:'커버<br>(선택)'}</button><div><button class="pl-pick" data-a="pickmusic">[음악 파일 선택]</button><div class="pl-hint">${fn}</div></div></div>`
+      +`<div class="bar"><button data-a="upmusic">[업로드]</button><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button><button class="pl-r" data-a="covchg">[커버 변경]</button></div>`
+      +`<input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/ogg" multiple class="hide"><input type="file" id="m-cover" accept="image/*" class="hide"><input type="file" id="m-cover-chg" accept="image/*" class="hide">`;
+  }
+  return h;
+}
+const fmt=s=>isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
+function updProg(){
+  const sk=$('#pl-seek');if(!sk)return;
+  const d=au.duration,t=au.currentTime||0,ok=S.cur>=0&&isFinite(d)&&d>0;
+  if(!(Date.now()-(S.seekT||0)<400)){const v=ok?Math.round(t/d*1000):0;sk.value=v;sk.style.setProperty('--p',v/10+'%')}
+  $('#pl-time').textContent=fmt(ok?t:0)+' / '+(ok?fmt(d):'0:00');
+}
+['timeupdate','loadedmetadata','durationchange'].forEach(ev=>au.addEventListener(ev,updProg));
+document.addEventListener('input',e=>{
+  const sk=e.target;if(sk.id!='pl-seek')return;
+  const d=au.duration;S.seekT=Date.now();sk.style.setProperty('--p',sk.value/10+'%');
+  if(S.cur>=0&&isFinite(d)&&d>0){au.currentTime=sk.value/1000*d;$('#pl-time').textContent=fmt(au.currentTime)+' / '+fmt(d)}
+});
+const fileB64=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
+async function putCover(src){
+  const bmp=await createImageBitmap(src),sc=Math.min(1,480/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=Math.max(1,Math.round(bmp.width*sc));c.height=Math.max(1,Math.round(bmp.height*sc));
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);
+  const bl=await new Promise(r=>c.toBlob(r,'image/jpeg',.86));
+  const p='music/cover/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.jpg';
+  S.blob[p]=URL.createObjectURL(bl);await put(p,await fileB64(bl));return p;
+}
+async function embCover(f){
+  if(!/\.mp3$/i.test(f.name))return null;
+  try{
+    const h=new Uint8Array(await f.slice(0,10).arrayBuffer());
+    if(h[0]!=73||h[1]!=68||h[2]!=51)return null;
+    const ver=h[3],size=(h[6]<<21)|(h[7]<<14)|(h[8]<<7)|h[9];
+    const b=new Uint8Array(await f.slice(0,10+size).arrayBuffer());
+    let o=10;
+    if(h[5]&0x40)o+=ver==4?((b[10]<<21)|(b[11]<<14)|(b[12]<<7)|b[13]):(((b[10]<<24)|(b[11]<<16)|(b[12]<<8)|b[13])+4);
+    const v2=ver==2,hl=v2?6:10;
+    while(o+hl<=b.length){
+      const id=String.fromCharCode(...b.slice(o,o+(v2?3:4)));
+      if(!/^[A-Z0-9]+$/.test(id))break;
+      const fs=v2?((b[o+3]<<16)|(b[o+4]<<8)|b[o+5]):ver==4?((b[o+4]<<21)|(b[o+5]<<14)|(b[o+6]<<7)|b[o+7]):(((b[o+4]<<24)|(b[o+5]<<16)|(b[o+6]<<8)|b[o+7])>>>0);
+      const d=o+hl;if(fs<=0||d+fs>b.length)break;
+      if(id=='APIC'||id=='PIC'){
+        const enc=b[d];let i=d+1;
+        if(v2)i+=3;else{while(i<d+fs&&b[i]!=0)i++;i++}
+        i++;
+        if(enc==0||enc==3){while(i<d+fs&&b[i]!=0)i++;i++}else{while(i+1<d+fs&&!(b[i]==0&&b[i+1]==0))i+=2;i+=2}
+        const data=b.slice(i,d+fs);
+        if(data.length>100)return new Blob([data],{type:data[0]==0xFF?'image/jpeg':data[0]==0x89?'image/png':'application/octet-stream'});
+      }
+      o=d+fs;
+    }
+  }catch(e){}
+  return null;
+}
+async function upMusic(){
+  if(!S.admin)return;
+  const P=S.pend,M=S.music;
+  if(S.lock)return;
+  if(!P.files.length){msg('음악 파일을 먼저 선택하세요. ([음악 파일 선택])');return}
+  S.lock=1;let ok=0;
+  try{
+    msg('업로드 준비 중…');
+    const shared=P.cover?await putCover(P.cover):null;
+    for(const f of P.files){
+      msg(`업로드 중 (${ok+1}/${P.files.length}) ${f.name}`+(f.size>25e6?' - 큰 파일이라 오래 걸려요':''));
+      const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
+      S.blob[p]=URL.createObjectURL(f);await put(p,await fileB64(f));
+      let cv=shared;if(!cv){const eb=await embCover(f);if(eb)cv=await putCover(eb).catch(()=>null)}
+      const e={name:f.name.replace(/\.[^.]+$/,''),file:p};if(cv)e.cover=cv;
+      const i=M.findIndex(m=>m.file==p);if(i<0)M.push(e);else{if(M[i].cover&&!cv)e.cover=M[i].cover;M[i]=e}
+      ok++;
+    }
+  }catch(err){msg('업로드 실패: '+err.message)}
+  finally{try{if(ok)await saveMusic()}catch(err){msg('목록 저장 실패: '+err.message)}S.lock=0}
+  if(ok){if(S.pend.url)URL.revokeObjectURL(S.pend.url);S.pend={files:[],cover:null,url:''};renderMusic();msg(ok+'곡을 올렸습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.')}
+}
+async function chgCover(file){
+  if(!S.admin)return;
+  const ix=[...document.querySelectorAll('.mck')].map((c,i)=>c.checked?i:-1).filter(i=>i>=0);
+  if(!ix.length){msg('커버를 바꿀 곡을 먼저 체크하세요.');return}
+  if(S.lock)return;S.lock=1;msg('커버 업로드 중…');
+  const bak=S.music.map(m=>({...m}));
+  try{
+    const np=await putCover(file),olds=new Set();
+    ix.forEach(i=>{if(S.music[i].cover)olds.add(S.music[i].cover);S.music[i].cover=np});
+    await saveMusic();
+    const used=new Set(S.music.map(m=>m.cover));
+    for(const o of olds)if(!used.has(o))await del(o).catch(()=>{});
+    S.lock=0;renderMusic();msg('커버를 바꿨습니다.');
+  }catch(err){S.music=bak;S.lock=0;renderMusic();msg('커버 변경 실패: '+err.message)}
+}
+const render=()=>{renderCal();renderTags();renderArt();renderMusic();renderModal()};
+function playIdx(i){
+  if(!S.music.length)return;
+  S.cur=(i+S.music.length)%S.music.length;
+  const f=S.music[S.cur].file;au.src=S.blob[f]||encodeURI(f);au.play().catch(()=>{});S.playing=true;renderMusic();
+}
+au.onended=()=>playIdx(S.cur+1);
+au.onerror=async()=>{const f=S.music[S.cur]&&S.music[S.cur].file;
+  if(S.admin&&f&&!S.blob[f]){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}/contents/${f}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github.raw+json'},cache:'no-store'});if(r.ok){S.blob[f]=URL.createObjectURL(await r.blob());au.src=S.blob[f];au.play().catch(()=>{});return}}catch(e){}}
+  S.playing=false;renderMusic()};
+// === [이미지 처리] ===
+const mkCanvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+const toBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
+const b64blob=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+async function shrink(file){
+  const MAX=800,keep={blob:file,name:file.name};
+  if(/gif|svg/.test(file.type))return keep;
+  let src;try{src=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){throw new Error('이미지를 열 수 없습니다: '+file.name)}
+  if(src.width<=MAX){if(src.close)src.close();return keep}
+  const png=file.type=='image/png',H=Math.round(src.height*MAX/src.width);let cw=src.width,ch=src.height;
+  while(cw/2>=MAX){const nw=Math.floor(cw/2),nh=Math.floor(ch/2),c=mkCanvas(nw,nh),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,nw,nh);if(src.close)src.close();src=c;cw=nw;ch=nh}
+  const c=mkCanvas(MAX,H),x=c.getContext('2d');
+  if(!png){x.fillStyle='#fff';x.fillRect(0,0,MAX,H)}
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(src,0,0,MAX,H);if(src.close)src.close();
+  const blob=await toBlob(c,png?'image/png':'image/jpeg',.88);if(!blob)throw new Error('이미지 변환 실패: '+file.name);
+  return {blob,name:file.name.replace(/\.[^.]+$/,'')+(png?'.png':'.jpg')};
+}
+function insertTok(ta,tok){
+  const v=ta.value,pos=ta.dataset.t?ta.selectionStart:v.length;
+  const pre=pos>0&&v[pos-1]!='\n'?'\n':'',post=pos<v.length&&v[pos]!='\n'?'\n':'';
+  ta.setRangeText(pre+tok+post,pos,pos,'end');ta.dataset.t=1;
+  ta.dispatchEvent(new Event('input',{bubbles:true}));renderThumbs();
+}
+function rmTok(i){
+  const ta=$('#e-body');if(!ta)return;const m=[...ta.value.matchAll(/!\[[^\]]*\]\([^)]+\)/g)][i];if(!m)return;
+  let a=m.index,b=a+m[0].length;if(ta.value[b]=='\n')b++;else if(a>0&&ta.value[a-1]=='\n')a--;
+  ta.setRangeText('',a,b,'end');ta.dispatchEvent(new Event('input',{bubbles:true}));renderThumbs();
+}
+function renderThumbs(){
+  const ta=$('#e-body'),box=$('#thumbs');if(!ta||!box)return;
+  const L=[...ta.value.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)],key=JSON.stringify([L.map(m=>m[0]),S.upl]);
+  if(box.dataset.k===key)return;box.dataset.k=key;
+  $('#thc').textContent=`첨부된 이미지 (${L.length})`;
+  box.innerHTML=L.map((m,i)=>`<div class="th" data-a="thumb" data-p="${esc(m[2])}"><button type="button" class="x" data-a="thx" data-i="${i}" aria-label="이미지 삭제">✕</button><img src="${esc(S.blob[m[2]]||m[2])}" data-p="${esc(m[2])}" alt=""><span>${esc(m[1])}</span></div>`).join('')
+    +(S.upl?`<div class="th up"><span>업로드 중… (${S.upl.i}/${S.upl.n})</span><div class="pbar"><i></i></div></div>`:'');
+  const pb=box.querySelector('.pbar i');if(pb)pb.style.width=S.upl.pct+'%';
+}
+async function addFiles(list){
+  const ta=$('#e-body'),say=t=>{const m=$('#dzmsg');if(m)m.textContent=t||''};if(!ta)return;
+  if(S.upBusy){say('이전 업로드가 끝난 뒤 다시 시도해 주세요.');return}
+  const fs=[...list].filter(f=>/^image\//.test(f.type));
+  if(!fs.length){say('이미지 파일만 올릴 수 있습니다.');return}
+  S.upBusy=1;say('');
+  for(let i=0;i<fs.length;i++){
+    S.upl={i:i+1,n:fs.length,pct:10};renderThumbs();
+    try{
+      let f=fs[i];if(!f.name||f.name=='image.png')f=new File([f],'paste-'+Date.now()+'.png',{type:f.type});
+      const r=await shrink(f);S.upl.pct=45;renderThumbs();
+      const yr=($('#e-date').value||today()).slice(0,4),p=`img/${yr}/${Date.now()}-${r.name.replace(/[^\w.\-]/g,'_')}`;
+      S.blob[p]=URL.createObjectURL(r.blob);S.up.push(p);
+      await put(p,await b64blob(r.blob));S.upl.pct=100;
+      insertTok(ta,`![${r.name.replace(/\.[^.]+$/,'').replace(/[\[\]()]/g,'')}](${p})`);
+    }catch(e){say('업로드 실패: '+e.message)}
+  }
+  S.upl=null;S.upBusy=0;renderThumbs();
+}
+const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
+document.addEventListener('dragover',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.toggle('over',!!e.target.closest('#dz'))});
+document.addEventListener('dragleave',e=>{const z=$('#dz');if(z&&e.target.closest&&e.target.closest('#dz'))z.classList.remove('over')});
+document.addEventListener('drop',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.remove('over');addFiles(e.dataTransfer.files)});
+document.addEventListener('paste',e=>{if(S.mode!='edit'||S.modal)return;const fs=[...(e.clipboardData?e.clipboardData.files:[])].filter(f=>/^image\//.test(f.type));if(!fs.length)return;e.preventDefault();addFiles(fs)});
+document.addEventListener('focusin',e=>{if(e.target.id=='e-body')e.target.dataset.t=1});
+document.addEventListener('input',e=>{if(e.target.id=='e-body')renderThumbs()});
+document.addEventListener('keydown',e=>{if((e.key=='Enter'||e.key==' ')&&e.target.id=='dz'){e.preventDefault();$('#e-img').click()}});
+const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date').value,title:g('e-title').value,body:g('e-body').value,weather:g('e-wx').value.trim(),tags:g('e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:g('e-hid').checked})};
+// === [모달 렌더링] ===
+function renderModal(){
+  const w=$('#modal'),b=$('#mbox'),k=S.modal;
+  w.style.display=k?'flex':'none';if(!k){uiClose();return}
+  b.className=k=='music'?'mp':'';
+  let h='';
+  if(k=='auth'){
+    const tid=curTid(),def=UI.def||'note';
+    h=`<div class="row2 tn"><span>Tone</span>${['white','dark','note'].map(t=>`<button class="${t==tid?'on':''}" data-a="tone" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}${S.admin&&def==t?'<span class="def-mark">(기본)</span>':''}</button>`).join('')}${toneBtns()}</div>${designHTML()}<div class="ud"></div><div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar"><button data-a="mclose">[닫기]</button></div>`;
+  }
+  else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
+    h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
+  else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
+  else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tcancel">[닫기]</button><button data-a="tdone">[완료]</button></div>';
+  else if(k=='imgview'){const v=S.view||{};h=`<img class="big" src="${esc(S.blob[v.p]||v.p)}" data-p="${esc(v.p)}" alt=""><div class="cap"><span>${esc(v.name)}</span><span><button data-a="imgdel">[삭제]</button> <button data-a="mclose">[닫기]</button></span></div>`}
+  else if(k=='music')h=musicHTML();
+  const ck=k=='music'?[...b.querySelectorAll('.mck')].map(c=>c.checked):[];
+  b.innerHTML=h;b.classList.toggle('wide',k=='imgview');
+  if(k=='music'){const bx=b.querySelectorAll('.mck');if(bx.length==ck.length)bx.forEach((c,i)=>c.checked=ck[i]);updProg()}
+  const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range]):not([data-ui])');if(f)f.focus();
+}
+if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px')).observe(document.querySelector('header'));
+const toTop=()=>{$('#art').scrollTop=0;window.scrollTo(0,0)};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fld=d=>JSON.stringify([d.date,d.weather||'',d.title,d.body,(d.tags||[]).join(','),!!d.hidden]);
+try{localStorage.removeItem('draft')}catch(e){}
+const dirty=()=>{if(S.mode!='edit'||!$('#e-body'))return false;syncDraft();return fld(S.draft)!=S.snap};
+const leave=()=>!dirty()||confirm('저장하지 않은 내용이 있습니다. 나갈까요?');
+const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:history.replaceState).call(history,null,'','#'+id);S.hs=1};
+window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const i=$('#e-wx'),w=b.dataset.w;
+  i.value=i.value.includes(w)?i.value.replace(w,''):i.value+w;b.classList.toggle('on',i.value.includes(w));i.dispatchEvent(new Event('input',{bubbles:true}))});
+window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
+  Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()});
+const go=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth();S.modal=null;renderCal();renderModal()};
+const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
+const mvt=(i,d)=>{const L=tagList(true).map(x=>x[0]);const j=i+d;if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];S.tags.order=L;renderModal()};
+const mvm=async d=>{if(!S.admin||S.lock)return;const i=[...document.querySelectorAll('.mck')].findIndex(c=>c.checked);if(i<0)return;const j=i+d;if(j<0||j>=S.music.length)return;
+  S.lock=1;const cf=S.cur>=0?S.music[S.cur].file:null;
+  [S.music[i],S.music[j]]=[S.music[j],S.music[i]];if(cf)S.cur=S.music.findIndex(t=>t.file==cf);
+  await busy(saveMusic);S.lock=0;renderMusic();document.querySelectorAll('.mck').forEach((c,k)=>c.checked=k==j)};
+// === [클릭 라우터] ===
+document.addEventListener('click',async e=>{
+  if(e.target.classList&&e.target.classList.contains('mck'))return;
+  const el=e.target.closest('[data-a]');if(!el)return;
+  const a=el.dataset.a,v=el.dataset.v;
+  if(['day','tag','open','home'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
+  if(a=='menu'){S.modal='auth';renderModal()}
+  else if(a=='logout'){try{delete sessionStorage.gk;delete localStorage.gk}catch(x){}location.reload()}
+  else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
+  else if(a=='sy')go(+v,S.m);
+  else if(a=='sm')go(S.y,+v);
+  else if(a=='home'){e.preventDefault();const v=vis()[0];Object.assign(S,{tag:null,pid:v?v.id:null,date:v?v.date:null,mode:'view',modal:null});const d=v?new Date(v.date+'T00:00'):new Date();S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()}
+  else if(a=='prev')go(S.y,S.m-1);
+  else if(a=='next')go(S.y,S.m+1);
+  else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
+  else if(a=='tag'){pick({tag:v});render();toTop()}
+  else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal();toTop()}
+  else if(a=='new'){if(!S.admin)return;const d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='edit'){if(!S.admin)return;const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()}
+  else if(a=='pick'){$('#e-img').click()}
+  else if(a=='thx'){rmTok(+el.dataset.i)}
+  else if(a=='thumb'){const L=[...$('#e-body').value.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)],i=[...document.querySelectorAll('#thumbs .th[data-p]')].indexOf(el);
+    if(L[i]){S.vi=i;S.view={p:L[i][2],name:L[i][1]};S.modal='imgview';renderModal()}}
+  else if(a=='imgdel'){rmTok(S.vi);S.modal=null;renderModal()}
+  else if(a=='cancel'){if(!leave())return;await busy(()=>purge(S.up,new Set(imgsOf((S.full[S.draft.id]||{}).body))));S.up=[];S.mode='view';renderArt()}
+  else if(a=='save'){if(!S.admin)return;if(S.upBusy){const m=$('#dzmsg');if(m)m.textContent='이미지 업로드가 끝난 뒤 저장해 주세요.';return}
+    const d={...S.draft,date:$('#e-date').value,title:$('#e-title').value.trim(),weather:$('#e-wx').value.trim(),body:$('#e-body').value,
+      tags:$('#e-tags').value.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean),hidden:$('#e-hid').checked};
+    if(!d.title||!d.date||!d.tags.length){toast('날짜, 제목, Tags는 필수입니다.',1);return}
+    let base=null;
+    if(!d.id){base=await load('data/index.json',S.posts);const pre=d.date.replace(/-/g,''),n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+String(n).padStart(2,'0')}
+    const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'',pv=S.posts.find(x=>x.id==d.id),same=!!pv&&pv.date==m.date&&pv.title==m.title&&!!pv.hidden==m.hidden&&(pv.tags||[]).join(',')==m.tags.join(',');
+    try{
+      await put(`data/${d.id.slice(0,4)}/${d.id}.json`,b64(JSON.stringify({...m,weather:d.weather||'',body:d.body},null,1)));
+      if(!same){const arr=[...(base||await load('data/index.json',S.posts))],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;await saveJSON('data/index.json',arr);S.posts=arr}
+      S.full[d.id]={...m,weather:d.weather||'',body:d.body};
+      await purge([...imgsOf(old),...S.up],new Set(imgsOf(d.body)));
+    }catch(e){toast('저장 실패: '+e.message,1);return}
+    S.up=[];S.mode='view';S.pid=d.id;S.date=d.date;S.tag=null;
+    const dt=new Date(d.date+'T00:00');S.y=dt.getFullYear();S.m=dt.getMonth();render();
+  }
+  else if(a=='delpost'){if(!S.admin||!confirm('이 글을 삭제할까요?'))return;
+    const id=S.pid,fp=await loadPost(id),gone=imgsOf(fp&&fp.body);
+    try{const arr=(await load('data/index.json',S.posts)).filter(x=>x.id!=id);await saveJSON('data/index.json',arr);S.posts=arr;delete S.full[id];
+      await del(`data/${id.slice(0,4)}/${id}.json`);await purge(gone,new Set())}catch(e){toast('삭제 실패: '+e.message,1);return}
+    pick({});render()}
+  else if(a=='tedit'){if(!S.admin)return;S.modal='tags';renderModal()}
+  else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
+  else if(a=='tdone'){if(!S.admin)return;await busy(saveTags);S.modal=null;render()}
+  // 방문자·관리자 공통: 등록된 톤(기본 3개 + 추가 톤) 중 하나를 선택해 내 화면에 적용
+  else if(a=='tone'){userToneSet(v);WK=null;uiRun(v);setLogo();renderModal()}
+  else if(a=='utone'){if(!UI.tones.some(t=>t.id==v))return;userToneSet(v);WK=null;uiRun(v);setLogo();renderModal()}
+  // 관리자 전용: 새 톤 추가 / 추가 톤 삭제(기본 3개 톤은 삭제 불가) / 기본값(UI.def) 설정 / 글자 크기·해시 정렬 / 서버 저장
+  else if(a=='tnew'){if(!S.admin)return;if(UI.tones.length>=5){toast('추가 톤은 최대 5개까지 만들 수 있습니다.',1);return}
+    WK=null;uiRun();let n=1;while(UI.tones.some(x=>x.name=='톤 '+n))n++;
+    const id='c'+Date.now().toString(36);UI.tones.push({id,name:'톤 '+n,bg:hex6(uiEff('bg')),pbg:hex6(uiEff('pbg')),fc:hex6(uiEff('fc'))});
+    userToneSet(id);uiSaveLocal();uiRun(id);setLogo();renderModal()}
+  else if(a=='tdelc'){if(!S.admin)return;const t=uiTone();if(!t){toast('기본 3개 톤(White, Dark, Note)은 삭제할 수 없습니다.',1);return}
+    if(!confirm(`'${t.name}' 톤을 삭제할까요?`))return;
+    UI.tones=UI.tones.filter(x=>x.id!=t.id);if(UI.def==t.id)UI.def='note';
+    userToneSet(UI.def);WK=null;uiSaveLocal();uiRun(UI.def);setLogo();renderModal();toast('톤을 삭제했습니다. [디자인 저장]을 눌러 반영하세요.')}
+  else if(a=='tsetdefault'){if(!S.admin)return;const tid=curTid();UI.def=tid;uiSaveLocal();renderModal();toast('기본 톤을 변경했습니다. [디자인 저장]을 눌러 반영하세요.')}
+  else if(a=='ufs'||a=='uhs'){if(!S.admin)return;UI[a=='ufs'?'fs':'hs']=v;uiRun();uiSaveLocal();renderModal()}
+  else if(a=='ulogo'){if(!S.admin)return;const i=$('#u-logo');if(i)i.click()}
+  else if(a=='ulogo0'){if(!S.admin)return;const t=uiTone();if(t){delete t.logo;uiSaveLocal();setLogo();renderModal()}}
+  else if(a=='uisave'){if(!S.admin)return;if(uiBad()){toast('글자색과 배경색이 너무 비슷해 저장할 수 없습니다.',1);return}
+    await busy(async()=>{await saveUI();uiSaveLocal();toast('디자인 설정을 저장소에 저장했습니다. 방문자 화면에 곧 반영됩니다.')})}
+  else if(a=='kinput'){$('#krow').innerHTML='<span>관리자 모드</span><input id="pw" type="password" placeholder="관리자 코드" autocomplete="off"><button data-a="authok">[확인]</button>';$('#pw').focus()}
+  else if(a=='mclose'){S.modal=null;renderModal()}
+  else if(a=='tup'){if(S.admin)mvt(+v,-1)}
+  else if(a=='tdn'){if(S.admin)mvt(+v,1)}
+  else if(a=='thide'){if(!S.admin)return;const h=S.tags.hidden;e.target.checked?h.push(v):S.tags.hidden=h.filter(x=>x!=v)}
+  else if(a=='mtoggle'){S.modal=S.modal=='music'?null:'music';renderModal()}
+  else if(a=='play'){if(S.playing){au.pause();S.playing=false;renderMusic()}else if(S.cur<0)playIdx(0);else{au.play();S.playing=true;renderMusic()}}
+  else if(a=='nextm')playIdx(S.cur+1);
+  else if(a=='song')playIdx(+v);
+  else if(a=='mdel'){if(!S.admin||S.lock)return;const ix=[...document.querySelectorAll('.mck')].filter(c=>c.checked).map(c=>+c.dataset.i);
+    if(!ix.length||!confirm('선택한 곡을 삭제할까요?'))return;
+    S.lock=1;const gone=ix.map(i=>S.music[i].file),goneC=ix.map(i=>S.music[i].cover).filter(Boolean),cf=S.cur>=0?S.music[S.cur].file:null;
+    S.music=S.music.filter((_,i)=>!ix.includes(i));
+    await busy(async()=>{await saveMusic();for(const f of gone)await del(f).catch(()=>{});const used=new Set(S.music.map(m=>m.cover));for(const c of new Set(goneC))if(!used.has(c))await del(c).catch(()=>{})});
+    S.lock=0;
+    if(cf&&gone.includes(cf)){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}else S.cur=cf?S.music.findIndex(t=>t.file==cf):-1;
+    renderMusic()}
+  else if(a=='mup')mvm(-1);
+  else if(a=='mdn')mvm(1);
+  else if(a=='prevm'){if(S.cur>=0&&au.currentTime>3)au.currentTime=0;else playIdx(S.cur>=0?S.cur-1:0)}
+  else if(a=='pickmusic'){if(!S.admin)return;const i=$('#m-up');if(i)i.click()}
+  else if(a=='pickcover'){if(!S.admin)return;const i=$('#m-cover');if(i)i.click()}
+  else if(a=='upmusic')upMusic();
+  else if(a=='covchg'){if(!S.admin)return;if(![...document.querySelectorAll('.mck')].some(c=>c.checked)){msg('커버를 바꿀 곡을 먼저 체크하세요.');return}const i=$('#m-cover-chg');if(i)i.click()}
+});
+document.addEventListener('change',async e=>{
+  if(!S.admin)return;
+  const t=e.target;
+  if(t.id=='e-img'){const fs=[...t.files];t.value='';addFiles(fs)}
+  if(t.id=='u-logo'){const f=t.files[0];t.value='';if(f)await uiLogo(f)}
+  if(t.id=='m-up'){
+    const all=[...t.files],good=all.filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));
+    t.value='';S.pend.files=good;renderModal();
+    if(good.length<all.length)msg('mp3 · m4a · ogg 파일만 올릴 수 있습니다. (제외 '+(all.length-good.length)+'개)');
+  }
+  if(t.id=='m-cover'){
+    const f=t.files[0];t.value='';if(!f)return;
+    if(!/^image\//.test(f.type)){msg('이미지 파일을 골라 주세요.');return}
+    if(S.pend.url)URL.revokeObjectURL(S.pend.url);
+    S.pend.cover=f;S.pend.url=URL.createObjectURL(f);renderModal();
+  }
+  if(t.id=='m-cover-chg'){
+    const f=t.files[0];t.value='';if(!f)return;
+    if(!/^image\//.test(f.type)){msg('이미지 파일을 골라 주세요.');return}
+    await chgCover(f);
+  }
+});
+// === [관리자 로그인] ===
+const msg=t=>{let m=$('#amsg');if(!m){m=document.createElement('span');m.id='amsg';m.style.color='var(--logo)';$('#mbox').appendChild(m)}m.textContent=t};
+const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function authStep(){
+  const pw=$('#pw'),gk=$('#gk');
+  if(pw){
+    if(await sha(pw.value.trim())!==CFG.gate){msg('코드가 맞지 않습니다.');return}
+    $('#krow').innerHTML='<span>관리자 모드</span><input id="gk" type="password" placeholder="GitHub 키(토큰)" autocomplete="off"><button data-a="authok">[확인]</button>';
+    $('#krow').insertAdjacentHTML('afterend','<label class="row2"><span></span><span><input type="checkbox" id="keep">이 기기에서는 유지</span></label>');$('#gk').focus();
+  }else if(gk){
+    const k=gk.value.replace(/\s/g,'');
+    if(!k){msg('키를 입력하세요.');return}
+    msg('확인 중… ('+O+'/'+R+')');
+    try{
+      const r=await fetch(`https://api.github.com/repos/${O}/${R}`,{headers:{Authorization:'Bearer '+k,Accept:'application/vnd.github+json'}});
+      if(!r.ok){msg(`실패(${r.status}): 저장소 ${O}/${R} 또는 키 권한을 확인하세요. 주소가 다르면 코드 상단 CFG에 owner/repo를 적으세요.`);return}
+      const j=await r.json();
+      if(j.permissions&&j.permissions.push===false){msg('이 키에는 쓰기 권한이 없습니다. (Contents: Read and write 필요)');return}
+      S.key=k;try{if($('#keep')&&$('#keep').checked){localStorage.gk=k;delete sessionStorage.gk}else{sessionStorage.gk=k;delete localStorage.gk}}catch(x){}S.admin=true;S.modal=null;renderModal();window['ga-disable-G-JC6PD25F8X']=true;await reload();render();
+    }catch(err){msg('오류: '+err.message)}
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&S.modal){S.modal=null;renderModal()}if(e.key=='Enter'&&e.target.closest('#mbox')){e.preventDefault();authStep()}});
+document.addEventListener('click',e=>{if(e.target.closest('[data-a="authok"]'))authStep();if(e.target.id=='modal'){S.modal=null;renderModal()}});
+// 로고 선택: 추가 톤에 지정된 로고(t.logo)가 있으면 우선 사용, 없으면 톤에 맞는 기본 로고 파일 표시
+function setLogo(){
+  const i=$('#logoimg'),L=$('#logo a'),ct=uiTone(),
+  f=document.documentElement.dataset.tone=='custom'?(uiLum(uiCS('--bg'))<.2?'logod.gif':'logo.gif'):({white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif');
+  delete L.dataset.t;i.style.display='';
+  const LG=ct&&ct.logo?ct.logo:'';i.classList.toggle('uc',!!LG);
+  if(LG){i.onerror=()=>{delete ct.logo;setLogo()};i.src=LG;return}
+  i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='TAKESOUL'}};
+  i.src=f;
+}
+setLogo();
+const track=p=>{if(S.lt!=p.id){S.lt=p.id;if(!S.admin)try{gtag('event','view_post',{post_id:p.id,post_title:p.title})}catch(e){}}};
+// === [시작 지점] ===
+(async()=>{
+  if(S.admin){try{const r=await fetch(`https://api.github.com/repos/${O}/${R}`,{headers:{Authorization:'Bearer '+S.key,Accept:'application/vnd.github+json'}});
+    if(r.status==401){try{delete sessionStorage.gk;delete localStorage.gk}catch(x){}S.key='';S.admin=false;toast('저장된 키가 만료되어 로그아웃되었습니다.',1)}}catch(e){}}
+  await reload();
+  const hv=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden)),v=hv||vis()[0],d=v?new Date(v.date+'T00:00'):new Date();
+  S.y=d.getFullYear();S.m=d.getMonth();if(v){S.pid=v.id;S.date=v.date}
+  render();
+})();
+</script>
+</body>
+</html>
