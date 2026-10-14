@@ -7,12 +7,12 @@
   "ln": 7
  },
  "mob": {
-  "tone": "dark",
+  "tone": "cmv8qe8t0",
   "tones": [
    {
     "id": "cmv8qe8t0",
     "name": "dark bright",
-    "bg": "#000000",
+    "bg": "#262624",
     "pbg": "#262624",
     "fc": "#ffffff",
     "logo": ""
