@@ -1,6 +1,14 @@
 {
- "default": "note",
- "tones": [],
- "fs": "l",
- "hs": "v"
+ "desk": {
+  "default": "note",
+  "tones": [],
+  "fs": "n",
+  "hs": "v"
+ },
+ "mob": {
+  "default": "note",
+  "tones": [],
+  "fs": "l",
+  "hs": "v"
+ }
 }
