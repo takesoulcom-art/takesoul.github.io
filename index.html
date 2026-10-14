@@ -6,9 +6,10 @@
 <!-- [보안] CSP(콘텐츠 보안 정책)
  script-src 의 sha256 값 = 아래 인라인 script 태그 3개(톤 결정 / gtag / 메인)의 내용 해시.
  ※ 인라인 스크립트를 한 글자라도 고치면 해시가 달라져 실행이 차단됨 → 해시 재계산 필요.
+ (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-r/e5Yd7S0c0E/68RQBDyzZwTFOQUsjEYc8H0E4U+Mxw=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-cFi+m6Xt74VozXEXE7r+UTIOA+QppjXOaTROsGoknFs=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4OXfR9ujoDm8Wh70FGzP7Bwi1bZewcZRaioq/SQlpkU=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-JTppylIZV+ypclkKdCrU91hBAsVTekMFcO69VjvABv4=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -32,6 +33,34 @@
 // 결과는 <html data-tone="..."> 에 저장 → CSS 변수(:root[data-tone=...])가 색을 바꿈
 (function(){var t="note";try{t=localStorage.tone||sessionStorage.tone||t}catch(e){try{t=sessionStorage.tone||t}catch(e2){}}
 if(!/^(white|dark|note)$/.test(t))t="note";document.documentElement.dataset.tone=t})();
+// [디자인] 관리자가 정한 사이트 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬)을 페이지가 그려지기 전에 적용(깜빡임 방지).
+// 사이트 디자인 원본은 data/design.json(GitHub). 메인 스크립트가 불러올 때마다 localStorage('uidesign')에 사본을 남기고, 여기서는 그 사본을 읽음.
+// 보여줄 톤 = 방문자가 직접 고른 톤(localStorage.tone) > 관리자가 정한 기본 톤(default) > note
+// 기본 톤 3개(white/dark/note)는 고정. 사용자 톤은 tones:[{id,name,bg,pbg,fc,logo}] (bg 배경 / pbg 본문 배경 / fc 글자색, #RGB·#RRGGBB)
+// fs 글자 크기 s(작게)·n(기본)·l(크게) / hs 해시 정렬 v(세로)·h(가로)
+function uiDesign(){var s='';try{s=localStorage.uidesign||''}catch(e){}try{var o=JSON.parse(s);return o&&typeof o=='object'&&!Array.isArray(o)?o:{}}catch(e){return {}}}
+function uiHas(D,id){var i;if(/^(white|dark|note)$/.test(id))return true;if(id&&D.tones)for(i=0;i<D.tones.length;i++)if(D.tones[i]&&D.tones[i].id==id)return true;return false}
+function uiPick(D){var t='';try{t=localStorage.tone||sessionStorage.tone||''}catch(e){try{t=sessionStorage.tone||''}catch(e2){}}if(!uiHas(D,t))t=D.default;if(!uiHas(D,t))t='note';return t}
+function uiApply(D,id){D=D||{};id=uiHas(D,id)?id:uiPick(D);var r=document.documentElement,s=r.style,H=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,
+ok=function(v){return typeof v=='string'&&H.test(v)?v:''},
+set=function(k,v){if(v)s.setProperty(k,v);else s.removeProperty(k)},
+c=null,i,bg='',pb='',fc='',
+mix=!!(window.CSS&&CSS.supports&&CSS.supports('color','color-mix(in srgb,red 50%,blue)'));
+if(!/^(white|dark|note)$/.test(id)&&D.tones)for(i=0;i<D.tones.length;i++)if(D.tones[i]&&D.tones[i].id==id)c=D.tones[i];
+if(c){bg=ok(c.bg);pb=ok(c.pbg);fc=ok(c.fc);if(!(bg&&pb&&fc)){c=null;bg=pb=fc='';id=/^(white|dark|note)$/.test(D.default)?D.default:'note'}}
+// 사용자 톤이면 data-tone="custom"(전용 CSS 없음 → 기본 변수 + 아래 값으로 덮어씀) / 아니면 기본 톤
+r.setAttribute('data-tone',c?'custom':id);
+set('--bg',bg);set('--paper',pb);set('--ink',fc);set('--mid',fc);
+set('--lo',c&&mix?'color-mix(in srgb,'+fc+' 72%,var(--bg))':fc);
+// 선택 강조(--sel)·테두리(--line)는 글자/배경에서 자동 계산(어두운 배경에서도 읽히도록)
+set('--sel',c&&mix?'color-mix(in srgb,var(--ink) 16%,var(--bg))':'');
+set('--line',c&&mix?'color-mix(in srgb,var(--ink) 24%,var(--bg))':'');
+if(pb)r.setAttribute('data-ubody','');else r.removeAttribute('data-ubody');
+var cs='';if(bg){var h=bg.slice(1);if(h.length==3)h=h.replace(/./g,'$&$&');cs=(parseInt(h.slice(0,2),16)*299+parseInt(h.slice(2,4),16)*587+parseInt(h.slice(4,6),16)*114)/1000<128?'dark':'light'}
+set('color-scheme',cs);
+r.setAttribute('data-fs',/^[ls]$/.test(D.fs)?D.fs:'n');
+r.setAttribute('data-hs',D.hs=='h'?'h':'v');}
+uiApply(uiDesign());
 // 관리자 키가 저장돼 있으면 GA 수집 비활성화 (본인 방문 제외)
 try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true}catch(e){}</script>
 <!-- Google Analytics (측정 ID: G-JC6PD25F8X). 관리자 로그인 상태에서는 수집이 꺼져 본인 방문은 집계되지 않음 -->
@@ -61,16 +90,35 @@ try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true
 :root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
 :root[data-tone=note] .tx{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
 :root[data-tone=dark] #modal{background:rgba(0,0,0,.5)}
+/* ===== [디자인] 관리자가 메뉴(≡)에서 정하는 사이트 공통 디자인: 사용자 톤 + 글자 크기 + 해시 정렬 (data/design.json 에 저장)
+    기본 톤 3개(white/dark/note)는 고정 / 사용자 톤은 data-tone=custom 으로 표시되고 색은 <html> 인라인 CSS 변수로 지정됨
+    --fs 글자 크기 증감: 기본 0 / 크게 +2pt / 작게 -2pt. 모든 font-size 는 calc(기본px + var(--fs)) 형태라 캘린더·음악 팝업까지 함께 변함
+    data-ubody 사용자 톤(본문 배경 색 지정)일 때 붙음 → 글 영역(article)·버튼줄·팝업 배경에 --paper 적용 (note 톤과 같은 방식)
+    data-hs=h 해시(Tags)를 가로 나열 + 콤마 구분. 기본(v)은 세로 목록 ===== */
+:root{--fs:0pt}
+:root[data-fs=l]{--fs:2pt}
+:root[data-fs=s]{--fs:-2pt}
+:root[data-ubody] article,:root[data-ubody] .act,:root[data-ubody] #mbox{background:var(--paper)}
+.tl{display:block}
+.row2.tn{flex-wrap:wrap;row-gap:2px}
+:root[data-hs=h] .tl{display:flex;flex-wrap:wrap}
+:root[data-hs=h] .tag{display:block;padding:2px 0;margin-right:.45em}
+:root[data-hs=h] .tag:not(:last-child)::after{content:",";font-weight:400}
+/* 설정 모달 안: 색 코드 입력칸 + 색상 선택기 / 구분선 / 안내·경고 문구 */
+.row2 input[type=color]{flex:none;width:34px;height:28px;padding:0;border:1px solid var(--line);background:none;cursor:pointer}
+.ud{border-top:1px solid var(--line);margin:12px 0 6px}
+.uh,.uw{margin:2px 0 6px;font-size:calc(11px + var(--fs));line-height:1.5}
+.uh{color:var(--lo)}.uw{color:var(--logo)}.uw:empty{display:none}
 /* [설정 모달] 메뉴(≡) 안의 한 줄 행(Tone, 관리자 모드). 라벨 너비 76px */
 .row2{display:flex;align-items:center;gap:14px;margin:6px 0}
-.row2>span:first-child{width:76px;flex:none;color:var(--lo)}
+.row2>span:first-child{width:84px;flex:none;color:var(--lo)}
 .row2 input{flex:1;min-width:0}
 .row2 button{color:var(--mid)}
 .row2 button.on{color:var(--ink);font-weight:600}
 /* [2] 기본 리셋 / 전체 글자 크기 - body 기본 13px, 줄간격 1.7. 사이트 기본 글자 크기를 바꾸려면 body의 13px 수정 */
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 var(--sans);height:100dvh;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 var(--sans);font-size:calc(13px + var(--fs));height:100dvh;overflow:hidden}
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
 input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
@@ -81,8 +129,9 @@ input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
 .wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
 /* 로고 영역: 이미지 높이 27px(#logo img). 이미지가 없으면 data-t 문구(TAKESOUL)를 글자 20px로 표시 */
-#logo{flex:1;color:var(--logo);font-size:20px;letter-spacing:.5px}
+#logo{flex:1;color:var(--logo);font-size:calc(20px + var(--fs));letter-spacing:.5px}
 #logo img{height:27px;display:block}
+#logo img.uc{width:auto;max-width:min(240px,60vw);object-fit:contain;object-position:left center}
 #logo a{display:inline-block;vertical-align:top;color:inherit;text-decoration:none}
 #logo a[data-t]::before{content:attr(data-t)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -90,7 +139,7 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 #music{display:flex;align-items:center;gap:10px;color:var(--mid)}
 #music button{color:var(--mid);display:flex;align-items:center;padding:6px 4px}
 #music svg{display:block}
-#menu{font-size:20px;color:var(--mid)}
+#menu{font-size:calc(20px + var(--fs));color:var(--mid)}
 /* [모달 공통] 전체 화면 어두운 막(#modal) + 가운데 상자(#mbox, 폭 340px). 설정/연도·월 선택/태그 편집/이미지 크게 보기/음악 플레이어가 모두 이 상자를 재사용 */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;overflow:auto}
@@ -105,20 +154,20 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
 aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 /* [캘린더] 머리(‹ 2026 10 ›) / 날짜 격자(7열). 버튼 터치 영역 44px 이상 유지(모바일 접근성) */
-.cal-h{display:flex;align-items:center;justify-content:space-between;font-size:16px;letter-spacing:1px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;font-size:calc(16px + var(--fs));letter-spacing:1px}
 .cal-h{display:block}
 .ch{display:flex;align-items:center;justify-content:center;gap:8px}
 .ch>span{display:flex;align-items:center;gap:6px}
-.ch button{font-size:16px;letter-spacing:1px}
+.ch button{font-size:calc(16px + var(--fs));letter-spacing:1px}
 .ch [data-a=py],.ch [data-a=pm]{min-height:44px;padding:10px 12px}
-.ch [data-a=prev],.ch [data-a=next]{min-width:44px;min-height:44px;font-size:26px;line-height:1;padding:6px 12px;letter-spacing:0;position:relative;top:-2px}
+.ch [data-a=prev],.ch [data-a=next]{min-width:44px;min-height:44px;font-size:calc(26px + var(--fs));line-height:1;padding:6px 12px;letter-spacing:0;position:relative;top:-2px}
 /* 연도·월 선택 팝업의 3열 버튼 */
 .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
 .pk button{padding:4px 0;color:var(--mid)}
 .pk .on{color:var(--ink);background:var(--sel)}
 /* 날짜 격자: 글자 12px, 요일 11px, 행 간격 10px / .d = 날짜 셀 높이 30px / .has = 글이 있는 날(점 4px) / .sel = 선택된 날(원 26px) */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-top:16px;row-gap:10px;font-size:12px}
-.cal .w{color:var(--lo);font-size:11px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-top:16px;row-gap:10px;font-size:calc(12px + var(--fs))}
+.cal .w{color:var(--lo);font-size:calc(11px + var(--fs))}
 .d{height:30px;line-height:24px;position:relative;color:var(--mid)}
 .d.has{cursor:pointer;color:var(--ink)}
 .d.has::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dot)}
@@ -131,8 +180,8 @@ aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 .tag.on{color:var(--ink);font-weight:600}
 /* [글 본문 영역] 테두리 상자, 안쪽 여백 36px 40px. 제목 h2 = 20px / 본문 .body 줄간격 1.95 / 본문 이미지는 최대 폭 100% */
 article{font-family:var(--sans);border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
-.meta{color:var(--lo);font-size:12px;letter-spacing:1px}
-h2{font-weight:400;font-size:20px;margin:12px 0 28px}
+.meta{color:var(--lo);font-size:calc(12px + var(--fs));letter-spacing:1px}
+h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .body{white-space:pre-wrap;font-family:var(--sans);line-height:1.95;color:var(--mid)}
 .tx{white-space:pre-wrap}
 .body img{display:block;max-width:100%;margin:16px 0}
@@ -146,16 +195,16 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
     .ed textarea 최소 높이 300px */
 .ed{display:flex;flex-direction:column;gap:8px;margin-top:20px}
 .dz{border:1px dashed var(--mid);padding:22px 12px;text-align:center;cursor:pointer;color:var(--mid)}
-.dz small{display:block;color:var(--lo);font-size:11px;margin-top:4px}
+.dz small{display:block;color:var(--lo);font-size:calc(11px + var(--fs));margin-top:4px}
 .dz.over{background:var(--sel);color:var(--ink)}
-#dzmsg{font-size:12px;color:var(--logo)}
-.thh{display:flex;justify-content:space-between;color:var(--lo);font-size:12px}
+#dzmsg{font-size:calc(12px + var(--fs));color:var(--logo)}
+.thh{display:flex;justify-content:space-between;color:var(--lo);font-size:calc(12px + var(--fs))}
 .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .th{position:relative;border:1px solid var(--line);cursor:pointer;min-width:0}
 .th img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
-.th>span{display:block;padding:2px 6px;font-size:11px;color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.th .x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:12px;line-height:22px;text-align:center}
-.th.up{cursor:default;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--mid);font-size:12px}
+.th>span{display:block;padding:2px 6px;font-size:calc(11px + var(--fs));color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th .x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:calc(12px + var(--fs));line-height:22px;text-align:center}
+.th.up{cursor:default;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--mid);font-size:calc(12px + var(--fs))}
 .pbar{width:70%;height:2px;background:var(--line)}.pbar i{display:block;height:100%;background:var(--ink)}
 @media(max-width:760px){.thumbs{grid-template-columns:repeat(3,1fr)}}
 /* 이미지 크게 보기 모달(폭 880px, 이미지 최대 높이 70vh) */
@@ -165,7 +214,7 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .ed textarea{min-height:300px;font-family:var(--sans)}
 /* 날씨 이모지 버튼 (최소 40px 터치 영역) */
 .wx{display:flex;flex-wrap:wrap;gap:4px}
-.wx button{font-size:20px;line-height:1;min-width:40px;min-height:40px;padding:6px;border:1px solid transparent}
+.wx button{font-size:calc(20px + var(--fs));line-height:1;min-width:40px;min-height:40px;padding:6px;border:1px solid transparent}
 .wx button:hover{border-color:var(--line)}
 .wx button.on{background:var(--sel)}
 .chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
@@ -174,15 +223,15 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
     .pl-add = 관리자용 업로드 영역(커버 칸 56px) / .seek = 재생 위치 슬라이더(선 1px, 동그라미 9px) */
 #mbox.mp{width:min(380px,92vw);padding:18px 22px 16px}
 .pl-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.pl-h b{font-family:var(--sans);font-weight:400;font-size:16px;color:var(--ink)}
-.pl-h small{margin-left:auto;font-size:11px;color:var(--lo)}
+.pl-h b{font-family:var(--sans);font-weight:400;font-size:calc(16px + var(--fs));color:var(--ink)}
+.pl-h small{margin-left:auto;font-size:calc(11px + var(--fs));color:var(--lo)}
 .pl-x{min-width:36px;min-height:36px;margin-right:-8px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
-.pl-cover{width:150px;height:150px;margin:16px auto 10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:44px;line-height:1}
+.pl-cover{width:150px;height:150px;margin:16px auto 10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(44px + var(--fs));line-height:1}
 .pl-cover img,.pl-th img,.pl-cv img{width:100%;height:100%;object-fit:cover;display:block}
-.pl-t{text-align:center;font-size:14px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pl-s{text-align:center;font-size:11px;color:var(--lo)}
+.pl-t{text-align:center;font-size:calc(14px + var(--fs));font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-s{text-align:center;font-size:calc(11px + var(--fs));color:var(--lo)}
 .pl-bar{display:flex;align-items:center;gap:10px;margin:14px 0 4px}
-.pl-time{font-size:11px;color:var(--lo);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pl-time{font-size:calc(11px + var(--fs));color:var(--lo);white-space:nowrap;font-variant-numeric:tabular-nums}
 .seek{-webkit-appearance:none;appearance:none;flex:1;min-width:0;width:auto;height:24px;padding:0;border:0;background:transparent;cursor:pointer}
 .seek::-webkit-slider-runnable-track{height:1px;background:linear-gradient(to right,var(--ink) var(--p,0%),var(--line) var(--p,0%))}
 .seek::-moz-range-track{height:1px;background:var(--line)}
@@ -195,16 +244,16 @@ h2{font-weight:400;font-size:20px;margin:12px 0 28px}
 .pl-list{margin-top:12px;max-height:240px;overflow-y:auto}
 .pl-row{display:flex;align-items:center;gap:10px;padding:6px;color:var(--mid);cursor:pointer}
 .pl-row.on{background:var(--sel);color:var(--ink);font-weight:600}
-.pl-n{flex:none;width:16px;text-align:center;font-size:11px;color:var(--lo)}
+.pl-n{flex:none;width:16px;text-align:center;font-size:calc(11px + var(--fs));color:var(--lo)}
 .pl-n svg{width:13px;height:13px;display:block;margin:0 auto}
-.pl-th{flex:none;width:28px;height:28px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:13px;line-height:1}
+.pl-th{flex:none;width:28px;height:28px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(13px + var(--fs));line-height:1}
 .pl-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pl-add{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px;border:1px dashed var(--line)}
-.pl-cv{flex:none;width:56px;height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10.5px;line-height:1.3;text-align:center;color:var(--mid)}
+.pl-cv{flex:none;width:56px;height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:calc(10.5px + var(--fs));line-height:1.3;text-align:center;color:var(--mid)}
 .pl-pick{color:var(--ink)}
-.pl-hint{margin-top:2px;font-size:11px;line-height:1.5;color:var(--lo)}
+.pl-hint{margin-top:2px;font-size:calc(11px + var(--fs));line-height:1.5;color:var(--lo)}
 .pl-r{margin-left:auto}
-.pl-empty{margin:16px 0 0;font-size:12px;color:var(--lo)}
+.pl-empty{margin:16px 0 0;font-size:calc(12px + var(--fs));color:var(--lo)}
 /* [유틸] .hide 숨김 / #toast 화면 아래 알림 메시지(표시 시간은 JS toast()에서 설정) */
 .hide{display:none!important}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
@@ -310,7 +359,7 @@ const load=async(f,d)=>{
   try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
 };
 // 글목록·태그·음악 3개 파일을 동시에 다시 불러옴(본문 캐시 S.full도 비움)
-const reload=async()=>{S.full={};[S.posts,S.tags,S.music]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[])])};
+const reload=async()=>{S.full={};[S.posts,S.tags,S.music,S.dz]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[]),load('data/design.json',{})]);dInit()};
 // [알림] toast(메시지, 오류여부): 화면 아래 알림(성공 3초/오류 6초). busy(): 저장 중 오류를 알림으로 보여주는 래퍼
 let toastT;const toast=(t,err)=>{const el=$('#toast');el.textContent=t;el.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{el.className=''},err?6000:3000)};
 const busy=async fn=>{try{await fn()}catch(e){toast('저장 실패: '+e.message,1)}};
@@ -327,6 +376,112 @@ function tagList(all){
   names=[...o,...names.filter(t=>!o.includes(t))];
   return names.filter(t=>all||!S.tags.hidden.includes(t)).map(t=>[t,c[t]]);
 }
+// === [디자인] 관리자 전용: 사용자 톤(추가/변경/삭제, 최대 5개) · 기본 톤 지정 · 글자 크기 · 해시 정렬 · 톤별 로고
+//   저장 위치: data/design.json (글/태그/음악과 같은 GitHub 저장소). 로고 이미지: img/logo/
+//   S.dz = 저장된(사이트 공통) 디자인 / S.dw = 관리자가 편집 중인 임시본(null이면 편집 안 함). [디자인 저장]을 눌러야 저장·반영되고, 메뉴를 닫으면 임시본은 버려짐
+//   방문자: 관리자가 정한 기본 톤으로 처음 보이고, 메뉴에서 톤(기본 3개 + 사용자 톤)을 골라 볼 수 있음(내 브라우저에만 기억). 편집은 불가
+//   적용은 맨 위 uiApply() 가 <html> 의 CSS 변수/속성(data-tone, data-fs, data-hs, data-ubody)을 바꾸는 방식이라 화면을 다시 그릴 필요가 없음
+const HX=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,BI=/^(white|dark|note)$/,TN={white:'White',dark:'Dark',note:'Note'};
+const hex6=h=>{h=String(h||'').trim();if(!HX.test(h))return '#000000';h=h.slice(1);if(h.length==3)h=h.replace(/./g,'$&$&');return '#'+h.toLowerCase()};
+const uiLum=h=>{const n=parseInt(hex6(h).slice(1),16);return [n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)};
+const uiCR=(a,b)=>{const x=uiLum(a),y=uiLum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const uiCS=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+// 지금 화면에 실제로 적용된 색(새 톤을 만들 때 복사용): 본문 배경은 note 톤·사용자 톤이면 --paper, 아니면 페이지 배경
+const uiEff=k=>{const r=document.documentElement;return k=='bg'?uiCS('--bg'):k=='fc'?uiCS('--ink'):(r.dataset.tone=='note'||r.hasAttribute('data-ubody')?uiCS('--paper'):uiCS('--bg'))};
+// design.json 정리(잘못된 값 제거, 톤 최대 5개, 기본 톤이 사라졌으면 note)
+const dNorm=o=>{o=o&&typeof o=='object'?o:{};
+  const tones=(Array.isArray(o.tones)?o.tones:[]).filter(t=>t&&typeof t.id=='string'&&/^[\w-]+$/.test(t.id)&&!BI.test(t.id)&&typeof t.name=='string'&&HX.test(t.bg)&&HX.test(t.pbg)&&HX.test(t.fc)).slice(0,5)
+    .map(t=>({id:t.id,name:t.name.slice(0,12),bg:hex6(t.bg),pbg:hex6(t.pbg),fc:hex6(t.fc),logo:typeof t.logo=='string'&&/^img\/logo\/[\w.\-]+$/.test(t.logo)?t.logo:''}));
+  return {default:BI.test(o.default)||tones.some(t=>t.id==o.default)?o.default:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v'}};
+const dSer=D=>({default:D.default,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs});
+S.dz=dNorm(uiDesign());S.dw=null;S.tid='';
+const dView=()=>S.dw||S.dz;
+// 지금 보여주는 톤 id: 이번에 고른 톤 > 방문자가 기억해 둔 톤 > 관리자 기본 톤 > note
+const curId=()=>{const D=dView();return S.tid&&uiHas(D,S.tid)?S.tid:uiPick(D)};
+const toneT=id=>dView().tones.find(t=>t.id==id);
+const toneName=id=>TN[id]||(toneT(id)||{}).name||id;
+const dApply=()=>uiApply(dView(),curId());
+const dCache=()=>{try{localStorage.uidesign=JSON.stringify(dSer(S.dz))}catch(e){}};
+// 서버에서 design.json 을 읽은 직후 호출(reload 안): 정리 → 사본 저장 → 적용
+function dInit(){S.dz=dNorm(S.dz);S.dw=null;dCache();dApply();setLogo()}
+// 톤 고르기: 내 브라우저에 기억(방문자·관리자 공통)
+const setTone=v=>{S.tid=v;try{localStorage.tone=v}catch(e){try{sessionStorage.tone=v}catch(x){}}};
+// 글자색과 배경색 대비가 너무 낮으면(2:1 미만) 읽을 수 없는 톤 → 저장 불가
+const toneBad=t=>uiCR(t.fc,t.bg)<2||uiCR(t.fc,t.pbg)<2;
+// 편집 시작: 저장본을 복사해 임시본 만들기
+const dEdit=()=>{if(!S.dw)S.dw=dNorm(dSer(S.dz));return S.dw};
+const dDirty=()=>!!S.dw&&(JSON.stringify(dSer(S.dw))!=JSON.stringify(dSer(S.dz))||S.dw.tones.some(t=>t.pend));
+// 메뉴를 닫을 때: 저장하지 않은 임시본은 버리고 저장된 디자인으로 복귀
+function uiClose(){if(!S.dw)return;const d=dDirty();S.dw.tones.forEach(t=>{if(t.pend)URL.revokeObjectURL(t.pend.url)});S.dw=null;dApply();setLogo();if(d)toast('저장하지 않은 디자인 변경을 취소했습니다.')}
+const uiWarn=()=>{const w=$('#uwarn'),t=toneT(curId());if(w)w.textContent=t&&toneBad(t)?'글자색과 배경색이 너무 비슷해 저장할 수 없어요. 색을 더 다르게 해 주세요.':''};
+// 입력칸/색상 선택기 값을 톤 값에 맞춤(sk,ss = 지금 입력 중인 칸은 건드리지 않음)
+function uiSync(sk,ss){const t=toneT(curId());if(t)['bg','pbg','fc'].forEach(k=>{
+  document.querySelectorAll(`#mbox [data-ui="${k}"]`).forEach(el=>{if(k==sk&&el.dataset.ik==ss)return;el.value=hex6(t[k])})});uiWarn()}
+// 사용자 톤 편집(관리자): 이름 / 색(#RGB·#RRGGBB, # 없이 입력해도 인정, 형식이 아니면 무시). 화면에는 바로 미리보기
+function uiColor(k,raw,src){if(!S.admin)return;const t=dEdit().tones.find(x=>x.id==curId());if(!t)return;
+  if(k=='name'){const n=String(raw).trim().slice(0,12);if(!n)return;t.name=n;const b=document.querySelector(`#mbox [data-a="tone"][data-v="${t.id}"]`);if(b)b.textContent=n;return}
+  if(k!='bg'&&k!='pbg'&&k!='fc')return;
+  let v=String(raw).trim();if(v&&v[0]!='#')v='#'+v;if(!HX.test(v))return;
+  t[k]=hex6(v);dApply();uiSync(k,src)}
+// 로고(관리자): 톤마다 따로. 화면 높이 27px 고정. svg(500KB 이하)·gif(300KB 이하)는 원본 유지, 그 외는 높이 54px(2배 해상도)·폭 480px 이내 PNG로 축소(여러 단계 축소로 화질 보존)
+// 올린 파일은 임시본(pend)에만 두고, [디자인 저장] 때 img/logo/ 로 올림
+async function uiLogo(f){
+  if(!S.admin)return;const t=toneT(curId());if(!t){toast('기본 톤의 로고는 바꿀 수 없습니다. 새 톤을 만들어 주세요.',1);return}
+  if(!/^image\//.test(f.type)){toast('이미지 파일을 골라 주세요.',1);return}
+  try{
+    const svg=f.type=='image/svg+xml',gif=f.type=='image/gif';let blob=f,ext=svg?'svg':gif?'gif':'png',note='';
+    if(!((svg&&f.size<=5e5)||(gif&&f.size<=3e5))){
+      let src;try{src=await createImageBitmap(f)}catch(e){throw new Error('이미지를 열 수 없습니다.')}
+      const sc=Math.min(1,54/src.height,480/src.width),tw=Math.max(1,Math.round(src.width*sc)),th=Math.max(1,Math.round(src.height*sc));let cw=src.width,ch=src.height;
+      while(cw/2>=tw&&ch/2>=th){const nw=Math.floor(cw/2),nh=Math.floor(ch/2),c=mkCanvas(nw,nh),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,nw,nh);if(src.close)src.close();src=c;cw=nw;ch=nh}
+      const c=mkCanvas(tw,th),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,tw,th);if(src.close)src.close();
+      blob=await toBlob(c,'image/png');ext='png';if(!blob)throw new Error('이미지 변환 실패');if(gif)note=' (GIF가 커서 정지 이미지로 변환했습니다)';
+    }
+    if(blob.size>1.5e6)throw new Error('이미지가 너무 큽니다.');
+    const tt=dEdit().tones.find(x=>x.id==t.id);if(!tt)return;
+    if(tt.pend)URL.revokeObjectURL(tt.pend.url);
+    tt.pend={blob,url:URL.createObjectURL(blob),ext};
+    setLogo();renderModal();toast('로고를 바꿨습니다. [디자인 저장]을 눌러야 모든 방문자에게 적용돼요.'+note);
+  }catch(e){toast('로고 변경 실패: '+e.message,1)}
+}
+// [디자인 저장]: ① 새 로고 업로드 ② design.json 저장 ③ 안 쓰는 옛 로고 삭제. 방문자 화면에는 배포 후(1분쯤) 반영
+async function dSave(){
+  if(!S.admin||S.lock)return;
+  if(!S.dw||!dDirty()){toast('변경한 내용이 없습니다.');return}
+  const bad=S.dw.tones.find(toneBad);if(bad){toast(`'${bad.name}' 톤의 글자색과 배경색이 너무 비슷해 저장할 수 없습니다.`,1);return}
+  S.lock=1;
+  try{
+    for(const t of S.dw.tones)if(t.pend){const p=`img/logo/${t.id}-${Date.now().toString(36)}.${t.pend.ext}`;S.blob[p]=t.pend.url;await put(p,await b64blob(t.pend.blob));t.logo=p;delete t.pend}
+    await saveJSON('data/design.json',dSer(S.dw));
+    const keep=new Set(S.dw.tones.map(t=>t.logo).filter(Boolean));
+    for(const o of S.dz.tones)if(o.logo&&!keep.has(o.logo))await del(o.logo).catch(()=>{});
+    S.dz=dNorm(dSer(S.dw));S.dw=null;dCache();dApply();setLogo();renderModal();toast('디자인을 저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.');
+  }catch(e){toast('저장 실패: '+e.message,1)}
+  finally{S.lock=0}
+}
+// Tone 줄에 붙는 사용자 톤 버튼들(방문자도 선택 가능)
+const toneBtns=()=>dView().tones.map(t=>`<button class="${t.id==curId()?'on':''}" data-a="tone" data-v="${esc(t.id)}">${esc(t.name)}</button>`).join('');
+// 설정 모달의 관리자 전용 디자인 줄들: 기본 톤 → 톤 관리 → (사용자 톤을 보는 중이면) 이름/색 3개/로고 → 글자 크기 / 해시 정렬(모든 톤 공통)
+function designHTML(){
+  if(!S.admin)return '';
+  const D=dView(),id=curId(),t=toneT(id),r=document.documentElement;
+  const rw=(k,lb)=>{const v=hex6(t[k]);return `<div class="row2"><span>${lb}</span><input data-ui="${k}" data-ik="t" value="${v}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="${lb} 코드 (예: #ffffff)"><input type="color" data-ui="${k}" data-ik="c" value="${v}" aria-label="${lb} 선택"></div>`};
+  const op=(a,cur,L)=>L.map(([v,x])=>`<button class="${v==cur?'on':''}" data-a="${a}" data-v="${v}">${x}</button>`).join('');
+  let h=`<div class="ud"></div><div class="row2"><span>기본 톤</span><span>${esc(toneName(D.default))}</span>${D.default==id?'':'<button data-a="tdef">[지금 톤으로]</button>'}</div>`
+    +`<div class="row2"><span>톤 관리</span><button data-a="tnew">[+ 새 톤]</button>${t?'<button data-a="tdelc">[삭제]</button>':''}</div>`;
+  if(t)h+=`<div class="row2"><span>이름</span><input data-ui="name" data-ik="t" value="${esc(t.name)}" maxlength="12" autocomplete="off" aria-label="톤 이름"></div>`
+    +rw('bg','배경 색')+rw('pbg','본문 배경')+rw('fc','글자 색')
+    +`<div class="uh">색 코드는 #ffffff 형식으로 입력하거나 오른쪽 색상 선택기를 쓰세요.</div><div class="uw" id="uwarn" role="status">${toneBad(t)?'글자색과 배경색이 너무 비슷해 저장할 수 없어요. 색을 더 다르게 해 주세요.':''}</div>`
+    +`<div class="row2"><span>로고</span><button data-a="ulogo">[변경]</button>${t.logo||t.pend?'<button data-a="ulogo0">[기본]</button>':''}<input type="file" id="u-logo" data-ui="logo" accept="image/*" class="hide"></div>`;
+  else h+=`<div class="uh">White · Dark · Note는 고정이라 수정·삭제할 수 없어요. [+ 새 톤]을 누르면 지금 톤을 복사해 나만의 톤을 만들 수 있어요. (최대 5개)</div>`;
+  return h+`<div class="ud"></div><div class="row2"><span>글자 크기</span>${op('ufs',D.fs,[['s','작게'],['n','기본'],['l','크게']])}</div>`
+    +`<div class="row2"><span>해시 정렬</span>${op('uhs',D.hs,[['v','세로'],['h','가로']])}</div>`
+    +`<div class="uh">디자인 설정은 관리자만 바꿀 수 있고, [디자인 저장] 후 모든 방문자에게 적용돼요.</div>`;
+}
+// 색·이름 입력 중: 올바른 형식이면 바로 미리보기 / 입력칸을 벗어나면 표시값 정리
+document.addEventListener('input',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.type=='file'||k=='logo')return;uiColor(k,t.value,t.dataset.ik)});
+document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.dataset.ik!='t')return;
+  if(k=='name'){const o=toneT(curId());if(o&&!t.value.trim())t.value=o.name}else uiSync()});
 // === [캘린더] 글 있는 날에 점(.has), 관리자 전용 숨김글만 있는 날은 주황 점(.hid). 날짜 클릭은 data-a="day" 로 아래 클릭 라우터가 처리 ===
 function renderCal(){
   const has=new Set(vis().map(p=>p.date));
@@ -346,7 +501,7 @@ function renderCal(){
 // === [태그 목록] 왼쪽 하단 (관리자는 Edit 버튼으로 순서/숨김 편집) ===
 function renderTags(){
   let h=`<h4><span>Tags</span>${S.admin?'<button data-a="tedit">Edit</button>':''}</h4>`;
-  h+=tagList(false).map(([t,n])=>`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('');
+  h+='<div class="tl">'+tagList(false).map(([t,n])=>`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('')+'</div>';
   $('#tags').innerHTML=h||'<h4>Tags</h4>';
 }
 // S.blob : 방금 올린 이미지/음악의 임시 주소(blob:) 저장소 - 배포 반영 전에도 바로 보이게 함
@@ -633,11 +788,11 @@ const syncDraft=()=>{const g=i=>$('#'+i);Object.assign(S.draft,{date:g('e-date')
 //   auth 설정(Tone·관리자) / y 연도 선택 / m 월 선택 / tags 태그 편집 / imgview 이미지 크게 / music 음악 플레이어 ===
 function renderModal(){
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
-  w.style.display=k?'flex':'none';if(!k)return;
+  w.style.display=k?'flex':'none';if(!k){uiClose();return}
   b.className=k=='music'?'mp':'';
   const X='<button data-a="mclose">[닫기]</button>';let h='';
   if(k=='auth'){const cur=document.documentElement.dataset.tone;
-    h=`<div class="row2"><span>Tone</span>${['white','dark','note'].map(t=>`<button class="${t==cur?'on':''}" data-a="tone" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div><div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar"><button data-a="mclose">[닫기]</button></div>`}
+    h=`<div class="row2 tn"><span>Tone</span>${['white','dark','note'].map(t=>`<button class="${t==cur?'on':''}" data-a="tone" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}${toneBtns()}</div>${designHTML()}<div class="ud"></div><div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar">${S.admin?`<button data-a="dsave">[디자인 저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[닫기]</button></div>`}
   else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
@@ -647,7 +802,7 @@ function renderModal(){
   const ck=k=='music'?[...b.querySelectorAll('.mck')].map(c=>c.checked):[];
   b.innerHTML=h;b.classList.toggle('wide',k=='imgview');
   if(k=='music'){const bx=b.querySelectorAll('.mck');if(bx.length==ck.length)bx.forEach((c,i)=>c.checked=ck[i]);updProg()}
-  const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range])');if(f)f.focus();
+  const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range]):not([data-ui])');if(f)f.focus();
 }
 // 헤더 높이를 CSS 변수(--hh)로 전달: 모바일에서 관리자 버튼줄이 고정 헤더 아래에 붙게 함
 if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px')).observe(document.querySelector('header'));
@@ -680,6 +835,7 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
 //   글: open new edit save cancel delpost / 이미지: pick thumb thx imgdel
 //   음악: mtoggle play prevm nextm song upmusic mdel mup mdn pickmusic pickcover covchg
 //   기타: menu home tone kinput logout mclose
+//   디자인(관리자 전용): tnew tdelc tdef(톤 추가/삭제/기본 지정) ufs(글자 크기) uhs(해시 정렬) ulogo ulogo0(로고 변경/기본) dsave(저장)
 //  새 기능 버튼 추가법: HTML에 data-a="이름"을 넣고 아래에 else if(a=='이름') 분기를 추가 ===
 document.addEventListener('click',async e=>{
   if(e.target.classList&&e.target.classList.contains('mck'))return;
@@ -729,7 +885,17 @@ document.addEventListener('click',async e=>{
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
   else if(a=='tdone'){await busy(saveTags);S.modal=null;render()}
-  else if(a=='tone'){document.documentElement.dataset.tone=v;try{localStorage.tone=v}catch(e){try{sessionStorage.tone=v}catch(x){}}setLogo();renderModal()}
+  else if(a=='tone'){if(!uiHas(dView(),v))return;setTone(v);dApply();setLogo();renderModal()}
+  else if(a=='tnew'){if(!S.admin)return;const D=dEdit();if(D.tones.length>=5){toast('톤은 최대 5개까지 만들 수 있습니다.',1);return}
+    let n=1;while(D.tones.some(x=>x.name=='내 톤 '+n))n++;const id='c'+Date.now().toString(36);
+    D.tones.push({id,name:'내 톤 '+n,bg:hex6(uiEff('bg')),pbg:hex6(uiEff('pbg')),fc:hex6(uiEff('fc')),logo:''});setTone(id);dApply();setLogo();renderModal()}
+  else if(a=='tdelc'){if(!S.admin)return;const D=dEdit(),t=D.tones.find(x=>x.id==curId());if(!t||!confirm(`'${t.name}' 톤을 삭제할까요? ([디자인 저장]을 눌러야 확정돼요)`))return;
+    if(t.pend)URL.revokeObjectURL(t.pend.url);D.tones=D.tones.filter(x=>x.id!=t.id);if(D.default==t.id)D.default='note';setTone(D.default);dApply();setLogo();renderModal()}
+  else if(a=='tdef'){if(!S.admin)return;dEdit().default=curId();renderModal()}
+  else if(a=='ufs'||a=='uhs'){if(!S.admin)return;dEdit()[a=='ufs'?'fs':'hs']=v;dApply();renderModal()}
+  else if(a=='ulogo'){if(!S.admin)return;const i=$('#u-logo');if(i)i.click()}
+  else if(a=='ulogo0'){if(!S.admin)return;const t=dEdit().tones.find(x=>x.id==curId());if(t){if(t.pend)URL.revokeObjectURL(t.pend.url);delete t.pend;t.logo='';setLogo();renderModal()}}
+  else if(a=='dsave')dSave();
   else if(a=='kinput'){$('#krow').innerHTML='<span>관리자 모드</span><input id="pw" type="password" placeholder="관리자 코드" autocomplete="off"><button data-a="authok">[확인]</button>';$('#pw').focus()}
   else if(a=='mclose'){S.modal=null;renderModal()}
   else if(a=='tup')mvt(+v,-1);
@@ -760,6 +926,7 @@ document.addEventListener('change',async e=>{
   const t=e.target;
   const rd=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
   if(t.id=='e-img'){const fs=[...t.files];t.value='';addFiles(fs)}
+  if(t.id=='u-logo'){const f=t.files[0];t.value='';if(f)await uiLogo(f)}
   if(t.id=='m-up'){
     const all=[...t.files],good=all.filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));
     t.value='';S.pend.files=good;renderModal();
@@ -802,12 +969,15 @@ async function authStep(){
 }
 document.addEventListener('keydown',e=>{if(e.key=='Escape'&&S.modal){S.modal=null;renderModal()}if(e.key=='Enter'&&e.target.closest('#mbox')){e.preventDefault();authStep()}});
 document.addEventListener('click',e=>{if(e.target.closest('[data-a="authok"]'))authStep();if(e.target.id=='modal'){S.modal=null;renderModal()}});
-// 톤에 맞는 로고 파일 선택: white=logo.gif / dark=logod.gif / note=logon.gif (없으면 logo.gif → 글자 로고)
-function setLogo(){
-  const i=$('#logoimg'),L=$('#logo a'),f={white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[document.documentElement.dataset.tone]||'logo.gif';
-  delete L.dataset.t;i.style.display='';
-  i.onerror=()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='TAKESOUL'}};
-  i.src=f;
+// 로고 선택: 사용자 톤에 관리자가 올려 둔 로고가 있으면 그것을 우선(높이 27px 고정, 폭 상한은 .uc)
+// 없으면 톤에 맞는 로고 파일(사용자 톤은 배경이 어두우면 logod.gif): white=logo.gif / dark=logod.gif / note=logon.gif (없으면 logo.gif → 글자 로고)
+function setLogo(opt){
+  const i=$('#logoimg'),L=$('#logo a'),id=curId(),T=toneT(id);
+  const def=T?(uiLum(T.bg)<.2?'logod.gif':'logo.gif'):({white:'logo.gif',dark:'logod.gif',note:'logon.gif'}[id]||'logo.gif');
+  const cus=T&&!opt&&(T.pend?T.pend.url:(T.logo?(S.blob[T.logo]||T.logo):''));
+  delete L.dataset.t;i.style.display='';i.classList.toggle('uc',!!cus);
+  i.onerror=cus?()=>setLogo(1):()=>{if(!i.src.endsWith('/logo.gif'))i.src='logo.gif';else{i.style.display='none';L.dataset.t='TAKESOUL'}};
+  i.src=cus||def;
 }
 setLogo();
 // 조회 통계: 글을 볼 때 GA 이벤트 전송(관리자 제외)
