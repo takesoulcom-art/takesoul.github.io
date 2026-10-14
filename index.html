@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-Bmq7JPUbJyR3uUo3OE7MeFHZJF1Zg8PzYjyL89l7v7s=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-WNYwrOfPCsZ5ZXaX6zHRTG4+N7XWOQqukucK8zI+DLc=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -268,6 +268,17 @@ article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.t
 aside{order:2}
 header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+/* ===== [최근 글 목록] 달력 우측 상단 [List]/[Back] 버튼 + 달력 자리에 나오는 목록(.rl). 달력 헤더와 같은 높이(44px)를 유지해 전환 시 칸이 흔들리지 않음 */
+.cal-h{display:grid;grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);align-items:center}
+.cal-h>.ch{grid-column:2}
+.cal-h>.lb{grid-column:3;justify-self:end;font-size:calc(12px + var(--fs));color:var(--mid);padding:8px 0 8px 8px;white-space:nowrap}
+.ch.lt>span{min-height:44px;font-size:calc(16px + var(--fs));letter-spacing:1px}
+.cal.rl{display:block;text-align:left;margin-top:8px;font-size:calc(12px + var(--fs))}
+.ri{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;color:var(--mid)}
+.ri small{flex:none;color:var(--lo);font-size:calc(11px + var(--fs))}
+.ri span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ri.on{color:var(--ink);font-weight:600}
+.ri.e{cursor:default}
 </style>
 </head>
 <body>
@@ -319,7 +330,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const KEY0=(()=>{try{return sessionStorage.gk||localStorage.gk||''}catch(e){return ''}})();
 // [전역 상태 S] 화면의 모든 상태를 한곳에서 관리
 //   posts 글 목록 / tags 태그 설정 / music 음악 목록
-//   y,m 캘린더 연·월(m은 0~11) / date 선택한 날짜 / tag 선택한 태그 / pid 보고 있는 글 id
+//   y,m 캘린더 연·월(m은 0~11) / date 선택한 날짜 / tag 선택한 태그 / pid 보고 있는 글 id / lv 최근 글 목록을 달력 자리에 보여주는 중(true)
 //   mode 'view'(읽기) | 'edit'(쓰기) / admin 관리자 여부 / key GitHub 토큰
 //   modal 열린 팝업 종류(auth,y,m,tags,imgview,music) / cur 재생 중 곡 번호(-1=없음) / playing 재생 여부
 //   draft 작성 중인 글 / snap 작성 시작 시점 스냅샷(저장 안 한 변경 감지용)
@@ -392,16 +403,16 @@ const uiCR=(a,b)=>{const x=uiLum(a),y=uiLum(b);return (Math.max(x,y)+.05)/(Math.
 const uiCS=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
 // 지금 화면에 실제로 적용된 색(새 톤을 만들 때 복사용): 본문 배경은 note 톤·사용자 톤이면 --paper, 아니면 페이지 배경
 const uiEff=k=>{const r=document.documentElement;return k=='bg'?uiCS('--bg'):k=='fc'?uiCS('--ink'):(r.dataset.tone=='note'||r.hasAttribute('data-ubody')?uiCS('--paper'):uiCS('--bg'))};
-// 한 쪽 디자인 정리(잘못된 값 제거, 톤 최대 5개, 기본 톤이 사라졌으면 note)
-const setNorm=o=>{o=o&&typeof o=='object'?o:{};
+// 한 쪽 디자인 정리(잘못된 값 제거, 톤 최대 5개, 적용 톤이 사라졌으면 note, 최근 글 개수 ln 은 0·5·6·7 중 하나 — 없으면 dl)
+const setNorm=(o,dl)=>{o=o&&typeof o=='object'?o:{};
   const tones=(Array.isArray(o.tones)?o.tones:[]).filter(t=>t&&typeof t.id=='string'&&/^[\w-]+$/.test(t.id)&&!BI.test(t.id)&&typeof t.name=='string'&&HX.test(t.bg)&&HX.test(t.pbg)&&HX.test(t.fc)).slice(0,5)
     .map(t=>({id:t.id,name:t.name.slice(0,12),bg:hex6(t.bg),pbg:hex6(t.pbg),fc:hex6(t.fc),logo:typeof t.logo=='string'&&/^img\/logo\/[\w.\-]+$/.test(t.logo)?t.logo:''}));
-  const want=o.tone||o.default;return {tone:BI.test(want)||tones.some(t=>t.id==want)?want:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v'}};
+  const want=o.tone||o.default;return {tone:BI.test(want)||tones.some(t=>t.id==want)?want:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v',ln:[0,5,6,7].includes(o.ln)?o.ln:dl}};
 // design.json 전체 정리: {desk,mob}. 옛 형식(가로·세로 구분 없음)이면 같은 값을 양쪽에 복사
-const dNorm=o=>{o=o&&typeof o=='object'?o:{};return {desk:setNorm(o.desk||o),mob:setNorm(o.mob||o.desk||o)}};
-const serSet=D=>({tone:D.tone,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs});
+const dNorm=o=>{o=o&&typeof o=='object'?o:{};return {desk:setNorm(o.desk||o,7),mob:setNorm(o.mob||o.desk||o,5)}};
+const serSet=D=>({tone:D.tone,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs,ln:D.ln});
 const dSer=D=>({desk:serSet(D.desk),mob:serSet(D.mob)});
-S.dz=dNorm(uiDesign());S.dw=null;S.em=null;
+S.dz=dNorm(uiDesign());S.dw=null;S.em=null;S.lv=false;
 const dView=()=>S.dw||S.dz;
 // 지금 적용해서 보여줄 화면: 관리자가 메뉴에서 고른 편집 화면(있으면) > 실제 화면 폭
 const curMode=()=>S.admin&&S.em?S.em:uiMode();
@@ -423,7 +434,7 @@ const dDirty=()=>!!S.dw&&(JSON.stringify(dSer(S.dw))!=JSON.stringify(dSer(S.dz))
 // 메뉴를 닫을 때: 저장하지 않은 임시본·다른 화면 미리보기는 버리고 저장된 디자인(지금 화면 기준)으로 복귀
 function uiClose(){if(!S.dw&&!S.em)return;const d=dDirty();
   if(S.dw){MK.forEach(m=>S.dw[m].tones.forEach(t=>{if(t.pend)URL.revokeObjectURL(t.pend.url)}));S.dw=null}
-  S.em=null;dApply();setLogo();if(d)toast('저장하지 않은 디자인 변경을 취소했습니다.')}
+  S.em=null;dApply();setLogo();renderCal();if(d)toast('저장하지 않은 디자인 변경을 취소했습니다.')}
 const uiWarn=()=>{const w=$('#uwarn'),t=toneT(curId());if(w)w.textContent=t&&toneBad(t)?'글자색과 배경색이 너무 비슷해 저장할 수 없어요. 색을 더 다르게 해 주세요.':''};
 // 입력칸/색상 선택기 값을 톤 값에 맞춤(sk,ss = 지금 입력 중인 칸은 건드리지 않음)
 function uiSync(sk,ss){const t=toneT(curId());if(t)['bg','pbg','fc'].forEach(k=>{
@@ -466,7 +477,7 @@ async function dSave(){
     await saveJSON('data/design.json',dSer(S.dw));
     const keep=new Set();MK.forEach(m=>S.dw[m].tones.forEach(t=>{if(t.logo)keep.add(t.logo)}));
     for(const m of MK)for(const o of S.dz[m].tones)if(o.logo&&!keep.has(o.logo)){keep.add(o.logo);await del(o.logo).catch(()=>{})}
-    S.dz=dNorm(dSer(S.dw));S.dw=null;dCache();dApply();setLogo();renderModal();toast('디자인을 저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.');
+    S.dz=dNorm(dSer(S.dw));S.dw=null;dCache();dApply();setLogo();renderCal();renderModal();toast('디자인을 저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.');
   }catch(e){toast('저장 실패: '+e.message,1)}
   finally{S.lock=0}
 }
@@ -496,6 +507,8 @@ function designHTML(){
   else h+=`<div class="uh">White · Dark · Note는 고정이라 수정·삭제할 수 없어요. [+ 새 톤]을 누르면 지금 톤을 복사해 나만의 톤을 만들 수 있어요. (화면별 최대 5개)</div>`;
   return h+`<div class="ud"></div><div class="row2"><span>글자 크기</span>${op('ufs',D.fs,[['s','작게'],['n','기본'],['l','크게']])}</div>`
     +`<div class="row2"><span>해시 정렬</span>${op('uhs',D.hs,[['v','세로'],['h','가로']])}</div>`
+    +`<div class="row2"><span>최근 글</span>${op('uln',D.ln,[[0,'끔'],[5,'5개'],[6,'6개'],[7,'7개']])}</div>`
+    +`<div class="uh">최근 글: 달력 오른쪽 위 [List] 버튼으로 달력 ↔ 최근 글 목록(날짜·제목)을 바꿔 봐요. 끔이면 버튼이 사라져요.</div>`
     +`<div class="uh">디자인 설정은 관리자만 바꿀 수 있고, [디자인 저장] 후 모든 방문자에게 적용돼요.</div>`;
 }
 // 색·이름 입력 중: 올바른 형식이면 바로 미리보기 / 입력칸을 벗어나면 표시값 정리
@@ -503,17 +516,27 @@ document.addEventListener('input',e=>{const t=e.target,k=t.dataset&&t.dataset.ui
 document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.dataset.ik!='t')return;
   if(k=='name'){const o=toneT(curId());if(o&&!t.value.trim())t.value=o.name}else uiSync()});
 // 화면 폭이 가로↔세로 기준(760px)을 넘나들면(창 크기 조절·기기 회전) 그 화면의 디자인으로 바꿔 적용 (편집 중에는 건드리지 않음)
-try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApply();setLogo()}};if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
-// === [캘린더] 글 있는 날에 점(.has), 관리자 전용 숨김글만 있는 날은 주황 점(.hid). 날짜 클릭은 data-a="day" 로 아래 클릭 라우터가 처리 ===
+try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApply();setLogo();renderCal()}};if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
+// === [캘린더 / 최근 글 목록] 평소엔 달력(글 있는 날에 점 .has, 관리자 전용 숨김글만 있는 날은 주황 점 .hid / 날짜 클릭은 data-a="day").
+//   우측 상단 [List] 를 누르면(S.lv=true) 달력 자리에 최근 글 목록(날짜·제목, 최신순)이 나오고 [Back] 으로 달력 복귀.
+//   목록 개수·버튼 사용 여부는 디자인 설정(가로/세로별 ln: 0=버튼 없음 / 5·6·7). 태그를 누르면 목록은 달력으로 돌아감(클릭 라우터의 tag) ===
 function renderCal(){
+  const n=dS().ln||0;if(!n)S.lv=false;
+  const lb=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'[Back]':'[List]'}</button>`:'';
+  $('#cal').className='cal'+(S.lv?' rl':'');
+  if(S.lv){
+    $('#calh').innerHTML=`<div class="ch lt"><span>Recent</span></div>${lb}`;
+    $('#cal').innerHTML=list().slice(0,n).map(p=>`<div class="ri ${p.id==S.pid?'on':''}" data-a="open" data-v="${esc(p.id)}"><small>${esc(p.date)}</small><span>${esc(p.title||'(제목 없음)')}${p.hidden?' · 숨김':''}</span></div>`).join('')||'<div class="ri e">아직 작성된 글이 없습니다.</div>';
+    return;
+  }
   const has=new Set(vis().map(p=>p.date));
   const hid=new Set(S.admin?S.posts.filter(p=>p.hidden&&!has.has(p.date)).map(p=>p.date):[]);
   $('#calh').innerHTML=`<div class="ch"><button data-a="prev" aria-label="이전 달">‹</button><span><button data-a="py">${S.y}</button><button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
-  <button data-a="next" aria-label="다음 달">›</button></div>`;
-  const first=new Date(S.y,S.m,1).getDay(),n=new Date(S.y,S.m+1,0).getDate();
+  <button data-a="next" aria-label="다음 달">›</button></div>${lb}`;
+  const first=new Date(S.y,S.m,1).getDay(),n2=new Date(S.y,S.m+1,0).getDate();
   let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>`<div class="w">${w}</div>`).join('');
   for(let i=0;i<first;i++)h+='<div></div>';
-  for(let d=1;d<=n;d++){
+  for(let d=1;d<=n2;d++){
     const ds=`${S.y}-${String(S.m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const on=has.has(ds)||hid.has(ds);
     h+=`<div class="d ${on?'has':''} ${hid.has(ds)?'hid':''} ${S.date==ds?'sel':''}" ${on?`data-a="day" data-v="${ds}"`:''}><span>${d}</span></div>`;
@@ -853,11 +876,11 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
   [S.music[i],S.music[j]]=[S.music[j],S.music[i]];if(cf)S.cur=S.music.findIndex(t=>t.file==cf);
   await busy(saveMusic);S.lock=0;renderMusic();document.querySelectorAll('.mck').forEach((c,k)=>c.checked=k==j)};
 // === [클릭 라우터] 화면의 모든 버튼은 data-a="동작이름"(+data-v 값)으로 이 한 곳에서 처리
-//   캘린더: prev next py pm sy sm day / 태그: tag tedit thide tup tdn tdone tcancel
+//   캘린더: prev next py pm sy sm day list back(달력 ↔ 최근 글 목록) / 태그: tag tedit thide tup tdn tdone tcancel
 //   글: open new edit save cancel delpost / 이미지: pick thumb thx imgdel
 //   음악: mtoggle play prevm nextm song upmusic mdel mup mdn pickmusic pickcover covchg
 //   기타: menu home tone kinput logout mclose
-//   디자인(관리자 전용): dmode(가로/세로 편집 화면) tone(이 화면에 쓸 톤 선택) tnew tdelc(톤 추가/삭제) ufs(글자 크기) uhs(해시 정렬) ulogo ulogo0(로고 변경/기본) dsave(저장)
+//   디자인(관리자 전용): dmode(가로/세로 편집 화면) tone(이 화면에 쓸 톤 선택) tnew tdelc(톤 추가/삭제) ufs(글자 크기) uhs(해시 정렬) uln(최근 글 개수) ulogo ulogo0(로고 변경/기본) dsave(저장)
 //  새 기능 버튼 추가법: HTML에 data-a="이름"을 넣고 아래에 else if(a=='이름') 분기를 추가 ===
 document.addEventListener('click',async e=>{
   if(e.target.classList&&e.target.classList.contains('mck'))return;
@@ -873,7 +896,9 @@ document.addEventListener('click',async e=>{
   else if(a=='prev')go(S.y,S.m-1);
   else if(a=='next')go(S.y,S.m+1);
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
-  else if(a=='tag'){pick({tag:v});render();toTop()}
+  else if(a=='tag'){pick({tag:v});S.lv=false;render();toTop()}   // 최근 글 목록이 떠 있었다면 달력으로 되돌림(본문엔 이 태그의 글 목록 → 달력과 목록이 중복 출력되지 않게)
+  else if(a=='list'){S.lv=true;renderCal()}
+  else if(a=='back'){S.lv=false;renderCal()}
   else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth()}renderArt();renderCal();toTop()}
   else if(a=='new'){const d={date:today(),title:'',body:'',tags:[],hidden:false};S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()}
   else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;let d={...f};S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()}
@@ -908,13 +933,14 @@ document.addEventListener('click',async e=>{
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
   else if(a=='tdone'){await busy(saveTags);S.modal=null;render()}
   else if(a=='tone'){if(!S.admin||!uiHas(dS(),v))return;dES().tone=v;dApply();setLogo();renderModal()}
-  else if(a=='dmode'){if(!S.admin||(v!='desk'&&v!='mob'))return;S.em=v;dApply();setLogo();renderModal()}
+  else if(a=='dmode'){if(!S.admin||(v!='desk'&&v!='mob'))return;S.em=v;dApply();setLogo();renderCal();renderModal()}
   else if(a=='tnew'){if(!S.admin)return;const D=dES();if(D.tones.length>=5){toast('톤은 화면별로 최대 5개까지 만들 수 있습니다.',1);return}
     let n=1;while(D.tones.some(x=>x.name=='내 톤 '+n))n++;const id='c'+Date.now().toString(36);
     D.tones.push({id,name:'내 톤 '+n,bg:hex6(uiEff('bg')),pbg:hex6(uiEff('pbg')),fc:hex6(uiEff('fc')),logo:''});D.tone=id;dApply();setLogo();renderModal()}
   else if(a=='tdelc'){if(!S.admin)return;const D=dES(),t=D.tones.find(x=>x.id==curId());if(!t||!confirm(`'${t.name}' 톤을 삭제할까요? (${MS[curMode()]} 화면 · [디자인 저장]을 눌러야 확정돼요)`))return;
     if(t.pend)URL.revokeObjectURL(t.pend.url);D.tones=D.tones.filter(x=>x.id!=t.id);if(D.tone==t.id)D.tone='note';dApply();setLogo();renderModal()}
   else if(a=='ufs'||a=='uhs'){if(!S.admin)return;dES()[a=='ufs'?'fs':'hs']=v;dApply();renderModal()}
+  else if(a=='uln'){if(!S.admin)return;dES().ln=+v;renderCal();renderModal()}
   else if(a=='ulogo'){if(!S.admin)return;const i=$('#u-logo');if(i)i.click()}
   else if(a=='ulogo0'){if(!S.admin)return;const t=dES().tones.find(x=>x.id==curId());if(t){if(t.pend)URL.revokeObjectURL(t.pend.url);delete t.pend;t.logo='';setLogo();renderModal()}}
   else if(a=='dsave')dSave();
