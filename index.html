@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7niPuohxtNwXRTaZeyXmbvMg6FxXXu1tRG0lB+F3Kic=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-tfM5HIXZvvGhYOlop1vKLX37xf+/inP2QX8w5eN0bcA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-Bmq7JPUbJyR3uUo3OE7MeFHZJF1Zg8PzYjyL89l7v7s=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -27,31 +27,28 @@
 <!-- 검색엔진용 구조화 데이터(사이트 이름·별칭·작성자) -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"takesoul","alternateName":["변재신","janners"],"url":"https://takesoul.com/","author":{"@type":"Person","name":"변재신","alternateName":["takesoul","janners"]}}</script>
 <script>
-// [톤 결정] 페이지가 그려지기 전에 실행(깜빡임 방지). 시간대 자동 전환은 없음.
-// 우선순위: 사용자가 메뉴에서 고른 톤(localStorage, 없으면 sessionStorage) > 기본값 note
-// 기본 톤을 바꾸려면 아래 t="note" 수정 / 선택 가능한 톤: white, dark, note
-// 결과는 <html data-tone="..."> 에 저장 → CSS 변수(:root[data-tone=...])가 색을 바꿈
-(function(){var t="note";try{t=localStorage.tone||sessionStorage.tone||t}catch(e){try{t=sessionStorage.tone||t}catch(e2){}}
-if(!/^(white|dark|note)$/.test(t))t="note";document.documentElement.dataset.tone=t})();
+// [톤 결정] 페이지가 그려지기 전에 실행(깜빡임 방지). 톤은 방문자가 고르는 값이 아니라 관리자가 정한 홈페이지 설정값 → 바로 아래 [디자인] 코드가 처리.
+// 결과는 <html data-tone="..."> 에 저장 → CSS 변수(:root[data-tone=...])가 색을 바꿈. (선택 가능한 톤: white, dark, note + 관리자가 만든 사용자 톤)
 // [디자인] 관리자가 정한 사이트 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬)을 페이지가 그려지기 전에 적용(깜빡임 방지).
 // 디자인은 화면 종류별로 따로 저장됨: desk=가로(데스크톱) / mob=세로(모바일). 어느 쪽을 쓸지는 화면 폭으로 판단(uiQ = 아래 CSS @media 와 같은 760px 기준).
 // 사이트 디자인 원본은 data/design.json(GitHub). 메인 스크립트가 불러올 때마다 localStorage('uidesign')에 사본을 남기고, 여기서는 그 사본을 읽음.
-// 보여줄 톤 = 방문자가 직접 고른 톤(localStorage.tone) > 관리자가 정한 기본 톤(default) > note
-// 한 쪽 디자인(set) = {default, tones:[{id,name,bg,pbg,fc,logo}], fs, hs}  (bg 배경 / pbg 본문 배경 / fc 글자색: #RGB·#RRGGBB)
+// (이 사본은 첫 화면 깜빡임을 줄이기 위한 캐시일 뿐 — 방문자가 정하는 값이 아니며, 접속할 때마다 design.json 값으로 덮어써짐)
+// 보여줄 톤 = 관리자가 정한 이 화면(가로/세로)의 톤(tone, 없으면 note). 방문자는 톤을 고를 수 없고, 브라우저에 톤 선택값을 저장하지도 않음
+// 한 쪽 디자인(set) = {tone, tones:[{id,name,bg,pbg,fc,logo}], fs, hs}  (bg 배경 / pbg 본문 배경 / fc 글자색: #RGB·#RRGGBB)
 // fs 글자 크기 s(작게)·n(기본)·l(크게) / hs 해시 정렬 v(세로)·h(가로). 기본 톤 3개(white/dark/note)는 고정.
 var uiQ='(max-width:760px)';
 function uiMode(){return window.matchMedia&&matchMedia(uiQ).matches?'mob':'desk'}
 function uiDesign(){var s='';try{s=localStorage.uidesign||''}catch(e){}try{var o=JSON.parse(s);return o&&typeof o=='object'&&!Array.isArray(o)?o:{}}catch(e){return {}}}
 function uiSet(D,m){D=D||{};m=m||uiMode();return D[m]&&typeof D[m]=='object'?D[m]:D}
 function uiHas(D,id){var i;if(/^(white|dark|note)$/.test(id))return true;if(id&&D.tones)for(i=0;i<D.tones.length;i++)if(D.tones[i]&&D.tones[i].id==id)return true;return false}
-function uiPick(D){var t='';try{t=localStorage.tone||sessionStorage.tone||''}catch(e){try{t=sessionStorage.tone||''}catch(e2){}}if(!uiHas(D,t))t=D.default;if(!uiHas(D,t))t='note';return t}
+function uiPick(D){var t=D.tone||D.default;return uiHas(D,t)?t:'note'}
 function uiApply(D,id){D=D||{};id=uiHas(D,id)?id:uiPick(D);var r=document.documentElement,s=r.style,H=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,
 ok=function(v){return typeof v=='string'&&H.test(v)?v:''},
 set=function(k,v){if(v)s.setProperty(k,v);else s.removeProperty(k)},
 c=null,i,bg='',pb='',fc='',
 mix=!!(window.CSS&&CSS.supports&&CSS.supports('color','color-mix(in srgb,red 50%,blue)'));
 if(!/^(white|dark|note)$/.test(id)&&D.tones)for(i=0;i<D.tones.length;i++)if(D.tones[i]&&D.tones[i].id==id)c=D.tones[i];
-if(c){bg=ok(c.bg);pb=ok(c.pbg);fc=ok(c.fc);if(!(bg&&pb&&fc)){c=null;bg=pb=fc='';id=/^(white|dark|note)$/.test(D.default)?D.default:'note'}}
+if(c){bg=ok(c.bg);pb=ok(c.pbg);fc=ok(c.fc);if(!(bg&&pb&&fc)){c=null;bg=pb=fc='';id='note'}}
 // 사용자 톤이면 data-tone="custom"(전용 CSS 없음 → 기본 변수 + 아래 값으로 덮어씀) / 아니면 기본 톤
 r.setAttribute('data-tone',c?'custom':id);
 set('--bg',bg);set('--paper',pb);set('--ink',fc);set('--mid',fc);
@@ -385,7 +382,7 @@ function tagList(all){
 //   (옛 형식 {default,tones,fs,hs} 는 가로·세로 둘 다에 같은 값으로 자동 변환됨)
 //   S.dz = 저장된(사이트 공통) 디자인 / S.dw = 관리자가 편집 중인 임시본(null이면 편집 안 함) / S.em = 관리자가 메뉴에서 편집·미리보기 중인 화면(desk|mob)
 //   [디자인 저장]을 눌러야 저장·반영되고, 메뉴를 닫으면 임시본과 미리보기는 버려짐
-//   방문자: 지금 화면 폭에 맞는 쪽(가로/세로) 디자인의 기본 톤으로 처음 보이고, 메뉴에서 톤(기본 3개 + 그 화면의 사용자 톤)을 골라 볼 수 있음(내 브라우저에만 기억). 편집은 불가
+//   방문자: 톤을 고를 수 없음. 접속한 화면 폭에 맞는 쪽(가로/세로)에 관리자가 정해 둔 톤·글자 크기·해시 정렬로만 보임(홈페이지 설정값). 방문자별로 저장되는 값은 없음
 //   적용은 맨 위 uiApply() 가 <html> 의 CSS 변수/속성(data-tone, data-fs, data-hs, data-ubody)을 바꾸는 방식이라 화면을 다시 그릴 필요가 없음
 const HX=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,BI=/^(white|dark|note)$/,TN={white:'White',dark:'Dark',note:'Note'};
 const MODES={desk:'가로 (데스크톱)',mob:'세로 (모바일)'},MS={desk:'가로',mob:'세로'},MK=['desk','mob'];
@@ -399,27 +396,24 @@ const uiEff=k=>{const r=document.documentElement;return k=='bg'?uiCS('--bg'):k==
 const setNorm=o=>{o=o&&typeof o=='object'?o:{};
   const tones=(Array.isArray(o.tones)?o.tones:[]).filter(t=>t&&typeof t.id=='string'&&/^[\w-]+$/.test(t.id)&&!BI.test(t.id)&&typeof t.name=='string'&&HX.test(t.bg)&&HX.test(t.pbg)&&HX.test(t.fc)).slice(0,5)
     .map(t=>({id:t.id,name:t.name.slice(0,12),bg:hex6(t.bg),pbg:hex6(t.pbg),fc:hex6(t.fc),logo:typeof t.logo=='string'&&/^img\/logo\/[\w.\-]+$/.test(t.logo)?t.logo:''}));
-  return {default:BI.test(o.default)||tones.some(t=>t.id==o.default)?o.default:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v'}};
+  const want=o.tone||o.default;return {tone:BI.test(want)||tones.some(t=>t.id==want)?want:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v'}};
 // design.json 전체 정리: {desk,mob}. 옛 형식(가로·세로 구분 없음)이면 같은 값을 양쪽에 복사
 const dNorm=o=>{o=o&&typeof o=='object'?o:{};return {desk:setNorm(o.desk||o),mob:setNorm(o.mob||o.desk||o)}};
-const serSet=D=>({default:D.default,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs});
+const serSet=D=>({tone:D.tone,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs});
 const dSer=D=>({desk:serSet(D.desk),mob:serSet(D.mob)});
-S.dz=dNorm(uiDesign());S.dw=null;S.tid='';S.em=null;
+S.dz=dNorm(uiDesign());S.dw=null;S.em=null;
 const dView=()=>S.dw||S.dz;
 // 지금 적용해서 보여줄 화면: 관리자가 메뉴에서 고른 편집 화면(있으면) > 실제 화면 폭
 const curMode=()=>S.admin&&S.em?S.em:uiMode();
 const dS=()=>dView()[curMode()];          // 지금 화면의 디자인(읽기)
 const dES=()=>dEdit()[curMode()];         // 지금 화면의 디자인(편집용 임시본)
-// 지금 보여주는 톤 id: 이번에 고른 톤 > 방문자가 기억해 둔 톤 > 관리자 기본 톤 > note
-const curId=()=>{const D=dS();return S.tid&&uiHas(D,S.tid)?S.tid:uiPick(D)};
+// 지금 화면에 쓰는 톤 id = 관리자가 정한 이 화면의 톤(없거나 삭제됐으면 note)
+const curId=()=>uiPick(dS());
 const toneT=id=>dS().tones.find(t=>t.id==id);
-const toneName=id=>TN[id]||(toneT(id)||{}).name||id;
 const dApply=()=>uiApply(dS(),curId());
 const dCache=()=>{try{localStorage.uidesign=JSON.stringify(dSer(S.dz))}catch(e){}};
 // 서버에서 design.json 을 읽은 직후 호출(reload 안): 정리 → 사본 저장 → 적용
 function dInit(){S.dz=dNorm(S.dz);S.dw=null;dCache();dApply();setLogo()}
-// 톤 고르기: 내 브라우저에 기억(방문자·관리자 공통)
-const setTone=v=>{S.tid=v;try{localStorage.tone=v}catch(e){try{sessionStorage.tone=v}catch(x){}}};
 // 글자색과 배경색 대비가 너무 낮으면(2:1 미만) 읽을 수 없는 톤 → 저장 불가
 const toneBad=t=>uiCR(t.fc,t.bg)<2||uiCR(t.fc,t.pbg)<2;
 // 편집 시작: 저장본을 복사해 임시본 만들기
@@ -482,9 +476,11 @@ function designTop(){
   if(!S.em)S.em=uiMode();
   const m=curMode(),real=uiMode();
   return `<div class="row2 tn"><span>편집 화면</span>${MK.map(k=>`<button class="${k==m?'on':''}" data-a="dmode" data-v="${k}">${MODES[k]}</button>`).join('')}</div>`
-    +`<div class="uh">${m==real?`지금 이 기기는 ${MS[real]} 화면이에요. `:`지금 ${MS[real]} 화면에서 ${MS[m]} 화면 디자인을 미리 보는 중이에요. 색·글자 크기·해시 정렬은 미리 보이지만 배치는 실제 ${MS[m]} 화면과 다를 수 있어요. `}가로·세로 디자인은 따로 저장돼요.</div><div class="ud"></div>`;
+    +`<div class="uh">${m==real?`지금 이 기기는 ${MS[real]} 화면이에요. `:`지금 ${MS[real]} 화면에서 ${MS[m]} 화면 디자인을 미리 보는 중이에요. 색·글자 크기·해시 정렬은 미리 보이지만 배치는 실제 ${MS[m]} 화면과 다를 수 있어요. `}가로·세로 디자인은 따로 저장돼요. 아래에서 고른 Tone이 이 화면에서 모든 방문자에게 보이는 톤이에요.</div><div class="ud"></div>`;
 }
-// Tone 줄에 붙는 사용자 톤 버튼들(방문자도 선택 가능. 지금 화면의 사용자 톤만 보임)
+// Tone 줄에 붙는 사용자 톤 버튼들(관리자 전용. 지금 편집 화면의 사용자 톤만)
+// [관리자 전용] Tone 줄: 이 화면(가로/세로)에서 모든 방문자에게 보여줄 톤을 고름(기본 3개 + 이 화면의 사용자 톤). [디자인 저장] 후 적용
+const toneRow=()=>{if(!S.admin)return '';const cur=curId();return `<div class="row2 tn"><span>Tone</span>${Object.keys(TN).map(k=>`<button class="${k==cur?'on':''}" data-a="tone" data-v="${k}">${TN[k]}</button>`).join('')}${toneBtns()}</div>`};
 const toneBtns=()=>dS().tones.map(t=>`<button class="${t.id==curId()?'on':''}" data-a="tone" data-v="${esc(t.id)}">${esc(t.name)}</button>`).join('');
 // 설정 모달의 관리자 전용 디자인 줄들: 기본 톤 → 톤 관리 → (사용자 톤을 보는 중이면) 이름/색 3개/로고 → 글자 크기 / 해시 정렬
 function designHTML(){
@@ -492,8 +488,7 @@ function designHTML(){
   const D=dS(),id=curId(),t=toneT(id);
   const rw=(k,lb)=>{const v=hex6(t[k]);return `<div class="row2"><span>${lb}</span><input data-ui="${k}" data-ik="t" value="${v}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="${lb} 코드 (예: #ffffff)"><input type="color" data-ui="${k}" data-ik="c" value="${v}" aria-label="${lb} 선택"></div>`};
   const op=(a,cur,L)=>L.map(([v,x])=>`<button class="${v==cur?'on':''}" data-a="${a}" data-v="${v}">${x}</button>`).join('');
-  let h=`<div class="ud"></div><div class="row2"><span>기본 톤</span><span>${esc(toneName(D.default))}</span>${D.default==id?'':'<button data-a="tdef">[지금 톤으로]</button>'}</div>`
-    +`<div class="row2"><span>톤 관리</span><button data-a="tnew">[+ 새 톤]</button>${t?'<button data-a="tdelc">[삭제]</button>':''}</div>`;
+  let h=`<div class="ud"></div><div class="row2"><span>톤 관리</span><button data-a="tnew">[+ 새 톤]</button>${t?'<button data-a="tdelc">[삭제]</button>':''}</div>`;
   if(t)h+=`<div class="row2"><span>이름</span><input data-ui="name" data-ik="t" value="${esc(t.name)}" maxlength="12" autocomplete="off" aria-label="톤 이름"></div>`
     +rw('bg','배경 색')+rw('pbg','본문 배경')+rw('fc','글자 색')
     +`<div class="uh">색 코드는 #ffffff 형식으로 입력하거나 오른쪽 색상 선택기를 쓰세요.</div><div class="uw" id="uwarn" role="status">${toneBad(t)?'글자색과 배경색이 너무 비슷해 저장할 수 없어요. 색을 더 다르게 해 주세요.':''}</div>`
@@ -819,7 +814,7 @@ function renderModal(){
   b.className=k=='music'?'mp':'';
   const X='<button data-a="mclose">[닫기]</button>';let h='';
   if(k=='auth'){const cur=document.documentElement.dataset.tone;
-    h=`${designTop()}<div class="row2 tn"><span>Tone</span>${['white','dark','note'].map(t=>`<button class="${t==cur?'on':''}" data-a="tone" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}${toneBtns()}</div>${designHTML()}<div class="ud"></div><div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar">${S.admin?`<button data-a="dsave">[디자인 저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[닫기]</button></div>`}
+    h=`${designTop()}${toneRow()}${designHTML()}${S.admin?'<div class="ud"></div>':''}<div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar">${S.admin?`<button data-a="dsave">[디자인 저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[닫기]</button></div>`}
   else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
@@ -862,7 +857,7 @@ const mvm=async d=>{if(S.lock)return;const i=[...document.querySelectorAll('.mck
 //   글: open new edit save cancel delpost / 이미지: pick thumb thx imgdel
 //   음악: mtoggle play prevm nextm song upmusic mdel mup mdn pickmusic pickcover covchg
 //   기타: menu home tone kinput logout mclose
-//   디자인(관리자 전용): dmode(가로/세로 편집 화면) tnew tdelc tdef(톤 추가/삭제/기본 지정) ufs(글자 크기) uhs(해시 정렬) ulogo ulogo0(로고 변경/기본) dsave(저장)
+//   디자인(관리자 전용): dmode(가로/세로 편집 화면) tone(이 화면에 쓸 톤 선택) tnew tdelc(톤 추가/삭제) ufs(글자 크기) uhs(해시 정렬) ulogo ulogo0(로고 변경/기본) dsave(저장)
 //  새 기능 버튼 추가법: HTML에 data-a="이름"을 넣고 아래에 else if(a=='이름') 분기를 추가 ===
 document.addEventListener('click',async e=>{
   if(e.target.classList&&e.target.classList.contains('mck'))return;
@@ -912,14 +907,13 @@ document.addEventListener('click',async e=>{
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
   else if(a=='tdone'){await busy(saveTags);S.modal=null;render()}
-  else if(a=='tone'){if(!uiHas(dS(),v))return;setTone(v);dApply();setLogo();renderModal()}
+  else if(a=='tone'){if(!S.admin||!uiHas(dS(),v))return;dES().tone=v;dApply();setLogo();renderModal()}
   else if(a=='dmode'){if(!S.admin||(v!='desk'&&v!='mob'))return;S.em=v;dApply();setLogo();renderModal()}
   else if(a=='tnew'){if(!S.admin)return;const D=dES();if(D.tones.length>=5){toast('톤은 화면별로 최대 5개까지 만들 수 있습니다.',1);return}
     let n=1;while(D.tones.some(x=>x.name=='내 톤 '+n))n++;const id='c'+Date.now().toString(36);
-    D.tones.push({id,name:'내 톤 '+n,bg:hex6(uiEff('bg')),pbg:hex6(uiEff('pbg')),fc:hex6(uiEff('fc')),logo:''});setTone(id);dApply();setLogo();renderModal()}
+    D.tones.push({id,name:'내 톤 '+n,bg:hex6(uiEff('bg')),pbg:hex6(uiEff('pbg')),fc:hex6(uiEff('fc')),logo:''});D.tone=id;dApply();setLogo();renderModal()}
   else if(a=='tdelc'){if(!S.admin)return;const D=dES(),t=D.tones.find(x=>x.id==curId());if(!t||!confirm(`'${t.name}' 톤을 삭제할까요? (${MS[curMode()]} 화면 · [디자인 저장]을 눌러야 확정돼요)`))return;
-    if(t.pend)URL.revokeObjectURL(t.pend.url);D.tones=D.tones.filter(x=>x.id!=t.id);if(D.default==t.id)D.default='note';setTone(D.default);dApply();setLogo();renderModal()}
-  else if(a=='tdef'){if(!S.admin)return;dES().default=curId();renderModal()}
+    if(t.pend)URL.revokeObjectURL(t.pend.url);D.tones=D.tones.filter(x=>x.id!=t.id);if(D.tone==t.id)D.tone='note';dApply();setLogo();renderModal()}
   else if(a=='ufs'||a=='uhs'){if(!S.admin)return;dES()[a=='ufs'?'fs':'hs']=v;dApply();renderModal()}
   else if(a=='ulogo'){if(!S.admin)return;const i=$('#u-logo');if(i)i.click()}
   else if(a=='ulogo0'){if(!S.admin)return;const t=dES().tones.find(x=>x.id==curId());if(t){if(t.pend)URL.revokeObjectURL(t.pend.url);delete t.pend;t.logo='';setLogo();renderModal()}}
