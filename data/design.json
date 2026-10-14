@@ -1,16 +1,23 @@
 {
  "desk": {
-  "tone": "note",
+  "default": "note",
   "tones": [],
   "fs": "n",
-  "hs": "v",
-  "ln": 0
+  "hs": "v"
  },
  "mob": {
-  "tone": "dark",
-  "tones": [],
+  "default": "dark",
+  "tones": [
+   {
+    "id": "cmv8qe8t0",
+    "name": "dark bright",
+    "bg": "#262624",
+    "pbg": "#262624",
+    "fc": "#ffffff",
+    "logo": ""
+   }
+  ],
   "fs": "n",
-  "hs": "h",
-  "ln": 0
+  "hs": "h"
  }
 }
