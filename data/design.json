@@ -3,12 +3,14 @@
   "tone": "note",
   "tones": [],
   "fs": "n",
-  "hs": "h"
+  "hs": "h",
+  "ln": 0
  },
  "mob": {
   "tone": "dark",
   "tones": [],
   "fs": "n",
-  "hs": "h"
+  "hs": "h",
+  "ln": 5
  }
 }
