@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-WNYwrOfPCsZ5ZXaX6zHRTG4+N7XWOQqukucK8zI+DLc=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-5HG1nm9Bf9T/GekgY8sPUPkCIBT8iDlUhfUDwr1QAvI=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -268,13 +268,20 @@ article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.t
 aside{order:2}
 header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
-/* ===== [최근 글 목록] 달력 우측 상단 [List]/[Back] 버튼 + 달력 자리에 나오는 목록(.rl). 달력 헤더와 같은 높이(44px)를 유지해 전환 시 칸이 흔들리지 않음 */
-.cal-h{display:grid;grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);align-items:center}
-.cal-h>.ch{grid-column:2}
-.cal-h>.lb{grid-column:3;justify-self:end;font-size:calc(12px + var(--fs));color:var(--mid);padding:8px 0 8px 8px;white-space:nowrap}
+/* ===== [최근 글 목록] 달력 위 바깥 우상단의 관리 버튼 줄(.cbar: [List]/[Back]) + 달력 자리에 나오는 목록(.rl)
+   [높이 고정] 달력(최대 6주)과 목록(최대 7개) 중 큰 쪽에 맞춰 칸 높이를 px 로 고정 → 달력↔목록 전환, 달마다 주 수가 달라도, 글꼴 크기를 바꿔도 아래 Tags 가 위아래로 움직이지 않음
+     버튼 줄 32 + 달력 머리(.ch) 44 + 여백 16 + 본문(.cal) 260 = 352px
+     .cal 260 = 요일줄 20 + 6주 x 30 + 줄 간격 6 x 10 (주가 4~5개여도 빈 줄을 남겨 높이 유지) / 목록 7개 x 37 = 259 (5·6개로 설정해도 높이는 그대로) */
+.cbar{display:flex;justify-content:flex-end;align-items:center;height:32px}
+.cbar:empty{display:none}
+.cbar .lb{font-size:calc(12px + var(--fs));line-height:1.2;color:var(--mid);padding:6px 0 6px 12px;white-space:nowrap}
+.cal-h .ch{height:44px}
+.ch [data-a=py],.ch [data-a=pm]{line-height:1}
 .ch.lt>span{min-height:44px;font-size:calc(16px + var(--fs));letter-spacing:1px}
-.cal.rl{display:block;text-align:left;margin-top:8px;font-size:calc(12px + var(--fs))}
-.ri{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;color:var(--mid)}
+.cal{grid-template-rows:20px repeat(6,30px);align-content:start;height:260px}
+.cal .w{height:20px;line-height:20px}
+.cal.rl{display:block;height:260px;overflow:hidden;text-align:left}
+.ri{display:flex;align-items:center;gap:10px;height:37px;box-sizing:border-box;border-bottom:1px solid var(--line);cursor:pointer;color:var(--mid)}
 .ri small{flex:none;color:var(--lo);font-size:calc(11px + var(--fs))}
 .ri span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ri.on{color:var(--ink);font-weight:600}
@@ -295,7 +302,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 <div id="modal"><div id="mbox"></div></div>
 <main>
   <aside>
-    <section><div class="cal-h" id="calh"></div><div class="cal" id="cal"></div></section>
+    <section><div class="cbar" id="calbar"></div><div class="cal-h" id="calh"></div><div class="cal" id="cal"></div></section>
     <section class="tags" id="tags"></section>
   </aside>
   <article id="art"></article>
@@ -518,21 +525,21 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.u
 // 화면 폭이 가로↔세로 기준(760px)을 넘나들면(창 크기 조절·기기 회전) 그 화면의 디자인으로 바꿔 적용 (편집 중에는 건드리지 않음)
 try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApply();setLogo();renderCal()}};if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
 // === [캘린더 / 최근 글 목록] 평소엔 달력(글 있는 날에 점 .has, 관리자 전용 숨김글만 있는 날은 주황 점 .hid / 날짜 클릭은 data-a="day").
-//   우측 상단 [List] 를 누르면(S.lv=true) 달력 자리에 최근 글 목록(날짜·제목, 최신순)이 나오고 [Back] 으로 달력 복귀.
+//   달력 바깥 우상단 [List] 를 누르면(S.lv=true) 달력 자리에 최근 글 목록(날짜·제목, 최신순)이 나오고 [Back] 으로 달력 복귀.
 //   목록 개수·버튼 사용 여부는 디자인 설정(가로/세로별 ln: 0=버튼 없음 / 5·6·7). 태그를 누르면 목록은 달력으로 돌아감(클릭 라우터의 tag) ===
 function renderCal(){
   const n=dS().ln||0;if(!n)S.lv=false;
-  const lb=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'[Back]':'[List]'}</button>`:'';
+  $('#calbar').innerHTML=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'[Back]':'[List]'}</button>`:'';   // 달력 바깥 위쪽 우상단 관리 버튼
   $('#cal').className='cal'+(S.lv?' rl':'');
   if(S.lv){
-    $('#calh').innerHTML=`<div class="ch lt"><span>Recent</span></div>${lb}`;
+    $('#calh').innerHTML=`<div class="ch lt"><span>Recent</span></div>`;
     $('#cal').innerHTML=list().slice(0,n).map(p=>`<div class="ri ${p.id==S.pid?'on':''}" data-a="open" data-v="${esc(p.id)}"><small>${esc(p.date)}</small><span>${esc(p.title||'(제목 없음)')}${p.hidden?' · 숨김':''}</span></div>`).join('')||'<div class="ri e">아직 작성된 글이 없습니다.</div>';
     return;
   }
   const has=new Set(vis().map(p=>p.date));
   const hid=new Set(S.admin?S.posts.filter(p=>p.hidden&&!has.has(p.date)).map(p=>p.date):[]);
   $('#calh').innerHTML=`<div class="ch"><button data-a="prev" aria-label="이전 달">‹</button><span><button data-a="py">${S.y}</button><button data-a="pm">${String(S.m+1).padStart(2,'0')}</button></span>
-  <button data-a="next" aria-label="다음 달">›</button></div>${lb}`;
+  <button data-a="next" aria-label="다음 달">›</button></div>`;
   const first=new Date(S.y,S.m,1).getDay(),n2=new Date(S.y,S.m+1,0).getDate();
   let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>`<div class="w">${w}</div>`).join('');
   for(let i=0;i<first;i++)h+='<div></div>';
