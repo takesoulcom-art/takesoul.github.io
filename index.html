@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-O6a6z0yTlIy3hEpUNTCBUUl79kAu4dJWe/3fFsXuzlk=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-n0Mr6CqjcNoKdXodhocggv8bNljhpt3qisDeBJj4NT0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -250,6 +250,9 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .pl-hint{margin-top:2px;font-size:calc(11px + var(--fs));line-height:1.5;color:var(--lo)}
 .pl-r{margin-left:auto}
 .pl-empty{margin:16px 0 0;font-size:calc(12px + var(--fs));color:var(--lo)}
+/* [하단 문구] 우측 하단에 표시(저작권·버전 등). 글자 11px, 비어 있으면 자리도 차지하지 않음 */
+#foot{flex:none;padding-top:10px;text-align:right;color:var(--lo);font-size:calc(11px + var(--fs));line-height:1.5;overflow-wrap:anywhere}
+#foot:empty{display:none}
 /* [유틸] .hide 숨김 / #toast 화면 아래 알림 메시지(표시 시간은 JS toast()에서 설정) */
 .hide{display:none!important}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
@@ -260,7 +263,7 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{top:calc(var(--hh,0px) + 4px)}
 main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
 article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.tags{padding-top:24px}
-aside{order:2}
+aside{order:2}#foot{padding-top:28px}
 header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 /* ===== [최근 글 목록] 달력 위 바깥 우상단의 관리 버튼 줄(.cbar: [List]/[Back]) + 달력 자리에 나오는 목록(.rl)
@@ -300,6 +303,8 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
   </aside>
   <article id="art"></article>
 </main>
+<!-- 우측 하단 문구(저작권·버전 등): 메뉴(≡)의 [하단 문구]에서 관리자가 입력 → data/design.json 의 ft -->
+<footer id="foot"></footer>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <audio id="au"></audio>
@@ -387,7 +392,7 @@ function tagList(all){
   return names.filter(t=>all||!S.tags.hidden.includes(t)).map(t=>[t,c[t]]);
 }
 // === [디자인] 관리자 전용: 가로(데스크톱)/세로(모바일) 화면별 디자인 — 사용자 톤(추가/변경/삭제, 화면별 최대 5개) · 기본 톤 · 글자 크기 · 해시 정렬 · 톤별 로고
-//   저장 위치: data/design.json = {desk:{...}, mob:{...}} (글/태그/음악과 같은 GitHub 저장소). 로고 이미지: img/logo/
+//   저장 위치: data/design.json = {desk:{...}, mob:{...}, ft:'우측 하단 문구'} (글/태그/음악과 같은 GitHub 저장소). 로고 이미지: img/logo/
 //   (옛 형식 {default,tones,fs,hs} 는 가로·세로 둘 다에 같은 값으로 자동 변환됨)
 //   S.dz = 저장된(사이트 공통) 디자인 / S.dw = 관리자가 편집 중인 임시본(null이면 편집 안 함) / S.em = 관리자가 메뉴에서 편집·미리보기 중인 화면(desk|mob)
 //   [디자인 저장]을 눌러야 저장·반영되고, 메뉴를 닫으면 임시본과 미리보기는 버려짐
@@ -407,11 +412,14 @@ const setNorm=(o,dl)=>{o=o&&typeof o=='object'?o:{};
     .map(t=>({id:t.id,name:t.name.slice(0,12),bg:hex6(t.bg),pbg:hex6(t.pbg),fc:hex6(t.fc),logo:typeof t.logo=='string'&&/^img\/logo\/[\w.\-]+$/.test(t.logo)?t.logo:''}));
   const want=o.tone||o.default;return {tone:BI.test(want)||tones.some(t=>t.id==want)?want:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v',ln:[0,5,6,7].includes(o.ln)?o.ln:dl}};
 // design.json 전체 정리: {desk,mob}. 옛 형식(가로·세로 구분 없음)이면 같은 값을 양쪽에 복사
-const dNorm=o=>{o=o&&typeof o=='object'?o:{};return {desk:setNorm(o.desk||o,7),mob:setNorm(o.mob||o.desk||o,5)}};
+const dNorm=o=>{o=o&&typeof o=='object'?o:{};return {desk:setNorm(o.desk||o,7),mob:setNorm(o.mob||o.desk||o,5),ft:typeof o.ft=='string'?o.ft.replace(/[\r\n]+/g,' ').slice(0,200):''}};
 const serSet=D=>({tone:D.tone,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs,ln:D.ln});
-const dSer=D=>({desk:serSet(D.desk),mob:serSet(D.mob)});
+const dSer=D=>({desk:serSet(D.desk),mob:serSet(D.mob),ft:String(D.ft||'').trim()});
 S.dz=dNorm(uiDesign());S.dw=null;S.em=null;S.lv=false;
 const dView=()=>S.dw||S.dz;
+// 우측 하단 문구 표시(textContent 라서 HTML 은 해석되지 않음). 편집 중이면 임시본(S.dw) 값을 바로 미리보기
+function renderFooter(){const f=$('#foot');if(f)f.textContent=dView().ft||''}
+renderFooter();
 // 지금 적용해서 보여줄 화면: 관리자가 메뉴에서 고른 편집 화면(있으면) > 실제 화면 폭
 const curMode=()=>S.admin&&S.em?S.em:uiMode();
 const dS=()=>dView()[curMode()];          // 지금 화면의 디자인(읽기)
@@ -419,7 +427,7 @@ const dES=()=>dEdit()[curMode()];         // 지금 화면의 디자인(편집�
 // 지금 화면에 쓰는 톤 id = 관리자가 정한 이 화면의 톤(없거나 삭제됐으면 note)
 const curId=()=>uiPick(dS());
 const toneT=id=>dS().tones.find(t=>t.id==id);
-const dApply=()=>uiApply(dS(),curId());
+const dApply=()=>{uiApply(dS(),curId());renderFooter()};
 const dCache=()=>{try{localStorage.uidesign=JSON.stringify(dSer(S.dz))}catch(e){}};
 // 서버에서 design.json 을 읽은 직후 호출(reload 안): 정리 → 사본 저장 → 적용
 function dInit(){S.dz=dNorm(S.dz);S.dw=null;dCache();dApply();setLogo()}
@@ -507,11 +515,13 @@ function designHTML(){
     +`<div class="row2"><span>해시 정렬</span>${op('uhs',D.hs,[['v','세로'],['h','가로']])}</div>`
     +`<div class="row2"><span>최근 글</span>${op('uln',D.ln,[[0,'끔'],[5,'5개'],[6,'6개'],[7,'7개']])}</div>`
     +`<div class="uh">최근 글: 달력 오른쪽 위 [List] 버튼으로 달력 ↔ 최근 글 목록(날짜·제목)을 바꿔 봐요. 끔이면 버튼이 사라져요.</div>`
+    +`<div class="ud"></div><div class="row2"><span>하단 문구</span><input data-ui="ft" data-ik="t" value="${esc(dView().ft||'')}" maxlength="200" placeholder="예: © 2026 takesoul" autocomplete="off" aria-label="하단 문구"></div>`
+    +`<div class="uh">하단 문구: 홈페이지 우측 하단에 표시돼요. 가로·세로 화면 공통이며, 비우면 표시하지 않아요.</div>`
     +`<div class="uh">디자인 설정은 관리자만 바꿀 수 있고, [디자인 저장] 후 모든 방문자에게 적용돼요.</div>`;
 }
 // 색·이름 입력 중: 올바른 형식이면 바로 미리보기 / 입력칸을 벗어나면 표시값 정리
-document.addEventListener('input',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.type=='file'||k=='logo')return;uiColor(k,t.value,t.dataset.ik)});
-document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.dataset.ik!='t')return;
+document.addEventListener('input',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.type=='file'||k=='logo')return;if(k=='ft'){if(S.admin){dEdit().ft=t.value;renderFooter()}return}uiColor(k,t.value,t.dataset.ik)});
+document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||k=='ft'||t.dataset.ik!='t')return;
   if(k=='name'){const o=toneT(curId());if(o&&!t.value.trim())t.value=o.name}else uiSync()});
 // 화면 폭이 가로↔세로 기준(760px)을 넘나들면(창 크기 조절·기기 회전) 그 화면의 디자인으로 바꿔 적용 (편집 중에는 건드리지 않음)
 try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApply();setLogo();renderCal()}};if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
