@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-5HG1nm9Bf9T/GekgY8sPUPkCIBT8iDlUhfUDwr1QAvI=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-O6a6z0yTlIy3hEpUNTCBUUl79kAu4dJWe/3fFsXuzlk=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -119,7 +119,7 @@ try{if(sessionStorage.gk||localStorage.gk)window['ga-disable-G-JC6PD25F8X']=true
 /* [2] 기본 리셋 / 전체 글자 크기 - body 기본 13px, 줄간격 1.7. 사이트 기본 글자 크기를 바꾸려면 body의 13px 수정 */
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.7 var(--sans);font-size:calc(13px + var(--fs));height:100dvh;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;font-size:calc(13px + var(--fs));height:100dvh;overflow:hidden}
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
 input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
@@ -145,8 +145,6 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;overflow:auto}
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
-#mbox .row.on{color:var(--ink);font-weight:600}
-#mbox .mh{text-align:right;font-weight:700;color:var(--ink);margin-bottom:12px}
 #mbox .bar [data-a=mclose],#mbox .bar [data-a=mtoggle],#mbox .bar [data-a=tcancel]{order:99;margin-left:auto}
 .pd{text-align:right}
 #mbox .bar{display:flex;gap:12px;margin-top:14px;color:var(--mid)}
@@ -155,19 +153,18 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
 aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 /* [캘린더] 머리(‹ 2026 10 ›) / 날짜 격자(7열). 버튼 터치 영역 44px 이상 유지(모바일 접근성) */
-.cal-h{display:flex;align-items:center;justify-content:space-between;font-size:calc(16px + var(--fs));letter-spacing:1px}
-.cal-h{display:block}
+.cal-h{display:block;font-size:calc(16px + var(--fs));letter-spacing:1px}
 .ch{display:flex;align-items:center;justify-content:center;gap:8px}
 .ch>span{display:flex;align-items:center;gap:6px}
 .ch button{font-size:calc(16px + var(--fs));letter-spacing:1px}
-.ch [data-a=py],.ch [data-a=pm]{min-height:44px;padding:10px 12px}
+.ch [data-a=py],.ch [data-a=pm]{min-height:44px;padding:10px 12px;line-height:1}
 .ch [data-a=prev],.ch [data-a=next]{min-width:44px;min-height:44px;font-size:calc(26px + var(--fs));line-height:1;padding:6px 12px;letter-spacing:0;position:relative;top:-2px}
 /* 연도·월 선택 팝업의 3열 버튼 */
 .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;text-align:center}
 .pk button{padding:4px 0;color:var(--mid)}
 .pk .on{color:var(--ink);background:var(--sel)}
 /* 날짜 격자: 글자 12px, 요일 11px, 행 간격 10px / .d = 날짜 셀 높이 30px / .has = 글이 있는 날(점 4px) / .sel = 선택된 날(원 26px) */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-top:16px;row-gap:10px;font-size:calc(12px + var(--fs))}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:20px repeat(6,30px);align-content:start;height:260px;text-align:center;margin-top:16px;row-gap:10px;font-size:calc(12px + var(--fs))}
 .cal .w{color:var(--lo);font-size:calc(11px + var(--fs))}
 .d{height:30px;line-height:24px;position:relative;color:var(--mid)}
 .d.has{cursor:pointer;color:var(--ink)}
@@ -180,11 +177,10 @@ aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 .tag{display:flex;gap:6px;color:var(--mid);padding:2px 0;cursor:pointer}
 .tag.on{color:var(--ink);font-weight:600}
 /* [글 본문 영역] 테두리 상자, 안쪽 여백 36px 40px. 제목 h2 = 20px / 본문 .body 줄간격 1.95 / 본문 이미지는 최대 폭 100% */
-article{font-family:var(--sans);border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
+article{border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
 .meta{color:var(--lo);font-size:calc(12px + var(--fs));letter-spacing:1px}
 h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
-.body{white-space:pre-wrap;font-family:var(--sans);line-height:1.95;color:var(--mid)}
-.tx{white-space:pre-wrap}
+.body{white-space:pre-wrap;line-height:1.95;color:var(--mid)}
 .body img{display:block;max-width:100%;margin:16px 0}
 /* [관리자 버튼줄] [수정][삭제][글쓰기] - 스크롤해도 위에 붙어 있음(sticky) */
 .act{position:sticky;top:6px;width:fit-content;margin:6px 0 0 auto;padding:2px 0 2px 8px;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
@@ -212,19 +208,18 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 #mbox.wide{width:min(880px,94vw)}
 #mbox .big{display:block;max-width:100%;max-height:70vh;margin:0 auto}
 #mbox .cap{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;color:var(--mid)}
-.ed textarea{min-height:300px;font-family:var(--sans)}
+.ed textarea{min-height:300px}
 /* 날씨 이모지 버튼 (최소 40px 터치 영역) */
 .wx{display:flex;flex-wrap:wrap;gap:4px}
 .wx button{font-size:calc(20px + var(--fs));line-height:1;min-width:40px;min-height:40px;padding:6px;border:1px solid transparent}
 .wx button:hover{border-color:var(--line)}
 .wx button.on{background:var(--sel)}
-.chip{display:inline-flex;gap:4px;margin-right:10px;color:var(--mid)}
 /* ===== [음악 플레이어 팝업] =====
     .pl-* 클래스는 전부 이 팝업 전용. 폭 380px / 앨범 커버 150px / 목록 최대 높이 240px(넘으면 스크롤)
     .pl-add = 관리자용 업로드 영역(커버 칸 56px) / .seek = 재생 위치 슬라이더(선 1px, 동그라미 9px) */
 #mbox.mp{width:min(380px,92vw);padding:18px 22px 16px}
 .pl-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.pl-h b{font-family:var(--sans);font-weight:400;font-size:calc(16px + var(--fs));color:var(--ink)}
+.pl-h b{font-weight:400;font-size:calc(16px + var(--fs));color:var(--ink)}
 .pl-h small{margin-left:auto;font-size:calc(11px + var(--fs));color:var(--lo)}
 .pl-x{min-width:36px;min-height:36px;margin-right:-8px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
 .pl-cover{width:150px;height:150px;margin:16px auto 10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(44px + var(--fs));line-height:1}
@@ -276,9 +271,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 .cbar:empty{display:none}
 .cbar .lb{font-size:calc(12px + var(--fs));line-height:1.2;color:var(--mid);padding:6px 0 6px 12px;white-space:nowrap}
 .cal-h .ch{height:44px}
-.ch [data-a=py],.ch [data-a=pm]{line-height:1}
 .ch.lt>span{min-height:44px;font-size:calc(16px + var(--fs));letter-spacing:1px}
-.cal{grid-template-rows:20px repeat(6,30px);align-content:start;height:260px}
 .cal .w{height:20px;line-height:20px}
 .cal.rl{display:block;height:260px;overflow:hidden;text-align:left}
 .ri{display:flex;align-items:center;gap:10px;height:37px;box-sizing:border-box;border-bottom:1px solid var(--line);cursor:pointer;color:var(--mid)}
@@ -341,11 +334,9 @@ const KEY0=(()=>{try{return sessionStorage.gk||localStorage.gk||''}catch(e){retu
 //   mode 'view'(읽기) | 'edit'(쓰기) / admin 관리자 여부 / key GitHub 토큰
 //   modal 열린 팝업 종류(auth,y,m,tags,imgview,music) / cur 재생 중 곡 번호(-1=없음) / playing 재생 여부
 //   draft 작성 중인 글 / snap 작성 시작 시점 스냅샷(저장 안 한 변경 감지용)
-const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:KEY0,admin:!!KEY0,mOpen:false,cur:-1,playing:false,draft:null};
+const S={posts:[],tags:{order:[],hidden:[]},music:[],y:0,m:0,date:null,tag:null,pid:null,mode:'view',key:KEY0,admin:!!KEY0,cur:-1,playing:false,draft:null};
 // 음악 재생기(audio 태그)
 const au=$('#au');
-// 요일 이름(일~토)
-const WD=['일','월','화','수','목','금','토'];
 // [아이콘] 재생/정지/다음/이전/이퀄라이저/닫기 SVG. 크기는 sv()의 width/height(17) 수정
 const sv=p=>`<svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 const IC={play:sv('M4 2.5v11l9-5.5z'),pause:sv('M4 2.5h3v11H4zM9 2.5h3v11H9z'),next:sv('M3 2.5v11l7-5.5zM11 2.5h2.2v11H11z')};
@@ -554,7 +545,7 @@ function renderCal(){
 function renderTags(){
   let h=`<h4><span>Tags</span>${S.admin?'<button data-a="tedit">Edit</button>':''}</h4>`;
   h+='<div class="tl">'+tagList(false).map(([t,n])=>`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('')+'</div>';
-  $('#tags').innerHTML=h||'<h4>Tags</h4>';
+  $('#tags').innerHTML=h;
 }
 // S.blob : 방금 올린 이미지/음악의 임시 주소(blob:) 저장소 - 배포 반영 전에도 바로 보이게 함
 // S.up : 작성 중 새로 올린 이미지 경로(취소/저장 때 안 쓰는 파일 정리용) / S.full : 글 본문 캐시
@@ -627,7 +618,7 @@ function renderArt(){
   p={...p,body:fp.body,weather:fp.weather};track(p);
   const dt=new Date(p.date+'T00:00');
   a.innerHTML=`<div class="meta pd">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일${p.weather?', '+esc(p.weather):''}${p.hidden?' · 숨김':''}</div>`+
-    (S.admin?`<div class="act"><button data-a="edit">[수정]</button><button data-a="delpost">[삭제]</button><button data-a="new">[글쓰기]</button></div>`:'')+
+    acts+
     `<h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
 }
 // === [음악] 헤더 미니 플레이어 그리기. 곡이 없으면 방문자에겐 숨기고 관리자에겐 [음악 관리] 표시 ===
@@ -677,8 +668,7 @@ document.addEventListener('input',e=>{
   const d=au.duration;S.seekT=Date.now();sk.style.setProperty('--p',sk.value/10+'%');
   if(S.cur>=0&&isFinite(d)&&d>0){au.currentTime=sk.value/1000*d;$('#pl-time').textContent=fmt(au.currentTime)+' / '+fmt(d)}
 });
-// === [음악 업로드/커버] 파일 → base64
-const fileB64=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
+// === [음악 업로드/커버] (파일 → base64 변환은 아래 b64blob 사용)
 // 커버 이미지 축소(긴 변 480px, JPG 0.86)해서 music/cover/ 에 저장. 크기 조절은 480 / .86 수정
 async function putCover(src){
   const bmp=await createImageBitmap(src),sc=Math.min(1,480/Math.max(bmp.width,bmp.height));
@@ -686,7 +676,7 @@ async function putCover(src){
   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);
   const bl=await new Promise(r=>c.toBlob(r,'image/jpeg',.86));
   const p='music/cover/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.jpg';
-  S.blob[p]=URL.createObjectURL(bl);await put(p,await fileB64(bl));return p;
+  S.blob[p]=URL.createObjectURL(bl);await put(p,await b64blob(bl));return p;
 }
 // mp3 안에 들어있는 앨범 이미지(ID3 태그의 APIC)를 직접 추출. 없으면 null
 async function embCover(f){
@@ -729,7 +719,7 @@ async function upMusic(){
     for(const f of P.files){
       msg(`업로드 중 (${ok+1}/${P.files.length}) ${f.name}`+(f.size>25e6?' - 큰 파일이라 오래 걸려요':''));
       const p='music/'+f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
-      S.blob[p]=URL.createObjectURL(f);await put(p,await fileB64(f));
+      S.blob[p]=URL.createObjectURL(f);await put(p,await b64blob(f));
       let cv=shared;if(!cv){const eb=await embCover(f);if(eb)cv=await putCover(eb).catch(()=>null)}
       const e={name:f.name.replace(/\.[^.]+$/,''),file:p};if(cv)e.cover=cv;
       const i=M.findIndex(m=>m.file==p);if(i<0)M.push(e);else{if(M[i].cover&&!cv)e.cover=M[i].cover;M[i]=e}
@@ -842,8 +832,8 @@ function renderModal(){
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
   w.style.display=k?'flex':'none';if(!k){uiClose();return}
   b.className=k=='music'?'mp':'';
-  const X='<button data-a="mclose">[닫기]</button>';let h='';
-  if(k=='auth'){const cur=document.documentElement.dataset.tone;
+  let h='';
+  if(k=='auth'){
     h=`${designTop()}${toneRow()}${designHTML()}${S.admin?'<div class="ud"></div>':''}<div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar">${S.admin?`<button data-a="dsave">[디자인 저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[닫기]</button></div>`}
   else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
@@ -873,7 +863,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b
   i.value=i.value.includes(w)?i.value.replace(w,''):i.value+w;b.classList.toggle('on',i.value.includes(w));i.dispatchEvent(new Event('input',{bubbles:true}))});
 // 뒤로/앞으로 가기 시 해당 글로 이동
 window.addEventListener('popstate',()=>{const p=S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));if(!p||(S.mode=='edit'&&!leave()))return;
-  Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()});
+  Object.assign(S,{tag:null,pid:p.id,date:p.date,mode:'view',modal:null});const d=new Date(p.date+'T00:00');S.y=d.getFullYear();S.m=d.getMonth();render();toTop()});
 // === [이동 도우미] go: 캘린더 연/월 이동 / pick: 선택 상태 초기화 / mvt: 태그 순서 이동 / mvm: 음악 순서 이동 ===
 const go=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth();S.modal=null;renderCal();renderModal()};
 const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
@@ -899,7 +889,7 @@ document.addEventListener('click',async e=>{
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
   else if(a=='sy')go(+v,S.m);
   else if(a=='sm')go(S.y,+v);
-  else if(a=='home'){e.preventDefault();const v=vis()[0];Object.assign(S,{tag:null,pid:v?v.id:null,date:v?v.date:null,mode:'view',modal:null});const d=v?new Date(v.date+'T00:00'):new Date();S.y=d.getFullYear();S.m=d.getMonth();render();renderModal();toTop()}
+  else if(a=='home'){e.preventDefault();const v=vis()[0];Object.assign(S,{tag:null,pid:v?v.id:null,date:v?v.date:null,mode:'view',modal:null});const d=v?new Date(v.date+'T00:00'):new Date();S.y=d.getFullYear();S.m=d.getMonth();render();toTop()}
   else if(a=='prev')go(S.y,S.m-1);
   else if(a=='next')go(S.y,S.m+1);
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
@@ -979,7 +969,6 @@ document.addEventListener('click',async e=>{
 // 파일 선택창(input type=file) 처리: 글 이미지(e-img), 음악(m-up), 업로드 커버(m-cover), 커버 변경(m-cover-chg)
 document.addEventListener('change',async e=>{
   const t=e.target;
-  const rd=f=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(f)});
   if(t.id=='e-img'){const fs=[...t.files];t.value='';addFiles(fs)}
   if(t.id=='u-logo'){const f=t.files[0];t.value='';if(f)await uiLogo(f)}
   if(t.id=='m-up'){
