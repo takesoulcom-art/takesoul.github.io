@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-n0Mr6CqjcNoKdXodhocggv8bNljhpt3qisDeBJj4NT0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-OEFe3PxMDeiAjWXbblwqEI7UlypIcoMUb9igISwRBf0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -530,7 +530,7 @@ try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApply();setLogo();renderCal()}};i
 //   목록 개수·버튼 사용 여부는 디자인 설정(가로/세로별 ln: 0=버튼 없음 / 5·6·7). 태그를 누르면 목록은 달력으로 돌아감(클릭 라우터의 tag) ===
 function renderCal(){
   const n=dS().ln||0;if(!n)S.lv=false;
-  $('#calbar').innerHTML=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'[Back]':'[List]'}</button>`:'';   // 달력 바깥 위쪽 우상단 관리 버튼
+  $('#calbar').innerHTML=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'Back':'List'}</button>`:'';   // 달력 바깥 위쪽 우상단 관리 버튼
   $('#cal').className='cal'+(S.lv?' rl':'');
   if(S.lv){
     $('#calh').innerHTML=`<div class="ch lt"><span>Recent</span></div>`;
