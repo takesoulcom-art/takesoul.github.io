@@ -1,5 +1,10 @@
 [
  {
+  "name": "백아 - Amor",
+  "file": "music/백아 - Amor.mp3",
+  "cover": "music/cover/mvciu5r3felu.jpg"
+ },
+ {
   "name": "Nerd Connection - 그대만 있다면",
   "file": "music/Nerd Connection - 그대만 있다면.m4a",
   "cover": "music/cover/mv6j0nd6hdtu.jpg"
@@ -28,10 +33,5 @@
   "name": "10cm - 그러나",
   "file": "music/10cm - 그러나.mp3",
   "cover": "music/cover/mv6jwcbrddff.jpg"
- },
- {
-  "name": "백아 - Amor",
-  "file": "music/백아 - Amor.mp3",
-  "cover": "music/cover/mvciu5r3felu.jpg"
  }
 ]
