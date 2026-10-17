@@ -9,7 +9,7 @@
  (톤 결정 스크립트에는 디자인(기본 톤·사용자 톤·글자 크기·해시 정렬) 적용 코드가 함께 들어 있음)
  connect-src 의 api.github.com = 글/이미지/음악을 GitHub 저장소에 직접 저장하는 통신 허용.
  img-src / media-src 의 blob: = 업로드 직후 미리보기·재생용 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-OEFe3PxMDeiAjWXbblwqEI7UlypIcoMUb9igISwRBf0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-7ZQW4DAiMFuqraRNoOT4ldkWkWG9GteoacVZTl3JgIY=' 'sha256-eqz4LafOufMmY9k6sC+7ZpnRM9PtEUoFbOLsV11LlYY=' 'sha256-Dx0iJf5g3V/vXFncX/6xbvV022NK5BJzbH3oo1lIa2g=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -145,9 +145,12 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;overflow:auto}
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
-#mbox .bar [data-a=mclose],#mbox .bar [data-a=mtoggle],#mbox .bar [data-a=tcancel]{order:99;margin-left:auto}
 .pd{text-align:right}
-#mbox .bar{display:flex;gap:12px;margin-top:14px;color:var(--mid)}
+/* [버튼 배치 규칙] 수정·삭제·글쓰기 = 기능 우측 상단 / 저장·취소 = 기능 우측 하단(.bar, 오른쪽 정렬). .rt = 그 줄에서 오른쪽으로 밀기, .bar.top = 위쪽 줄 */
+.bar{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px;margin-top:14px;color:var(--mid)}
+.bar.top{margin:0 0 10px}
+.ed .bar{margin-top:6px}
+.rt{margin-left:auto}
 #mbox input[type=password]{margin-bottom:4px}
 /* [본문 2단 그리드] 왼쪽 aside(캘린더+태그) 폭 320px / 오른쪽 article(글) 나머지. 칸 사이 간격 32px */
 main{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);gap:32px;margin-top:24px}
@@ -248,7 +251,6 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .pl-cv{flex:none;width:56px;height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:calc(10.5px + var(--fs));line-height:1.3;text-align:center;color:var(--mid)}
 .pl-pick{color:var(--ink)}
 .pl-hint{margin-top:2px;font-size:calc(11px + var(--fs));line-height:1.5;color:var(--lo)}
-.pl-r{margin-left:auto}
 .pl-empty{margin:16px 0 0;font-size:calc(12px + var(--fs));color:var(--lo)}
 /* [하단 문구] 우측 하단에 표시(저작권·버전 등). 글자 11px, 비어 있으면 자리도 차지하지 않음 */
 #foot{flex:none;padding-top:10px;text-align:right;color:var(--lo);font-size:calc(11px + var(--fs));line-height:1.5;overflow-wrap:anywhere}
@@ -395,7 +397,7 @@ function tagList(all){
 //   저장 위치: data/design.json = {desk:{...}, mob:{...}, ft:'우측 하단 문구'} (글/태그/음악과 같은 GitHub 저장소). 로고 이미지: img/logo/
 //   (옛 형식 {default,tones,fs,hs} 는 가로·세로 둘 다에 같은 값으로 자동 변환됨)
 //   S.dz = 저장된(사이트 공통) 디자인 / S.dw = 관리자가 편집 중인 임시본(null이면 편집 안 함) / S.em = 관리자가 메뉴에서 편집·미리보기 중인 화면(desk|mob)
-//   [디자인 저장]을 눌러야 저장·반영되고, 메뉴를 닫으면 임시본과 미리보기는 버려짐
+//   [저장]을 눌러야 저장·반영되고, 메뉴를 닫으면 임시본과 미리보기는 버려짐
 //   방문자: 톤을 고를 수 없음. 접속한 화면 폭에 맞는 쪽(가로/세로)에 관리자가 정해 둔 톤·글자 크기·해시 정렬로만 보임(홈페이지 설정값). 방문자별로 저장되는 값은 없음
 //   적용은 맨 위 uiApply() 가 <html> 의 CSS 변수/속성(data-tone, data-fs, data-hs, data-ubody)을 바꾸는 방식이라 화면을 다시 그릴 필요가 없음
 const HX=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,BI=/^(white|dark|note)$/,TN={white:'White',dark:'Dark',note:'Note'};
@@ -452,7 +454,7 @@ function uiColor(k,raw,src){if(!S.admin)return;const t=dES().tones.find(x=>x.id=
   let v=String(raw).trim();if(v&&v[0]!='#')v='#'+v;if(!HX.test(v))return;
   t[k]=hex6(v);dApply();uiSync(k,src)}
 // 로고(관리자): 톤마다 따로. 화면 높이 27px 고정. svg(500KB 이하)·gif(300KB 이하)는 원본 유지, 그 외는 높이 54px(2배 해상도)·폭 480px 이내 PNG로 축소(여러 단계 축소로 화질 보존)
-// 올린 파일은 임시본(pend)에만 두고, [디자인 저장] 때 img/logo/ 로 올림
+// 올린 파일은 임시본(pend)에만 두고, [저장] 때 img/logo/ 로 올림
 async function uiLogo(f){
   if(!S.admin)return;const t=toneT(curId());if(!t){toast('기본 톤의 로고는 바꿀 수 없습니다. 새 톤을 만들어 주세요.',1);return}
   if(!/^image\//.test(f.type)){toast('이미지 파일을 골라 주세요.',1);return}
@@ -469,10 +471,10 @@ async function uiLogo(f){
     const tt=dES().tones.find(x=>x.id==t.id);if(!tt)return;
     if(tt.pend)URL.revokeObjectURL(tt.pend.url);
     tt.pend={blob,url:URL.createObjectURL(blob),ext};
-    setLogo();renderModal();toast('로고를 바꿨습니다. [디자인 저장]을 눌러야 모든 방문자에게 적용돼요.'+note);
+    setLogo();renderModal();toast('로고를 바꿨습니다. [저장]을 눌러야 모든 방문자에게 적용돼요.'+note);
   }catch(e){toast('로고 변경 실패: '+e.message,1)}
 }
-// [디자인 저장]: ① 새 로고 업로드 ② design.json(가로·세로 함께) 저장 ③ 안 쓰는 옛 로고 삭제. 방문자 화면에는 배포 후(1분쯤) 반영
+// [저장]: ① 새 로고 업로드 ② design.json(가로·세로 함께) 저장 ③ 안 쓰는 옛 로고 삭제. 방문자 화면에는 배포 후(1분쯤) 반영
 async function dSave(){
   if(!S.admin||S.lock)return;
   if(!S.dw||!dDirty()){toast('변경한 내용이 없습니다.');return}
@@ -496,7 +498,7 @@ function designTop(){
     +`<div class="uh">${m==real?`지금 이 기기는 ${MS[real]} 화면이에요. `:`지금 ${MS[real]} 화면에서 ${MS[m]} 화면 디자인을 미리 보는 중이에요. 색·글자 크기·해시 정렬은 미리 보이지만 배치는 실제 ${MS[m]} 화면과 다를 수 있어요. `}가로·세로 디자인은 따로 저장돼요. 아래에서 고른 Tone이 이 화면에서 모든 방문자에게 보이는 톤이에요.</div><div class="ud"></div>`;
 }
 // Tone 줄에 붙는 사용자 톤 버튼들(관리자 전용. 지금 편집 화면의 사용자 톤만)
-// [관리자 전용] Tone 줄: 이 화면(가로/세로)에서 모든 방문자에게 보여줄 톤을 고름(기본 3개 + 이 화면의 사용자 톤). [디자인 저장] 후 적용
+// [관리자 전용] Tone 줄: 이 화면(가로/세로)에서 모든 방문자에게 보여줄 톤을 고름(기본 3개 + 이 화면의 사용자 톤). [저장] 후 적용
 const toneRow=()=>{if(!S.admin)return '';const cur=curId();return `<div class="row2 tn"><span>Tone</span>${Object.keys(TN).map(k=>`<button class="${k==cur?'on':''}" data-a="tone" data-v="${k}">${TN[k]}</button>`).join('')}${toneBtns()}</div>`};
 const toneBtns=()=>dS().tones.map(t=>`<button class="${t.id==curId()?'on':''}" data-a="tone" data-v="${esc(t.id)}">${esc(t.name)}</button>`).join('');
 // 설정 모달의 관리자 전용 디자인 줄들: 기본 톤 → 톤 관리 → (사용자 톤을 보는 중이면) 이름/색 3개/로고 → 글자 크기 / 해시 정렬
@@ -505,7 +507,7 @@ function designHTML(){
   const D=dS(),id=curId(),t=toneT(id);
   const rw=(k,lb)=>{const v=hex6(t[k]);return `<div class="row2"><span>${lb}</span><input data-ui="${k}" data-ik="t" value="${v}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="${lb} 코드 (예: #ffffff)"><input type="color" data-ui="${k}" data-ik="c" value="${v}" aria-label="${lb} 선택"></div>`};
   const op=(a,cur,L)=>L.map(([v,x])=>`<button class="${v==cur?'on':''}" data-a="${a}" data-v="${v}">${x}</button>`).join('');
-  let h=`<div class="ud"></div><div class="row2"><span>톤 관리</span><button data-a="tnew">[+ 새 톤]</button>${t?'<button data-a="tdelc">[삭제]</button>':''}</div>`;
+  let h=`<div class="ud"></div><div class="row2"><span>톤 관리</span><button data-a="tnew">[+ 새 톤]</button>${t?'<button class="rt" data-a="tdelc">[삭제]</button>':''}</div>`;
   if(t)h+=`<div class="row2"><span>이름</span><input data-ui="name" data-ik="t" value="${esc(t.name)}" maxlength="12" autocomplete="off" aria-label="톤 이름"></div>`
     +rw('bg','배경 색')+rw('pbg','본문 배경')+rw('fc','글자 색')
     +`<div class="uh">색 코드는 #ffffff 형식으로 입력하거나 오른쪽 색상 선택기를 쓰세요.</div><div class="uw" id="uwarn" role="status">${toneBad(t)?'글자색과 배경색이 너무 비슷해 저장할 수 없어요. 색을 더 다르게 해 주세요.':''}</div>`
@@ -517,7 +519,7 @@ function designHTML(){
     +`<div class="uh">최근 글: 달력 오른쪽 위 [List] 버튼으로 달력 ↔ 최근 글 목록(날짜·제목)을 바꿔 봐요. 끔이면 버튼이 사라져요.</div>`
     +`<div class="ud"></div><div class="row2"><span>하단 문구</span><input data-ui="ft" data-ik="t" value="${esc(dView().ft||'')}" maxlength="200" placeholder="예: © 2026 takesoul" autocomplete="off" aria-label="하단 문구"></div>`
     +`<div class="uh">하단 문구: 홈페이지 우측 하단에 표시돼요. 가로·세로 화면 공통이며, 비우면 표시하지 않아요.</div>`
-    +`<div class="uh">디자인 설정은 관리자만 바꿀 수 있고, [디자인 저장] 후 모든 방문자에게 적용돼요.</div>`;
+    +`<div class="uh">디자인 설정은 관리자만 바꿀 수 있고, [저장] 후 모든 방문자에게 적용돼요.</div>`;
 }
 // 색·이름 입력 중: 올바른 형식이면 바로 미리보기 / 입력칸을 벗어나면 표시값 정리
 document.addEventListener('input',e=>{const t=e.target,k=t.dataset&&t.dataset.ui;if(!k||t.type=='file'||k=='logo')return;if(k=='ft'){if(S.admin){dEdit().ft=t.value;renderFooter()}return}uiColor(k,t.value,t.dataset.ik)});
@@ -530,7 +532,7 @@ try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApply();setLogo();renderCal()}};i
 //   목록 개수·버튼 사용 여부는 디자인 설정(가로/세로별 ln: 0=버튼 없음 / 5·6·7). 태그를 누르면 목록은 달력으로 돌아감(클릭 라우터의 tag) ===
 function renderCal(){
   const n=dS().ln||0;if(!n)S.lv=false;
-  $('#calbar').innerHTML=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'Back':'List'}</button>`:'';   // 달력 바깥 위쪽 우상단 관리 버튼
+  $('#calbar').innerHTML=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'[Back]':'[List]'}</button>`:'';   // 달력 바깥 위쪽 우상단 관리 버튼
   $('#cal').className='cal'+(S.lv?' rl':'');
   if(S.lv){
     $('#calh').innerHTML=`<div class="ch lt"><span>Recent</span></div>`;
@@ -553,7 +555,7 @@ function renderCal(){
 }
 // === [태그 목록] 왼쪽 하단 (관리자는 Edit 버튼으로 순서/숨김 편집) ===
 function renderTags(){
-  let h=`<h4><span>Tags</span>${S.admin?'<button data-a="tedit">Edit</button>':''}</h4>`;
+  let h=`<h4><span>Tags</span>${S.admin?'<button data-a="tedit">[수정]</button>':''}</h4>`;
   h+='<div class="tl">'+tagList(false).map(([t,n])=>`<div class="tag ${S.tag==t?'on':''}" data-a="tag" data-v="${esc(t)}"># ${esc(t)} (${n})</div>`).join('')+'</div>';
   $('#tags').innerHTML=h;
 }
@@ -603,7 +605,7 @@ function renderArt(){
       <div class="thh"><span id="thc"></span><span>썸네일 클릭 = 크게 보기</span></div>
       <div class="thumbs" id="thumbs"></div>
       <label><input type="checkbox" id="e-hid" style="width:auto" ${d.hidden?'checked':''}> 숨김</label>
-      <div><button data-a="save">[저장]</button> <button data-a="cancel">[취소]</button></div></div>`;
+      <div class="bar"><button data-a="save">[저장]</button><button data-a="cancel">[취소]</button></div></div>`;
     renderThumbs();
     return;
   }
@@ -648,7 +650,7 @@ S.pend={files:[],cover:null,url:''};
 function musicHTML(){
   const T=S.music,n=T.length,ci=S.cur>=0?S.cur:0,t=T[ci]||{},A=S.admin,P=S.pend;
   const cov=c=>c?`<img src="${esc(S.blob[c]||c)}" data-p="${esc(c)}" alt="" loading="lazy">`:'♬';
-  let h=`<div class="pl-h"><b>요즘 듣는 음악</b><small>${n}곡</small><button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button></div>`;
+  let h=`<div class="pl-h"><b>요즘 듣는 음악</b><small>${n}곡</small>${A&&n?'<button data-a="mdel">[삭제]</button>':''}<button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button></div>`;
   if(n){
     h+=`<div class="pl-cover">${cov(t.cover)}</div><div class="pl-t">${esc(t.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':(S.cur<0?'정지':'일시정지')}</div>`
       +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
@@ -658,7 +660,7 @@ function musicHTML(){
   if(A){
     const fn=P.files.length?esc(P.files[0].name)+(P.files.length>1?' 외 '+(P.files.length-1)+'개':'')+' 선택됨':'mp3 선택 시 내장 앨범 이미지를 자동 사용, 없으면 왼쪽 칸에서 직접 지정 (mp3 · m4a · ogg)';
     h+=`<div class="pl-add"><button class="pl-cv" data-a="pickcover" aria-label="커버 이미지 선택">${P.url?`<img src="${esc(P.url)}" alt="">`:'커버<br>(선택)'}</button><div><button class="pl-pick" data-a="pickmusic">[음악 파일 선택]</button><div class="pl-hint">${fn}</div></div></div>`
-      +`<div class="bar"><button data-a="upmusic">[업로드]</button><button data-a="mdel">[삭제]</button><button data-a="mup">▲</button><button data-a="mdn">▼</button><button class="pl-r" data-a="covchg">[커버 변경]</button></div>`
+      +`<div class="bar"><button data-a="mup" aria-label="위로">▲</button><button data-a="mdn" aria-label="아래로">▼</button><button data-a="covchg">[커버 변경]</button><button class="rt" data-a="upmusic">[업로드]</button><button data-a="mcancel">[취소]</button></div>`
       +`<input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/ogg" multiple class="hide"><input type="file" id="m-cover" accept="image/*" class="hide"><input type="file" id="m-cover-chg" accept="image/*" class="hide">`;
   }
   return h;
@@ -844,12 +846,12 @@ function renderModal(){
   b.className=k=='music'?'mp':'';
   let h='';
   if(k=='auth'){
-    h=`${designTop()}${toneRow()}${designHTML()}${S.admin?'<div class="ud"></div>':''}<div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar">${S.admin?`<button data-a="dsave">[디자인 저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[닫기]</button></div>`}
+    h=`${designTop()}${toneRow()}${designHTML()}${S.admin?'<div class="ud"></div>':''}<div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div><div class="bar">${S.admin?`<button data-a="dsave">[저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[취소]</button></div>`}
   else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
-  else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tcancel">[닫기]</button><button data-a="tdone">[완료]</button></div>';
-  else if(k=='imgview'){const v=S.view||{};h=`<img class="big" src="${esc(S.blob[v.p]||v.p)}" data-p="${esc(v.p)}" alt=""><div class="cap"><span>${esc(v.name)}</span><span><button data-a="imgdel">[삭제]</button> <button data-a="mclose">[닫기]</button></span></div>`}
+  else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tdone">[저장]</button><button data-a="tcancel">[취소]</button></div>';
+  else if(k=='imgview'){const v=S.view||{};h=`<div class="bar top"><button data-a="imgdel">[삭제]</button></div><img class="big" src="${esc(S.blob[v.p]||v.p)}" data-p="${esc(v.p)}" alt=""><div class="cap"><span>${esc(v.name)}</span><button data-a="mclose">[취소]</button></div>`}
   else if(k=='music')h=musicHTML();
   const ck=k=='music'?[...b.querySelectorAll('.mck')].map(c=>c.checked):[];
   b.innerHTML=h;b.classList.toggle('wide',k=='imgview');
@@ -944,7 +946,7 @@ document.addEventListener('click',async e=>{
   else if(a=='tnew'){if(!S.admin)return;const D=dES();if(D.tones.length>=5){toast('톤은 화면별로 최대 5개까지 만들 수 있습니다.',1);return}
     let n=1;while(D.tones.some(x=>x.name=='내 톤 '+n))n++;const id='c'+Date.now().toString(36);
     D.tones.push({id,name:'내 톤 '+n,bg:hex6(uiEff('bg')),pbg:hex6(uiEff('pbg')),fc:hex6(uiEff('fc')),logo:''});D.tone=id;dApply();setLogo();renderModal()}
-  else if(a=='tdelc'){if(!S.admin)return;const D=dES(),t=D.tones.find(x=>x.id==curId());if(!t||!confirm(`'${t.name}' 톤을 삭제할까요? (${MS[curMode()]} 화면 · [디자인 저장]을 눌러야 확정돼요)`))return;
+  else if(a=='tdelc'){if(!S.admin)return;const D=dES(),t=D.tones.find(x=>x.id==curId());if(!t||!confirm(`'${t.name}' 톤을 삭제할까요? (${MS[curMode()]} 화면 · [저장]을 눌러야 확정돼요)`))return;
     if(t.pend)URL.revokeObjectURL(t.pend.url);D.tones=D.tones.filter(x=>x.id!=t.id);if(D.tone==t.id)D.tone='note';dApply();setLogo();renderModal()}
   else if(a=='ufs'||a=='uhs'){if(!S.admin)return;dES()[a=='ufs'?'fs':'hs']=v;dApply();renderModal()}
   else if(a=='uln'){if(!S.admin)return;dES().ln=+v;renderCal();renderModal()}
@@ -953,6 +955,7 @@ document.addEventListener('click',async e=>{
   else if(a=='dsave')dSave();
   else if(a=='kinput'){$('#krow').innerHTML='<span>관리자 모드</span><input id="pw" type="password" placeholder="관리자 코드" autocomplete="off"><button data-a="authok">[확인]</button>';$('#pw').focus()}
   else if(a=='mclose'){S.modal=null;renderModal()}
+  else if(a=='mcancel'){if(S.pend.url)URL.revokeObjectURL(S.pend.url);S.pend={files:[],cover:null,url:''};S.modal=null;renderModal()}
   else if(a=='tup')mvt(+v,-1);
   else if(a=='tdn')mvt(+v,1);
   else if(a=='thide'){const h=S.tags.hidden;e.target.checked?h.push(v):S.tags.hidden=h.filter(x=>x!=v)}
