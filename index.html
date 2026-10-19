@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-zwJQo9GJhnx3aXoUVwneoodx+MS3GSrumE/EcV2KJ3Y=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-1SbjmCoX2xPXyQ85uj76SedDwOiblGNu2GdqJlDzzQM=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -557,7 +557,7 @@ function renderMusic(){
 }
 // 데이터: S.music={albums:[{year,name,cover,tracks:[{name,file,cover}]}]} (년도 오름차순). 옛 형식(곡 배열)은 mNorm 이 2026 앨범으로 자동 변환
 // 음악 팝업 화면(S.mv): play(재생) · list(앨범 목록) · reg(년도 선택/생성, 관리자) · edit(앨범 편집, 관리자). 편집 변경(S.pend 신규 곡·S.mw 순서/삭제·S.mt 앨범명·S.ac 앨범 커버)은 [저장] 전까지 임시 상태이며 팝업을 닫으면 버려짐
-const aDef=y=>y+'앨범';
+const aDef=y=>y+' 즐겨들은 노래';
 function mNorm(raw,dz){
   let A;
   if(Array.isArray(raw))A=[{year:2026,name:String((dz&&dz.mt)||''),cover:'',tracks:raw}];
@@ -598,9 +598,9 @@ function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHT
 function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const ci=mAct()?S.cur:-1,tr=ci>=0?T[ci]:null;
-  let h=`<div class="pl-h"><b>${al?esc(aNm(al))+(A?' - '+al.year:''):'음악'}</b><button class="pl-ed" data-a="mlist" aria-label="앨범 목록">${IC.list}</button>${mX}</div>`;
+  let h=`<div class="pl-h"><b>${al?esc(aNm(al))+(A?' - '+al.year:''):'음악'}</b><button class="pl-ed" data-a="mlist" aria-label="앨범 목록">${IC.list}</button><small>${A?T.length+'곡':''}</small>${mX}</div>`;
   if(T.length)h+=`<div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
-    +(tr?`<div class="pl-t">${esc(tr.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}</div>`:`<div class="pl-t">곡을 선택하세요</div><div class="pl-s">${T.length} 곡</div>`)
+    +(tr?`<div class="pl-t">${esc(tr.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}</div>`:`<div class="pl-t">곡을 선택하세요</div><div class="pl-s">${A?T.length+'곡 수록':'&nbsp;'}</div>`)
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
     +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing&&ci>=0?'정지':'재생'}">${S.playing&&ci>=0?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
     +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-y="${al.year}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-nm">${esc(x.name)}</span></div>`).join('')+'</div>';
@@ -611,7 +611,7 @@ function mPlayHTML(){
 function mListHTML(){
   const A=S.admin,L=aList(),va=vAlb();
   let h=`<div class="pl-h"><button class="pl-ed" data-a="mback" aria-label="뒤로">←</button><b>앨범 목록</b><small>${L.length}개</small>${mX}</div>`;
-  if(L.length)h+='<div class="al-g">'+L.map(a=>`<div class="al ${a.tracks.length?'':'em'} ${va&&va.year==a.year?'on':''}" data-a="goalb" data-v="${a.year}">${A?`<input type="checkbox" class="ack" data-y="${a.year}" aria-label="${a.year} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-y">${a.year}<small>(${a.tracks.length})</small></span></div>`).join('')+'</div>';
+  if(L.length)h+='<div class="al-g">'+L.map(a=>`<div class="al ${a.tracks.length?'':'em'} ${va&&va.year==a.year?'on':''}" data-a="goalb" data-v="${a.year}">${A?`<input type="checkbox" class="ack" data-y="${a.year}" aria-label="${a.year} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-y">${a.year}${A?`<small>(${a.tracks.length}곡)</small>`:''}</span></div>`).join('')+'</div>';
   else h+='<p class="pl-empty">등록된 앨범이 없습니다.</p>';
   if(A)h+='<div class="bar"><button data-a="adel">[삭제]</button><button data-a="mback">[닫기]</button></div>';
   return h;
