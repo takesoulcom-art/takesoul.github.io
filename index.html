@@ -157,8 +157,8 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 #music svg{display:block}
 #menu{font-size:calc(20px + var(--fs));color:var(--mid)}
 /* [모달 공통] 전체 화면 어두운 막(#modal) + 가운데 상자(#mbox, 폭 340px). 설정/연도·월 선택/태그 편집/이미지 크게 보기/음악 플레이어가 모두 이 상자를 재사용 */
-#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9}
-#mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;overflow:auto}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9;height:100vh;height:100dvh}
+#mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;max-height:80dvh;overflow:auto}
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
 .pd{text-align:right}
 /* [버튼 배치 규칙] 수정·삭제·글쓰기 = 기능 우측 상단 / 저장·취소 = 기능 우측 하단(.bar, 오른쪽 정렬). .rt = 그 줄에서 오른쪽으로 밀기, .bar.top = 위쪽 줄 */
@@ -233,9 +233,9 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .wx button:hover{border-color:var(--line)}
 .wx button.on{background:var(--sel)}
 /* ===== [음악 플레이어 팝업] =====
-    .pl-* 클래스는 전부 이 팝업 전용. 폭 380px / 앨범 커버 104px / 곡 목록은 스크롤 없이 전부 표시(10곡 기준 화면 높이 96% 이내)
+    .pl-* 클래스는 전부 이 팝업 전용. 폭 380px / 앨범 커버 104px / 곡 목록은 스크롤 없이 표시, 모달 최대 높이는 보이는 화면 기준 PC 96% / 모바일 90%(dvh), 넘으면 스크롤되되 [저장][취소] 줄은 아래에 고정
     .pl-add = 관리자용 업로드 영역(커버 칸 56px) / .seek = 재생 위치 슬라이더(선 1px, 동그라미 9px) */
-#mbox.mp{width:min(380px,92vw);max-height:96vh;padding:16px 22px 14px}
+#mbox.mp{width:min(380px,92vw);max-height:96vh;max-height:96dvh;padding:16px 22px 0}
 .pl-h{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .pl-h b{font-weight:400;font-size:calc(16px + var(--fs));color:var(--ink)}
 .pl-h small{margin-left:auto;font-size:calc(11px + var(--fs));color:var(--lo)}
@@ -273,7 +273,9 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .mtl button{min-width:28px;min-height:28px}
 .pl-row.nw{cursor:default}
 .pl-new{flex:none;font-size:calc(10px + var(--fs));color:var(--logo)}
-.mp .bar{margin-top:10px}
+.mp .bar{position:sticky;bottom:0;z-index:1;margin:2px -22px 0;padding:8px 22px 14px;background:inherit}
+.mp .pl-list:last-child{margin-bottom:14px}
+@media(max-width:760px){#mbox.mp{max-height:90vh;max-height:90dvh}}
 /* 제목 옆 ✏️ 와 제목 입력칸 */
 .pl-ed{flex:none;display:flex;align-items:center;justify-content:center;min-width:28px;min-height:28px;padding:0;font-size:calc(13px + var(--fs));line-height:1}
 .pl-ti{flex:1;min-width:0;padding:2px 6px;font-size:calc(16px + var(--fs))}
