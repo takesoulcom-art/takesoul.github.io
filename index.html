@@ -557,7 +557,7 @@ function renderMusic(){
 }
 // 데이터: S.music={albums:[{year,name,cover,tracks:[{name,file,cover}]}]} (년도 오름차순). 옛 형식(곡 배열)은 mNorm 이 2026 앨범으로 자동 변환
 // 음악 팝업 화면(S.mv): play(재생) · list(앨범 목록) · reg(년도 선택/생성, 관리자) · edit(앨범 편집, 관리자). 편집 변경(S.pend 신규 곡·S.mw 순서/삭제·S.mt 앨범명·S.ac 앨범 커버)은 [저장] 전까지 임시 상태이며 팝업을 닫으면 버려짐
-const aDef=y=>y+' 즐겨들은 노래';
+const aDef=y=>y+'앨범';
 function mNorm(raw,dz){
   let A;
   if(Array.isArray(raw))A=[{year:2026,name:String((dz&&dz.mt)||''),cover:'',tracks:raw}];
@@ -598,7 +598,7 @@ function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHT
 function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const ci=mAct()?S.cur:-1,tr=ci>=0?T[ci]:null;
-  let h=`<div class="pl-h"><b>${al?esc(aNm(al))+(A?' - '+al.year:''):'음악'}</b><button class="pl-ed" data-a="mlist" aria-label="앨범 목록">${IC.list}</button><small>${T.length}곡</small>${mX}</div>`;
+  let h=`<div class="pl-h"><b>${al?esc(aNm(al))+(A?' - '+al.year:''):'음악'}</b><button class="pl-ed" data-a="mlist" aria-label="앨범 목록">${IC.list}</button><small>${T.length}</small>${mX}</div>`;
   if(T.length)h+=`<div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
     +(tr?`<div class="pl-t">${esc(tr.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}</div>`:`<div class="pl-t">곡을 선택하세요</div><div class="pl-s">${T.length}곡 수록</div>`)
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
