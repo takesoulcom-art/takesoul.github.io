@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-srQF0fMUZ5LMVvrJ3UTOI97FRR/GaYkxTDdkdVuLYUE=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-czQwSgVBSJz24KAg7sM6NVojHtkLST5Qj1/ceEQk9ic=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -378,10 +378,11 @@ async function flushNow(msg,prog){
   const head=(await ghj(`/git/ref/heads/${br}`)).object.sha;
   const cm=await ghj(`/git/commits/${head}`);
   const tr=await ghj(`/git/trees/${cm.tree.sha}?recursive=1`);
-  const have=new Set((tr.tree||[]).filter(x=>x.type=='blob').map(x=>x.path));
+  const have=new Set((tr.tree||[]).filter(x=>x.type=='blob').map(x=>x.path)),shaOf={};(tr.tree||[]).forEach(x=>{if(x.type=='blob')shaOf[x.path]=x.sha});
   const adds=items.filter(([,v])=>!v.d),ents=[];let n=0;
   for(const [p,v] of adds){
     if(prog)prog(++n,adds.length,p);
+    if(v.mv){const sh=shaOf[v.mv];if(!sh)throw new Error('원본 파일을 찾지 못했어요: '+v.mv);ents.push({path:p,mode:'100644',type:'blob',sha:sh});continue}
     const bl=await ghj('/git/blobs',{method:'POST',body:JSON.stringify({content:v.b?await b64blob(v.b):b64(v.t),encoding:'base64'})});
     ents.push({path:p,mode:'100644',type:'blob',sha:bl.sha});
   }
@@ -707,7 +708,7 @@ function mListHTML(){
   let h=`<div class="pl-h"><button class="pl-ed" data-a="mback" aria-label="뒤로">←</button><b>${S.lm?'앨범 관리':'앨범 목록'}</b><small>${L.length}개</small>${mX}</div>`;
   if(L.length)h+='<div class="al-g">'+L.map(a=>`<div class="al ${a.tracks.length?'':'em'} ${va&&va.year==a.year?'on':''}" data-a="goalb" data-v="${a.year}">${A?`<input type="checkbox" class="ack" data-y="${a.year}" aria-label="${a.year} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-y">${a.year}${A?`<small>(${a.tracks.length}곡)</small>`:''}</span></div>`).join('')+'</div>';
   else h+='<p class="pl-empty">등록된 앨범이 없습니다.</p>';
-  if(A)h+='<div class="bar bl"><button data-a="rgnew">[앨범 생성]</button><span><button data-a="adel">[삭제]</button><button data-a="mback">[닫기]</button></span></div>';
+  if(A)h+='<div class="bar bl"><button data-a="rgnew">[앨범 생성]</button><span>'+(S.lm&&mHideN()?'<button data-a="mhide" title="음악 파일명을 무작위 값으로 변경">[파일명 숨기기]</button>':'')+'<button data-a="adel">[삭제]</button><button data-a="mback">[닫기]</button></span></div>';
   return h;
 }
 function mRegHTML(){
@@ -753,6 +754,31 @@ function onSeek(sk){
   if(mAct()&&isFinite(d)&&d>0){au.currentTime=sk.value/1000*d;$('#pl-time').textContent=fmt(au.currentTime)+' / '+fmt(d)}
 }
 function onTitle(t){S.mt=t.value;const b=$('[data-a="msave"]');if(b)b.textContent='[저장'+(mDirty()?' ●':'')+']'}
+const rnd=()=>{const a=new Uint8Array(12);crypto.getRandomValues(a);return [...a].map(b=>b.toString(16).padStart(2,'0')).join('')};
+const mExt=n=>((String(n).match(/\.(mp3|m4a|ogg)$/i)||[])[1]||'mp3').toLowerCase();
+const rndOK=f=>/^music\/[0-9a-f]{24}\.(mp3|m4a|ogg)$/.test(f);
+const mHideN=()=>AL().reduce((n,a)=>n+a.tracks.filter(t=>!rndOK(t.file)).length,0);
+// 이미 올린 곡의 파일명을 무작위 값으로 변경 (파일 재업로드 없이 git tree 에서 경로만 이동)
+async function mHide(){
+  if(S.lock)return;const n=mHideN();
+  if(!n){toast('모든 곡의 파일명이 이미 무작위 값이에요.');return}
+  if(!confirm(`음악 파일 ${n}개의 파일명을 무작위 값으로 바꿉니다.\n방문자 화면에는 1분쯤 뒤 반영되며, 그 사이 이미 열려 있는 페이지에서는 일부 곡이 재생되지 않을 수 있어요. 진행할까요?`))return;
+  S.lock=1;const q0=qSnap(),undo=[];
+  try{
+    AL().forEach(a=>a.tracks.forEach(t=>{
+      if(rndOK(t.file))return;
+      const np=`music/${rnd()}.${mExt(t.file)}`;
+      Q.set(np,{mv:t.file});Q.set(t.file,{d:1});if(S.blob[t.file])S.blob[np]=S.blob[t.file];
+      undo.push([t,t.file]);t.file=np;
+    }));
+    await saveMusic();
+    toast('GitHub에 저장 중…');
+    await flush('음악 파일명 변경');
+    au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false;
+    S.lock=0;renderMusic(1);toast(`${n}곡의 파일명을 바꿨습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.`);
+  }catch(err){
+    undo.forEach(([t,f])=>{t.file=f});qRestore(q0);S.lock=0;renderModal();toast('파일명 변경 실패: '+err.message,1)}
+}
 async function putCover(src){
   const bmp=await createImageBitmap(src),sc=Math.min(1,480/Math.max(bmp.width,bmp.height));
   const bl=await toBlob(draw(bmp,Math.max(1,Math.round(bmp.width*sc)),Math.max(1,Math.round(bmp.height*sc)),'#fff'),'image/jpeg',.86);
@@ -803,9 +829,7 @@ async function msave(){
       for(const it of P.items){
         const f=it.f;
         msg(`준비 중 (${up+1}/${P.items.length}) ${f.name}`+(f.size>25e6?' - 큰 파일이라 오래 걸려요':''));
-        const base=f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
-        const lg=W.find(m=>m.file=='music/'+base);
-        const p=lg?lg.file:`music/${y}/${base}`;
+        const p=`music/${rnd()}.${mExt(f.name)}`; // 실제 파일명은 무작위 값 (곡 제목은 music.json 의 name 에만 남음)
         try{await putBlob(p,f)}catch(e){throw new Error(f.name+': '+e.message)}
         let cv=null;
         if(it.cv){try{cv=await putCover(it.cv.file)}catch(e){covFail.push(f.name)}}
@@ -1070,6 +1094,7 @@ document.addEventListener('click',async e=>{
   else if(a=='mlist'){S.mv='list';S.lm=false;renderModal()}
   else if(a=='mreg'&&S.admin){const va=vAlb();if(va){S.alb=va.year;mClear();S.mt=null;S.mte=false;S.ef='play';S.mv='edit'}else{S.mv='reg';S.ry='';S.rt='';mClear()}renderModal()}
   else if(a=='malbum'&&S.admin){if(mDirty()&&!confirm('저장하지 않은 변경이 사라집니다. 앨범 관리로 이동할까요?'))return;mReset();S.mv='list';S.lm=true;renderModal()}
+  else if(a=='mhide'&&S.admin)await mHide();
   else if(a=='rgnew'&&S.admin){mClear();S.ry='';S.rt='';S.mv='reg';renderModal()}
   else if(a=='rgcancel'&&S.admin){mClear();S.mv=AL().length?'list':'play';S.lm=AL().length>0;renderModal()}
   else if(a=='rgadd'&&S.admin)rgAdd();
