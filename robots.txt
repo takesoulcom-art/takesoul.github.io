@@ -1,0 +1,9 @@
+# takesoul.com
+# 허용: 홈(index.html)과 글 내용(data/ 의 글 JSON — 페이지가 이 파일을 읽어 글을 그리므로 검색엔진도 접근해야 글이 색인됩니다)
+# 차단: 음악 파일, 이미지, 음악 목록(music.json)
+
+User-agent: *
+Allow: /
+Disallow: /music/
+Disallow: /img/
+Disallow: /data/music.json
