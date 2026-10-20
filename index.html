@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-czQwSgVBSJz24KAg7sM6NVojHtkLST5Qj1/ceEQk9ic=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-hxHJ8h8Pn0jozTHsIYeBYa+HFSv4r2sg+pOa2AItAPU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -403,7 +403,7 @@ const load=async(f,d)=>{
   try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
 };
 const loadIdx=()=>load('data/index.json',S.posts);
-const reload=async()=>{S.full={};[S.posts,S.tags,S.music,S.dz]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[]),load('data/design.json',{})]);dInit();S.music=mNorm(S.music,S.dz)};
+const reload=async()=>{S.full={};[S.posts,S.tags,S.music,S.dz]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[]),load('data/design.json',{})]);dInit();S.music=mNorm(S.music,S.dz);mcClean()};
 let toastT;const toast=(t,err)=>{const el=$('#toast');el.textContent=t;el.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{el.className=''},err?6000:3000)};
 const busy=async fn=>{try{await fn()}catch(e){toast('저장 실패: '+e.message,1)}};
 const newest=(a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id);
@@ -695,7 +695,7 @@ function mPlayHTML(){
   const ttl=al?esc(aNm(al))+(A?' - '+al.year:''):'';
   let h=`<div class="pl-h"><button class="pl-ed" data-a="mlist" aria-label="앨범 목록">${IC.list}</button><span class="pl-sp"></span>${mX}</div>`;
   if(T.length)h+=`<div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
-    +(tr?`<div class="pl-t">${esc(tr.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}</div>`:`<div class="pl-t">${ttl}</div><div class="pl-s">${A?T.length+'곡 수록':'&nbsp;'}</div>`)
+    +(tr?`<div class="pl-t">${esc(tr.name)}</div><div class="pl-s">${ci+1}번째 곡 · ${S.ld?'불러오는 중…':S.playing?'재생 중':'일시정지'}</div>`:`<div class="pl-t">${ttl}</div><div class="pl-s">${A?T.length+'곡 수록':'&nbsp;'}</div>`)
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
     +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing&&ci>=0?'정지':'재생'}">${S.playing&&ci>=0?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
     +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-y="${al.year}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-nm">${esc(x.name)}</span></div>`).join('')+'</div>';
@@ -774,8 +774,8 @@ async function mHide(){
     await saveMusic();
     toast('GitHub에 저장 중…');
     await flush('음악 파일명 변경');
-    au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false;
-    S.lock=0;renderMusic(1);toast(`${n}곡의 파일명을 바꿨습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.`);
+    mStop();S.cur=-1;S.playing=false;
+    mcClean();S.lock=0;renderMusic(1);toast(`${n}곡의 파일명을 바꿨습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.`);
   }catch(err){
     undo.forEach(([t,f])=>{t.file=f});qRestore(q0);S.lock=0;renderModal();toast('파일명 변경 실패: '+err.message,1)}
 }
@@ -846,8 +846,8 @@ async function msave(){
     if(ncv&&snap.cover&&!keepC.has(snap.cover))await del(snap.cover).catch(()=>{});
     msg('GitHub에 저장 중…');
     await flush('음악 저장: '+y+'년 앨범',(i,n)=>msg(`저장 준비 중 (${i}/${n})`));done=true;
-    if(S.pa==y&&S.cur>=0){if(cf&&!W.some(m=>m.file==cf)||!cf){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}else S.cur=W.findIndex(m=>m.file==cf)}
-    mReset();S.alb=y;S.lock=0;renderMusic(1);toast(covFail.length?'저장했지만 커버 읽기 실패: '+covFail.join(', ')+' (커버 없이 등록했어요)':'저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.',covFail.length?1:0);
+    if(S.pa==y&&S.cur>=0){if(cf&&!W.some(m=>m.file==cf)||!cf){mStop();S.cur=-1;S.playing=false}else S.cur=W.findIndex(m=>m.file==cf)}
+    mReset();S.alb=y;S.lock=0;mcClean();renderMusic(1);toast(covFail.length?'저장했지만 커버 읽기 실패: '+covFail.join(', ')+' (커버 없이 등록했어요)':'저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.',covFail.length?1:0);
   }catch(err){
     if(!done){al.tracks=snap.tracks;al.name=snap.name;al.cover=snap.cover;qRestore(q0)}
     S.lock=0;if(done)renderMusic(1);else renderModal();msg('저장 실패: '+err.message)}
@@ -888,19 +888,98 @@ async function adel(){
     }
     msg('GitHub에 저장 중…');
     await flush('앨범 삭제: '+gone.map(a=>a.year).join(', ')+'년');
-    if(S.cur>=0&&ys.includes(S.pa)){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}
+    if(S.cur>=0&&ys.includes(S.pa)){mStop();S.cur=-1;S.playing=false}
     if(ys.includes(S.alb))S.alb=null;
-    S.lock=0;renderMusic(1);toast('앨범을 삭제했습니다.');
+    S.lock=0;mcClean();renderMusic(1);toast('앨범을 삭제했습니다.');
   }catch(err){S.music.albums=old;qRestore(q0);S.lock=0;renderModal();msg('삭제 실패: '+err.message)}
 }
 const render=()=>{renderCal();renderTags();renderArt();renderMusic();renderModal()};
+// ── 음악 캐시 (Cache API) ──────────────────────────────────────────────
+// 곡을 처음 재생할 때 파일 전체를 받아 브라우저 Cache Storage 에 저장하고, 이후에는 네트워크 없이 blob: 주소로 재생한다.
+// 파일명이 업로드마다 무작위 값이라(경로 = 내용) 별도 버전 키가 필요 없다. 캐시/다운로드가 실패하면 기존처럼 원래 주소로 스트리밍한다.
+const MC={name:'music-v1',max:300e6,meta:'mc-meta'};
+const mcOK=()=>'caches' in window;
+const mcKey=f=>new URL(encodeURI(f),location.href).href;
+const mcMeta=()=>{try{return JSON.parse(localStorage.getItem(MC.meta)||'{}')||{}}catch(e){return {}}};
+const mcSave=m=>{try{localStorage.setItem(MC.meta,JSON.stringify(m))}catch(e){}};
+let mcP=0,mTok=0;const mcIn=new Map(),mUrls=new Map(); // mcIn: 진행 중 다운로드, mUrls: 캐시에서 만든 blob: 주소 (파일 → 주소)
+async function mcGet(f){
+  if(!mcOK())return null;
+  try{const c=await caches.open(MC.name),r=await c.match(mcKey(f));if(!r)return null;const b=await r.blob();
+    const m=mcMeta();m[f]={s:b.size,t:Date.now()};mcSave(m);return b}catch(e){return null}
+}
+function mcFetch(f){
+  if(mcIn.has(f))return mcIn.get(f);
+  const p=(async()=>{
+    const r=await fetch(encodeURI(f),{cache:'no-store'}); // 직접 캐시에 저장하므로 HTTP 캐시와 이중 저장하지 않음
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const b=await r.blob();mcPut(f,b);return b;
+  })().finally(()=>mcIn.delete(f));
+  mcIn.set(f,p);return p;
+}
+async function mcPut(f,b){
+  if(!mcOK())return;
+  try{
+    const c=await caches.open(MC.name);
+    await c.put(mcKey(f),new Response(b,{headers:{'Content-Type':b.type||'audio/mpeg'}}));
+    const m=mcMeta();m[f]={s:b.size,t:Date.now()};mcSave(m);
+    if(!mcP&&navigator.storage&&navigator.storage.persist){mcP=1;navigator.storage.persist().catch(()=>{})}
+    mcTrim(c);
+  }catch(e){}
+}
+async function mcTrim(c){ // 용량 한도 초과 시 오래 안 들은 곡부터 삭제 (재생 중·다음 곡은 제외)
+  try{
+    const m=mcMeta(),ks=Object.keys(m);let tot=ks.reduce((n,k)=>n+(m[k].s||0),0);
+    if(tot<=MC.max)return;
+    ks.sort((a,b)=>(m[a].t||0)-(m[b].t||0));
+    for(const k of ks){if(tot<=MC.max)break;if(mUrls.has(k)||mcIn.has(k))continue;await c.delete(mcKey(k));tot-=m[k].s||0;delete m[k]}
+    mcSave(m);
+  }catch(e){}
+}
+async function mcDel(f){try{const c=await caches.open(MC.name);await c.delete(mcKey(f));const m=mcMeta();delete m[f];mcSave(m)}catch(e){}}
+async function mcClean(){ // music.json 에 없는 곡(삭제·파일명 변경)은 캐시에서 제거
+  if(!mcOK())return;
+  try{
+    const keep=new Set();AL().forEach(a=>a.tracks.forEach(t=>keep.add(mcKey(t.file))));
+    if(!keep.size)return; // music.json 을 못 읽은 경우(오프라인 등)에 캐시를 통째로 지우지 않도록
+    const c=await caches.open(MC.name),m=mcMeta();
+    for(const r of await c.keys())if(!keep.has(r.url))await c.delete(r);
+    Object.keys(m).forEach(f=>{if(!keep.has(mcKey(f)))delete m[f]});mcSave(m);
+  }catch(e){}
+}
+async function mLoad(f){ // 캐시에서 꺼내거나(없으면 전체 다운로드) blob: 주소를 돌려줌. 실패하면 null
+  if(mUrls.has(f))return mUrls.get(f);
+  if(!mcOK())return null;
+  try{
+    const b=(await mcGet(f))||(await mcFetch(f));
+    if(!mUrls.has(f))mUrls.set(f,URL.createObjectURL(b));
+    return mUrls.get(f);
+  }catch(e){return null}
+}
+const mRel=keep=>{for(const [f,u] of mUrls)if(!keep.includes(f)){URL.revokeObjectURL(u);mUrls.delete(f)}};
+function mStop(){mTok++;S.ld=null;au.pause();au.removeAttribute('src');mRel([])}
+function mAfter(al,f){ // 지난 곡의 blob: 주소 정리 + 다음 곡 미리 받기 (데이터 절약 모드에서는 생략)
+  const n=al.tracks[(S.cur+1)%al.tracks.length],nf=n&&n.file;
+  mRel([f,nf]);
+  if(nf&&nf!=f&&!S.blob[nf]&&!mUrls.has(nf)&&!(navigator.connection&&navigator.connection.saveData))mLoad(nf);
+}
 function playIdx(i,y){
   const al=albBy(y==null?S.pa:y);if(!al||!al.tracks.length)return;
   S.pa=al.year;S.cur=(i+al.tracks.length)%al.tracks.length;
-  const f=al.tracks[S.cur].file;au.src=S.blob[f]||encodeURI(f);au.play().catch(()=>{});S.playing=true;renderMusic();
+  const f=al.tracks[S.cur].file,tok=++mTok,ready=S.blob[f]||mUrls.get(f);
+  S.playing=true;
+  if(ready){S.ld=null;au.src=ready;au.play().catch(()=>{});mAfter(al,f);renderMusic();return}
+  // 아직 캐시에 없음: 전체를 받은 뒤 재생 (처음 재생은 지연 → '불러오는 중…' 표시)
+  S.ld=f;au.pause();au.removeAttribute('src');au.load();updProg();renderMusic();
+  mLoad(f).then(u=>{
+    if(tok!=mTok)return; // 그 사이 다른 곡을 고르거나 정지함
+    S.ld=null;au.src=u||encodeURI(f);au.play().catch(()=>{});mAfter(al,f);renderMusic();
+  });
 }
 au.onended=()=>playIdx(S.cur+1);
 au.onerror=async()=>{const t=curT(),f=t&&t.file;
+  if(f&&mUrls.has(f)&&au.src==mUrls.get(f)){ // 캐시본 재생 실패 → 캐시를 버리고 기존 방식(스트리밍)으로
+    URL.revokeObjectURL(mUrls.get(f));mUrls.delete(f);mcDel(f);au.src=encodeURI(f);au.play().catch(()=>{});return}
   if(S.admin&&f&&!S.blob[f]){const u=await ghBlob(f);if(u){au.src=u;au.play().catch(()=>{});return}}
   S.playing=false;renderMusic()};
 const mkCanvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
@@ -1110,7 +1189,7 @@ document.addEventListener('click',async e=>{
     const va=el.closest('#mbox')?vAlb():null,foreign=!!va&&!mAct();
     if(a=='play'){
       if(foreign)playIdx(0,va.year);
-      else if(curT()){if(S.playing){au.pause();S.playing=false;renderMusic()}else{au.play();S.playing=true;renderMusic()}}
+      else if(curT()){if(S.playing){if(S.ld){mTok++;S.ld=null}au.pause();S.playing=false;renderMusic()}else if(!au.getAttribute('src'))playIdx(S.cur);else{au.play();S.playing=true;renderMusic()}}
       else{const tp=aTop();if(tp)playIdx(0,tp.year)}
     }else if(a=='nextm'){
       if(foreign)playIdx(0,va.year);else if(curT())playIdx(S.cur+1);else{const tp=aTop();if(tp)playIdx(0,tp.year)}
