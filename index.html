@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-g3vgaJsxkWygo1nwwe0SZuWI8E5rB9ZgeBQu4GAmoH0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-PQ7o/8CVPDSwFR0UunuA/bFF9Cbr7jc3X5uim6sAEaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -606,8 +606,8 @@ function mPlayHTML(){
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
     +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing&&ci>=0?'정지':'재생'}">${S.playing&&ci>=0?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
     +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-y="${al.year}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-nm">${esc(x.name)}</span></div>`).join('')+'</div>';
-  else if(A)h+=`${al?`<div class="pl-t">${ttl}</div>`:''}<p class="pl-empty">${al?'등록된 곡이 없습니다. 아래 [등록]에서 이 년도를 선택해 곡을 추가하세요.':'등록된 앨범이 없습니다. 아래 [등록]에서 년도를 만들어 주세요.'}</p>`;
-  if(A)h+='<div class="bar"><button data-a="mreg">[등록]</button></div>';
+  else if(A)h+=`${al?`<div class="pl-t">${ttl}</div>`:''}<p class="pl-empty">${al?'등록된 곡이 없습니다. 아래 [관리]에서 이 년도를 선택해 곡을 추가하세요.':'등록된 앨범이 없습니다. 아래 [관리]에서 년도를 만들어 주세요.'}</p>`;
+  if(A)h+='<div class="bar"><button data-a="mreg">[관리]</button></div>';
   return h;
 }
 function mListHTML(){
@@ -620,7 +620,7 @@ function mListHTML(){
 }
 function mRegHTML(){
   const L=AL();
-  return `<div class="pl-h"><b>앨범 등록</b>${mX}</div>`
+  return `<div class="pl-h"><b>음악 관리</b>${mX}</div>`
     +`<div class="rg-t">년도 선택</div><div class="rg">${L.length?L.map(a=>`<button data-a="rgpick" data-v="${a.year}">${a.year}</button>`).join(''):'<span class="pl-hint">생성된 년도가 없습니다.</span>'}</div>`
     +`<div class="rg-t">년도 생성</div><div class="rg-n"><input id="m-year" inputmode="numeric" maxlength="4" placeholder="년도입력 (숫자 4자리)" autocomplete="off" aria-label="년도 입력"><button data-a="rgadd">[추가]</button></div>`
     +`<div class="pl-hint">이미 있는 년도를 입력하면 그 앨범으로 이동해요.</div>`
