@@ -1,9 +1,10 @@
 {
- "v": 20261020142447,
+ "v": 20261020145933,
  "albums": [
   {
+   "id": "y2013",
    "year": 2013,
-   "name": "2013 즐겨들은 노래",
+   "name": "set, and go",
    "cover": "music/cover/mvgqh7fzr8dq.jpg",
    "tracks": [
     {
@@ -109,6 +110,7 @@
    ]
   },
   {
+   "id": "y2026",
    "year": 2026,
    "name": "part of me",
    "cover": "music/cover/mvf9457nr12z.jpg",
