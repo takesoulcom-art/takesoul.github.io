@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-E9r0GvLtbxHk2UEgTBUpLSf3YNWm5xdRq1wQMzMzLdY=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-srQF0fMUZ5LMVvrJ3UTOI97FRR/GaYkxTDdkdVuLYUE=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -552,8 +552,15 @@ function renderTags(){
 }
 S.blob={};S.up=[];S.full={};
 async function loadPost(id){if(S.full[id])return S.full[id];const p=await load(postPath(id),null);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
-async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;const u=await ghBlob(i.dataset.p);if(u)i.src=u}
-document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!='IMG'||!i.dataset.p)return;if(S.admin&&!i.dataset.f)imgFix(i);else if(i.closest('#mbox'))i.replaceWith('♬')},true);
+function imgFail(i){
+  if(!i.isConnected)return;
+  if(i.closest('#mbox')&&!i.classList.contains('big')){i.replaceWith('♬');return}
+  const s=document.createElement('span');Object.assign(s.dataset,i.dataset);
+  s.className=(i.className+' imgx').trim();s.textContent='[이미지를 불러오지 못했어요]';s.title=i.dataset.p||'';s.style.cssText='opacity:.6;font-size:.85em';
+  i.replaceWith(s);
+}
+async function imgFix(i){if(!S.admin||i.dataset.f)return;i.dataset.f=1;let u=null;try{u=await ghBlob(i.dataset.p)}catch(e){}if(u)i.src=u;else imgFail(i)}
+document.addEventListener('error',e=>{const i=e.target;if(!i||i.tagName!='IMG'||!i.dataset.p)return;if(S.admin&&!i.dataset.f)imgFix(i);else if(S.admin||i.closest('#mbox'))imgFail(i)},true);
 const imgList=s=>[...String(s||'').matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)];
 const imgsOf=b=>imgList(b).map(m=>m[2]);
 const purge=async(c,keep)=>{for(const p of new Set(c))if(!keep.has(p))await del(p).catch(()=>{})};
@@ -592,14 +599,14 @@ function renderArt(){
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
   if(S.tag&&!S.pid){
     a.innerHTML=`<div class="meta"># ${esc(S.tag)}</div>${acts}<div class="plist" style="margin-top:16px">`+
-      (posts.map(p=>`<div data-a="open" data-v="${p.id}"><small>${p.date}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
+      (posts.map(p=>`<div data-a="open" data-v="${esc(p.id)}"><small>${esc(p.date)}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
     return;
   }
   let p=S.posts.find(x=>x.id==S.pid);
   if(!p){
     const day=S.date?list().filter(x=>x.date==S.date):list();
     if(day.length>1&&S.date){
-      a.innerHTML=`<div class="meta">${S.date}</div>${acts}<div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${x.id}">${esc(x.title)}</div>`).join('')+'</div>';return;
+      a.innerHTML=`<div class="meta">${esc(S.date)}</div>${acts}<div class="plist" style="margin-top:16px">`+day.map(x=>`<div data-a="open" data-v="${esc(x.id)}">${esc(x.title)}</div>`).join('')+'</div>';return;
     }
     p=day[0];
   }
@@ -613,11 +620,31 @@ function renderArt(){
     acts+
     `<h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
 }
-function renderMusic(){
+function renderMusic(full){
   const m=$('#music'),ct=curT(),top=aTop(),t=ct||(top&&top.tracks[0]);
   if(!t)m.innerHTML=S.admin?'<button data-a="mtoggle">음악 관리</button>':'';
   else m.innerHTML=`<button data-a="mtoggle">♬ ${esc(t.name)}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button>`;
-  if(S.modal=='music')renderModal();
+  if(S.modal=='music'){if(full)renderModal();else mLive()}
+}
+// 재생 상태만 바뀔 때: 모달을 다시 그리지 않고 곡 목록 표시·재생 버튼만 부분 갱신 (스크롤·입력 포커스·입력값 유지)
+function mLive(){
+  const b=$('#mbox');if(!b)return;
+  const edit=S.admin&&S.mv=='edit'&&albBy(S.alb),play=!(S.mv=='list'||(S.admin&&S.mv=='reg')||edit);
+  if(!play&&!edit)return;
+  $$('#mbox .pl-row').forEach((r,i)=>{
+    const on=S.cur>=0&&S.pa==+r.dataset.y&&+r.dataset.v==S.cur;
+    r.classList.toggle('on',on);
+    const n=r.querySelector('.pl-n');if(n)n.innerHTML=on&&S.playing?IC.eq:String(i+1);
+  });
+  if(!play)return;
+  const t=document.createElement('div');t.innerHTML=mPlayHTML();
+  for(const q of ['.pl-cover','.pl-t','.pl-s','.pl-c [data-a="play"]']){
+    const a=b.querySelector(q),n=t.querySelector(q);
+    if(!a||!n){renderModal();return}
+    if(a.innerHTML!==n.innerHTML)a.innerHTML=n.innerHTML;
+    if(n.getAttribute('aria-label'))a.setAttribute('aria-label',n.getAttribute('aria-label'));
+  }
+  updProg();
 }
 // 데이터: S.music={albums:[{year,name,cover,tracks:[{name,file,cover}]}]} (년도 오름차순). 옛 형식(곡 배열)은 mNorm 이 2026 앨범으로 자동 변환
 // 음악 팝업 화면(S.mv): play(재생) · list(앨범 목록) · reg(년도 선택/생성, 관리자) · edit(앨범 편집, 관리자). 편집 변경(S.pend 신규 곡·S.mw 순서/삭제·S.mt 앨범명·S.ac 앨범 커버)은 [저장] 전까지 임시 상태이며 팝업을 닫으면 버려짐
@@ -646,6 +673,7 @@ const mAct=()=>{const v=vAlb();return S.cur>=0&&!!v&&S.pa==v.year};
 const eA=()=>S.mv=='edit'?albBy(S.alb):null;
 const mnN=(s,a)=>String(s||'').replace(/[\r\n]+/g,' ').trim().slice(0,30)||aDef(a.year);
 const newPend=()=>({items:[]}); // items: [{f:File, title, cv:{file,url}|null}] — 곡마다 파일·제목·커버를 한 줄로 관리
+const MUSIC_MAX=30e6; // 곡당 상한 (GitHub blob 100MB / Pages 약 1GB 고려)
 const pqFree=()=>{(S.pend.items||[]).forEach(it=>{if(it.cv)revoke(it.cv.url)})};
 S.pend=newPend();S.mw=null;S.mt=null;S.mte=false;S.ac=null;S.mv='play';S.alb=null;S.pa=null;S.lm=false;S.ry='';S.rt='';S.ef='play';
 const mMusicDirty=()=>{const a=eA();return !!S.pend.items.length||!!(a&&S.mw&&(S.mw.length!=a.tracks.length||S.mw.some((x,i)=>x!==a.tracks[i])))};
@@ -707,7 +735,7 @@ function mEditHTML(){
   const sz=n=>n>=1e6?(n/1e6).toFixed(1)+'MB':Math.max(1,Math.round(n/1e3))+'KB';
   h+=`<div class="pl-add pq"><div class="pq-t">곡 추가${PI.length?` · ${PI.length}곡 대기 중`:''}</div>`
     +PI.map((it,i)=>`<div class="pq-r"><button class="pl-cv" data-a="pqcover" data-v="${i}" aria-label="곡 커버 변경">${it.cv?`<img src="${esc(it.cv.url)}" alt="">`:'커버<br>(선택)'}</button><div class="pq-b"><input class="pq-in" data-pq="${i}" value="${esc(it.title)}" maxlength="60" autocomplete="off" aria-label="곡 제목"><div class="pl-hint">${esc(it.f.name)} · ${sz(it.f.size)}</div></div><button class="pq-x" data-a="pqdel" data-v="${i}" aria-label="제거">×</button></div>`).join('')
-    +`<button class="pl-pick" data-a="pickmusic">[+ 음악 파일 선택]</button><div class="pl-hint">${PI.length?'제목과 커버를 곡마다 바꿀 수 있어요. [저장]을 누르면 한 번에 등록돼요.':'mp3 · m4a · ogg 파일을 여러 개 한꺼번에 고를 수 있어요. mp3에 들어 있는 커버는 자동으로 채워져요.'}</div></div>`
+    +`<button class="pl-pick" data-a="pickmusic">[+ 음악 파일 선택]</button><div class="pl-hint">${PI.length?'제목과 커버를 곡마다 바꿀 수 있어요. [저장]을 누르면 한 번에 등록돼요.':'mp3 · m4a · ogg 파일을 여러 개 한꺼번에 고를 수 있어요. mp3에 들어 있는 커버는 자동으로 채워져요. 곡당 '+MUSIC_MAX/1e6+'MB까지 올릴 수 있어요.'}</div></div>`
     +`<div class="bar bl"><button data-a="malbum">[앨범 관리]</button><span><button data-a="msave">[저장${mDirty()?' ●':''}]</button><button data-a="mcancel">[취소]</button></span></div>`
     +`<input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/ogg" multiple class="hide"><input type="file" id="m-cover" accept="image/*" class="hide"><input type="file" id="m-acover" accept="image/*" class="hide">`;
   return h;
@@ -766,7 +794,7 @@ async function msave(){
   const P=S.pend,y=al.year,snap={name:al.name,cover:al.cover,tracks:al.tracks},W=(S.mw||al.tracks).slice();
   const cf=(S.cur>=0&&S.pa==y&&al.tracks[S.cur])?al.tracks[S.cur].file:null;
   const md=mMusicDirty(),nd=mNameDirty(),cd=mCovDirty();
-  S.lock=1;let up=0,done=false;const q0=qSnap();
+  S.lock=1;let up=0,done=false;const q0=qSnap(),covFail=[];
   try{
     let ncv=null;
     if(cd){msg('앨범 커버 업로드 중…');ncv=await putCover(S.ac.file)}
@@ -778,8 +806,9 @@ async function msave(){
         const base=f.name.replace(/[^\w.\-가-힣 ()\[\]]/g,'_');
         const lg=W.find(m=>m.file=='music/'+base);
         const p=lg?lg.file:`music/${y}/${base}`;
-        await putBlob(p,f);
-        const cv=it.cv?await putCover(it.cv.file):null;
+        try{await putBlob(p,f)}catch(e){throw new Error(f.name+': '+e.message)}
+        let cv=null;
+        if(it.cv){try{cv=await putCover(it.cv.file)}catch(e){covFail.push(f.name)}}
         const e={name:String(it.title||'').trim().slice(0,60)||f.name.replace(/\.[^.]+$/,''),file:p};if(cv)e.cover=cv;
         const i=W.findIndex(m=>m.file==p);if(i<0)W.push(e);else{if(W[i].cover&&!cv)e.cover=W[i].cover;W[i]=e}
         up++;
@@ -794,10 +823,10 @@ async function msave(){
     msg('GitHub에 저장 중…');
     await flush('음악 저장: '+y+'년 앨범',(i,n)=>msg(`저장 준비 중 (${i}/${n})`));done=true;
     if(S.pa==y&&S.cur>=0){if(cf&&!W.some(m=>m.file==cf)||!cf){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}else S.cur=W.findIndex(m=>m.file==cf)}
-    mReset();S.alb=y;S.lock=0;renderMusic();toast('저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.');
+    mReset();S.alb=y;S.lock=0;renderMusic(1);toast(covFail.length?'저장했지만 커버 읽기 실패: '+covFail.join(', ')+' (커버 없이 등록했어요)':'저장했습니다. 방문자 화면에는 1분쯤 뒤 반영돼요.',covFail.length?1:0);
   }catch(err){
     if(!done){al.tracks=snap.tracks;al.name=snap.name;al.cover=snap.cover;qRestore(q0)}
-    S.lock=0;if(done)renderMusic();else renderModal();msg('저장 실패: '+err.message)}
+    S.lock=0;if(done)renderMusic(1);else renderModal();msg('저장 실패: '+err.message)}
 }
 async function rgAdd(){
   if(S.lock)return;
@@ -837,7 +866,7 @@ async function adel(){
     await flush('앨범 삭제: '+gone.map(a=>a.year).join(', ')+'년');
     if(S.cur>=0&&ys.includes(S.pa)){au.pause();au.removeAttribute('src');S.cur=-1;S.playing=false}
     if(ys.includes(S.alb))S.alb=null;
-    S.lock=0;renderMusic();toast('앨범을 삭제했습니다.');
+    S.lock=0;renderMusic(1);toast('앨범을 삭제했습니다.');
   }catch(err){S.music.albums=old;qRestore(q0);S.lock=0;renderModal();msg('삭제 실패: '+err.message)}
 }
 const render=()=>{renderCal();renderTags();renderArt();renderMusic();renderModal()};
@@ -910,9 +939,9 @@ async function addFiles(list){
   S.upl=null;S.upBusy=0;renderThumbs();
 }
 const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
-document.addEventListener('dragover',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.toggle('over',!!e.target.closest('#dz'))});
+document.addEventListener('dragover',e=>{if(!hasFiles(e))return;e.preventDefault();if(S.mode!='edit'){e.dataTransfer.dropEffect='none';return}const z=$('#dz');if(z)z.classList.toggle('over',!!e.target.closest('#dz'))});
 document.addEventListener('dragleave',e=>{const z=$('#dz');if(z&&e.target.closest&&e.target.closest('#dz'))z.classList.remove('over')});
-document.addEventListener('drop',e=>{if(S.mode!='edit'||!hasFiles(e))return;e.preventDefault();const z=$('#dz');if(z)z.classList.remove('over');addFiles(e.dataTransfer.files)});
+document.addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();if(S.mode!='edit')return;const z=$('#dz');if(z)z.classList.remove('over');addFiles(e.dataTransfer.files)});
 document.addEventListener('paste',e=>{if(S.mode!='edit'||S.modal)return;const fs=[...(e.clipboardData?e.clipboardData.files:[])].filter(isImg);if(!fs.length)return;e.preventDefault();addFiles(fs)});
 document.addEventListener('focusin',e=>{if(e.target.id=='e-body')e.target.dataset.t=1});
 const parseTags=s=>s.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean);
@@ -927,7 +956,7 @@ function renderModal(){
   if(k=='auth'){
     const kr=`<div class="row2" id="krow"><span>관리자 모드</span><button data-a="${S.admin?'logout':'kinput'}">${S.admin?'[로그아웃]':'[입력]'}</button></div>`;
     h=`${designTop()}${designHTML()}${S.admin?`<div class="dcom"><div class="dh">공통 설정<small>가로·세로 모두 적용</small></div>${footRow()}${kr}</div><div class="uh">디자인 변경은 [저장]을 눌러야 모든 방문자에게 적용돼요.</div>`:kr}<div class="bar">${S.admin?`<button data-a="dsave">[저장${dDirty()?' ●':''}]</button>`:''}<button data-a="mclose">[취소]</button></div>`}
-  else if(k=='y'){const y1=Math.max(2026,new Date().getFullYear(),S.y),a=[];for(let y=Math.min(2026,S.y);y<=y1;y++)a.push(y);
+  else if(k=='y'){const ys=list().map(p=>+String(p.date).slice(0,4)).filter(n=>n>=1900&&n<=2100),cy=new Date().getFullYear(),y1=Math.max(cy,S.y,...ys),y0=Math.min(S.y,...(ys.length?ys:[cy])),a=[];for(let y=y0;y<=y1;y++)a.push(y);
     h=`<div class="pk">${a.map(y=>`<button class="${y==S.y?'on':''}" data-a="sy" data-v="${y}">${y}</button>`).join('')}</div>`}
   else if(k=='m')h=`<div class="pk">${[...Array(12)].map((_,i)=>`<button class="${i==S.m?'on':''}" data-a="sm" data-v="${i}">${i+1}</button>`).join('')}</div>`;
   else if(k=='tags')h='<div class="meta">체크한 Tags는 숨김</div>'+tagList(true).map(([t,n],i)=>`<div class="row"><input type="checkbox" data-a="thide" data-v="${esc(t)}" ${S.tags.hidden.includes(t)?'checked':''}># ${esc(t)} (${n}) <button data-a="tup" data-v="${i}">↑</button><button data-a="tdn" data-v="${i}">↓</button></div>`).join('')+'<div class="bar"><button data-a="tdone">[저장]</button><button data-a="tcancel">[취소]</button></div>';
@@ -1003,24 +1032,25 @@ document.addEventListener('click',async e=>{
     let base=null;
     if(!d.id){base=await loadIdx();const pre=d.date.replace(/-/g,''),n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+p2(n)}
     const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'',pv=S.posts.find(x=>x.id==d.id),same=!!pv&&pv.date==m.date&&pv.title==m.title&&!!pv.hidden==m.hidden&&(pv.tags||[]).join(',')==m.tags.join(',');
-    let na=null;
+    let na=null;const q0=qSnap(),pf=S.full[d.id];
     try{
       await saveJSON(postPath(d.id),{...m,weather:d.weather||'',body:d.body});
       if(!same){const arr=[...(base||await loadIdx())],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;await saveJSON('data/index.json',arr);na=arr}
       S.full[d.id]={...m,weather:d.weather||'',body:d.body};
       await purge([...imgsOf(old),...S.up],new Set(imgsOf(d.body)));
       toast('GitHub에 저장 중…');await flush('글 저장: '+d.title);if(na)S.posts=na;
-    }catch(e){toast('저장 실패: '+e.message,1);return}
+    }catch(e){qRestore(q0);if(pf)S.full[d.id]=pf;else delete S.full[d.id];toast('저장 실패: '+e.message,1);return}
     S.up=[];showPost(d);render();
   }
   else if(a=='delpost'){if(!confirm('이 글을 삭제할까요?'))return;
     const id=S.pid,fp=await loadPost(id),gone=imgsOf(fp&&fp.body);
+    const q0=qSnap();
     try{const arr=(await loadIdx()).filter(x=>x.id!=id);await saveJSON('data/index.json',arr);
-      await del(postPath(id));await purge(gone,new Set());await flush('글 삭제: '+id);S.posts=arr;delete S.full[id]}catch(e){toast('삭제 실패: '+e.message,1);return}
+      await del(postPath(id));await purge(gone,new Set());await flush('글 삭제: '+id);S.posts=arr;delete S.full[id]}catch(e){qRestore(q0);toast('삭제 실패: '+e.message,1);return}
     pick({});render()}
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
-  else if(a=='tdone'){await busy(async()=>{await saveTags();await flush('태그 저장')});S.modal=null;render()}
+  else if(a=='tdone'){const q0=qSnap();try{await saveTags();await flush('태그 저장')}catch(e){qRestore(q0);toast('저장 실패: '+e.message,1);return}S.modal=null;render()}
   else if(a=='tone'){if(!uiHas(dS(),v))return;dES().tone=v;dApplyAll();renderModal()}
   else if(a=='dmode'){if(v!='desk'&&v!='mob')return;S.em=v;dApplyAll();renderCal();renderModal()}
   else if(a=='tnew'){const D=dES();if(D.tones.length>=5){toast('톤은 화면별로 최대 5개까지 만들 수 있습니다.',1);return}
@@ -1079,8 +1109,9 @@ document.addEventListener('change',async e=>{
   else if(t.id=='u-logo'){const f=t.files[0];t.value='';if(f)await uiLogo(f)}
   else if(t.id=='m-up'){
     const all=[...t.files],good=all.filter(f=>/\.(mp3|m4a|ogg)$/i.test(f.name));t.value='';
-    const I=S.pend.items;let dup=0,over=0;
+    const I=S.pend.items;let dup=0,over=0;const big=[];
     for(const f of good){
+      if(f.size>MUSIC_MAX){big.push(f.name);continue}
       if(I.some(x=>x.f.name==f.name&&x.f.size==f.size)){dup++;continue}
       if(I.length>=30){over++;continue}
       const it={f,title:f.name.replace(/\.[^.]+$/,''),cv:null};I.push(it);
@@ -1089,7 +1120,7 @@ document.addEventListener('change',async e=>{
     }
     renderModal();
     const ex=all.length-good.length;
-    if(ex||dup||over)msg([ex?`mp3 · m4a · ogg 파일만 올릴 수 있어요 (제외 ${ex}개)`:'',dup?`이미 선택한 파일 ${dup}개는 건너뛰었어요`:'',over?`한 번에 최대 30곡까지만 담을 수 있어요 (제외 ${over}개)`:''].filter(Boolean).join(' · '));
+    if(ex||dup||over||big.length)msg([big.length?`곡당 ${MUSIC_MAX/1e6}MB를 넘는 파일은 제외했어요: ${big.slice(0,3).join(', ')}${big.length>3?' 외 '+(big.length-3)+'개':''}`:'',ex?`mp3 · m4a · ogg 파일만 올릴 수 있어요 (제외 ${ex}개)`:'',dup?`이미 선택한 파일 ${dup}개는 건너뛰었어요`:'',over?`한 번에 최대 30곡까지만 담을 수 있어요 (제외 ${over}개)`:''].filter(Boolean).join(' · '));
   }
   else if(t.id=='m-acover'){
     const f=t.files[0];t.value='';if(!f)return;
@@ -1141,7 +1172,7 @@ document.addEventListener('keydown',e=>{
   const t=e.target;
   if((e.key=='Enter'||e.key==' ')&&t.id=='dz'){e.preventDefault();clickEl('#e-img')}
   if(e.key=='Escape'&&S.modal)closeModal();
-  if(e.key=='Enter'&&t.closest('#mbox')){e.preventDefault();if(t.id=='m-title'){S.mte=false;renderModal()}else if(t.id=='m-year'||t.id=='m-rtitle')rgAdd();else authStep()}
+  if(e.key=='Enter'&&t.tagName=='INPUT'&&!['checkbox','radio','range','file','button'].includes(t.type)&&t.closest('#mbox')){e.preventDefault();if(t.id=='m-title'){S.mte=false;renderModal()}else if(t.id=='m-year'||t.id=='m-rtitle')rgAdd();else authStep()}
 });
 function setLogo(opt){
   const i=$('#logoimg'),L=$('#logo a'),id=curId(),T=toneT(id);
