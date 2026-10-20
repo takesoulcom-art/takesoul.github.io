@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-8sea6DvAg52Mi4EI0C3PKBsyoB/snGzYttm1tk6KP+I=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-E9r0GvLtbxHk2UEgTBUpLSf3YNWm5xdRq1wQMzMzLdY=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -336,6 +336,33 @@ const keySave=(k,keep)=>{keyClear();try{(keep?localStorage:sessionStorage).gk=k}
 const Q=new Map(),qSnap=()=>new Map(Q),qRestore=m=>{Q.clear();m.forEach((v,k)=>Q.set(k,v))};
 async function del(p){Q.set(p,{d:1})}
 const saveJSON=(p,o)=>{Q.set(p,{t:JSON.stringify(o,null,1)});return Promise.resolve()};
+// 모달 단계 ↔ 브라우저 뒤로가기: 모달/단계가 깊어질 때마다 히스토리 항목을 쌓고, 뒤로가기(스와이프·Backspace)는 페이지 이동 대신 한 단계 전으로 돌아간다
+const H={d:0,skip:0};
+const dp=()=>!S.modal?0:S.modal!='music'?1:S.mv=='list'?2:S.mv=='reg'?(AL().length?3:2):S.mv=='edit'?(S.ef=='list'?3:2):1;
+function hSync(){
+  const t=dp(),c=H.d;if(t==c)return;H.d=t;
+  if(t>c){for(let i=c;i<t;i++)history.pushState({m:i+1},'')}
+  else{H.skip=1;history.go(t-c);setTimeout(()=>{H.skip=0},700)}
+}
+function modalBack(){
+  if(S.modal!='music'||S.mv=='play'){closeModal();return}
+  if(S.mv=='edit'){
+    if(mDirty()&&!confirm('저장하지 않은 변경이 사라집니다. 이전 단계로 돌아갈까요?')){renderModal();return}
+    const tl=S.ef=='list';mReset();if(tl){S.mv='list';S.lm=true}renderModal();return;
+  }
+  if(S.mv=='reg'){mClear();if(AL().length){S.mv='list';S.lm=true}else S.mv='play';renderModal();return}
+  S.mv='play';S.lm=false;renderModal();
+}
+function hPop(){
+  if(H.skip){H.skip=0;return true}
+  if(H.d>0&&S.modal){H.d--;modalBack();return true}
+  H.d=0;return false;
+}
+document.addEventListener('keydown',e=>{
+  if(e.key!='Backspace'||!S.modal||e.ctrlKey||e.metaKey||e.altKey)return;
+  const t=e.target,tg=t&&t.tagName;if(tg=='INPUT'||tg=='TEXTAREA'||tg=='SELECT'||(t&&t.isContentEditable))return;
+  e.preventDefault();history.back();
+});
 let BRN=null,FL=Promise.resolve();
 async function ghj(path,o){
   const r=await fetch(GH+path,{...o,headers:{...ghHead(),'Content-Type':'application/json'},cache:'no-store'});
@@ -620,7 +647,7 @@ const eA=()=>S.mv=='edit'?albBy(S.alb):null;
 const mnN=(s,a)=>String(s||'').replace(/[\r\n]+/g,' ').trim().slice(0,30)||aDef(a.year);
 const newPend=()=>({items:[]}); // items: [{f:File, title, cv:{file,url}|null}] — 곡마다 파일·제목·커버를 한 줄로 관리
 const pqFree=()=>{(S.pend.items||[]).forEach(it=>{if(it.cv)revoke(it.cv.url)})};
-S.pend=newPend();S.mw=null;S.mt=null;S.mte=false;S.ac=null;S.mv='play';S.alb=null;S.pa=null;S.lm=false;S.ry='';S.rt='';
+S.pend=newPend();S.mw=null;S.mt=null;S.mte=false;S.ac=null;S.mv='play';S.alb=null;S.pa=null;S.lm=false;S.ry='';S.rt='';S.ef='play';
 const mMusicDirty=()=>{const a=eA();return !!S.pend.items.length||!!(a&&S.mw&&(S.mw.length!=a.tracks.length||S.mw.some((x,i)=>x!==a.tracks[i])))};
 const mNameDirty=()=>{const a=eA();return !!a&&S.mt!=null&&mnN(S.mt,a)!==aNm(a)};
 const mCovDirty=()=>!!S.ac;
@@ -778,7 +805,7 @@ async function rgAdd(){
   S.ry=s;S.rt=tv;
   if(!/^\d{4}$/.test(s)||+s<1900||+s>2100){msg('년도는 1900~2100 사이 숫자 4자리로 입력하세요.');return}
   const y=+s;
-  if(albBy(y)){S.alb=y;mClear();S.mt=null;S.mte=false;S.mv='edit';renderModal();toast(y+'년 앨범이 이미 있어 그 앨범으로 이동했어요.');return}
+  if(albBy(y)){S.alb=y;mClear();S.mt=null;S.mte=false;S.ef='list';S.mv='edit';renderModal();toast(y+'년 앨범이 이미 있어 그 앨범으로 이동했어요.');return}
   S.lock=1;const old=S.music.albums,q0=qSnap();
   try{
     msg('앨범 생성 중…');
@@ -787,7 +814,7 @@ async function rgAdd(){
     S.music.albums=[...old,{year:y,name:nm,cover:cv,tracks:[]}].sort((a,b)=>a.year-b.year);
     await saveMusic();
     await flush('앨범 생성: '+y+'년');
-    S.alb=y;mClear();S.mt=null;S.mte=false;S.mv='edit';S.ry='';S.rt='';S.lock=0;renderModal();toast(y+'년 앨범을 만들었어요. 곡을 등록해 주세요.');
+    S.alb=y;mClear();S.mt=null;S.mte=false;S.ef='list';S.mv='edit';S.ry='';S.rt='';S.lock=0;renderModal();toast(y+'년 앨범을 만들었어요. 곡을 등록해 주세요.');
   }catch(err){S.music.albums=old;qRestore(q0);S.lock=0;msg('저장 실패: '+err.message)}
 }
 async function adel(){
@@ -892,6 +919,7 @@ const parseTags=s=>s.split(',').map(s=>s.trim().replace(/^#/,'')).filter(Boolean
 const readForm=()=>{const g=i=>$('#'+i);return {date:g('e-date').value,title:g('e-title').value,body:g('e-body').value,weather:g('e-wx').value.trim(),tags:parseTags(g('e-tags').value),hidden:g('e-hid').checked}};
 const syncDraft=()=>Object.assign(S.draft,readForm());
 function renderModal(){
+  hSync();
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
   w.style.display=k?'flex':'none';if(!k){uiClose();if(mReset())toast('저장하지 않은 음악 변경을 취소했습니다.');return}
   b.className=k=='music'?'mp':k=='auth'?'st':'';
@@ -921,7 +949,7 @@ const setHash=id=>{if(location.hash.slice(1)==id)return;(S.hs?history.pushState:
 window.addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue=''}});
 function toggleWx(b){const i=$('#e-wx'),w=b.dataset.w;
   i.value=i.value.includes(w)?i.value.replace(w,''):i.value+w;b.classList.toggle('on',i.value.includes(w));fire(i)}
-window.addEventListener('popstate',()=>{const p=postByHash();if(!p||(S.mode=='edit'&&!leave()))return;showPost(p);render();toTop()});
+window.addEventListener('popstate',()=>{if(hPop())return;const p=postByHash();if(!p||(S.mode=='edit'&&!leave()))return;showPost(p);render();toTop()});
 const setYM=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth()};
 const setYMOf=ds=>{const d=ds?dOf(ds):new Date();setYM(d.getFullYear(),d.getMonth())};
 const postByHash=()=>S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));
@@ -1010,12 +1038,12 @@ document.addEventListener('click',async e=>{
   else if(a=='mcancel'){const d=mReset();renderModal();if(d)toast('저장하지 않은 변경을 취소했습니다.')}
   else if(a=='mback'){S.mv='play';S.lm=false;renderModal()}
   else if(a=='mlist'){S.mv='list';S.lm=false;renderModal()}
-  else if(a=='mreg'&&S.admin){const va=vAlb();if(va){S.alb=va.year;mClear();S.mt=null;S.mte=false;S.mv='edit'}else{S.mv='reg';S.ry='';S.rt='';mClear()}renderModal()}
+  else if(a=='mreg'&&S.admin){const va=vAlb();if(va){S.alb=va.year;mClear();S.mt=null;S.mte=false;S.ef='play';S.mv='edit'}else{S.mv='reg';S.ry='';S.rt='';mClear()}renderModal()}
   else if(a=='malbum'&&S.admin){if(mDirty()&&!confirm('저장하지 않은 변경이 사라집니다. 앨범 관리로 이동할까요?'))return;mReset();S.mv='list';S.lm=true;renderModal()}
   else if(a=='rgnew'&&S.admin){mClear();S.ry='';S.rt='';S.mv='reg';renderModal()}
   else if(a=='rgcancel'&&S.admin){mClear();S.mv=AL().length?'list':'play';S.lm=AL().length>0;renderModal()}
   else if(a=='rgadd'&&S.admin)rgAdd();
-  else if(a=='goalb'){S.alb=+v;if(S.lm&&S.admin){mClear();S.mt=null;S.mte=false;S.mv='edit'}else{S.mv='play';S.lm=false}renderModal()}
+  else if(a=='goalb'){S.alb=+v;if(S.lm&&S.admin){mClear();S.mt=null;S.mte=false;S.ef='list';S.mv='edit'}else{S.mv='play';S.lm=false}renderModal()}
   else if(a=='adel'&&S.admin)adel();
   else if(a=='pickacover'&&S.admin)clickEl('#m-acover');
   else if(a=='mtedit'){S.mte=!S.mte;renderModal();if(S.mte){const i=$('#m-title');if(i){i.focus();i.select()}}}
