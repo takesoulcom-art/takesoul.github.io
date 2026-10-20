@@ -1,5 +1,5 @@
 {
- "v": 20261020140212,
+ "v": 20261020142447,
  "albums": [
   {
    "year": 2013,
@@ -27,6 +27,11 @@
      "cover": "music/cover/mvgr0dmkzlxw.jpg"
     },
     {
+     "name": "아이유 - 나만 몰랐던 이야기",
+     "file": "music/ddba5599b38f80b133732235.mp3",
+     "cover": "music/cover/mvgr0dobt14v.jpg"
+    },
+    {
      "name": "이적 - 오래 전 그날",
      "file": "music/76682958f05ef46ab38c007c.mp3",
      "cover": "music/cover/mvgr0dqhrqks.jpg"
@@ -35,11 +40,6 @@
      "name": "성시경 - 거리에서",
      "file": "music/86b0a18f8cd6586cdd8defb1.mp3",
      "cover": "music/cover/mvgr0dnmqpi2.jpg"
-    },
-    {
-     "name": "아이유 - 나만 몰랐던 이야기",
-     "file": "music/ddba5599b38f80b133732235.mp3",
-     "cover": "music/cover/mvgr0dobt14v.jpg"
     },
     {
      "name": "Nell - Go",
