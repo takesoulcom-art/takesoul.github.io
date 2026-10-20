@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-vmB81mXffKa/Id8pSkmEFiJwBaWw5bRFV+IK23KvNbE=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-j2tcDeJN3W1EIVq8B/GCsgrTQPp4tgrxyeahlowdNeM=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -379,13 +379,15 @@ async function flushNow(msg,prog){
   const cm=await ghj(`/git/commits/${head}`);
   const tr=await ghj(`/git/trees/${cm.tree.sha}?recursive=1`);
   const have=new Set((tr.tree||[]).filter(x=>x.type=='blob').map(x=>x.path)),shaOf={};(tr.tree||[]).forEach(x=>{if(x.type=='blob')shaOf[x.path]=x.sha});
+  const vs=await verStamp(items,tr,shaOf); // 같은 커밋에 넣을 버전 계산 (최신 ver.json 기준)
   const adds=items.filter(([,v])=>!v.d),ents=[];let n=0;
   for(const [p,v] of adds){
     if(prog)prog(++n,adds.length,p);
     if(v.mv){const sh=shaOf[v.mv];if(!sh)throw new Error('원본 파일을 찾지 못했어요: '+v.mv);ents.push({path:p,mode:'100644',type:'blob',sha:sh});continue}
-    const bl=await ghj('/git/blobs',{method:'POST',body:JSON.stringify({content:v.b?await b64blob(v.b):b64(v.t),encoding:'base64'})});
+    const bl=await ghj('/git/blobs',{method:'POST',body:JSON.stringify({content:v.b?await b64blob(v.b):b64(vs.txt.has(p)?vs.txt.get(p):v.t),encoding:'base64'})});
     ents.push({path:p,mode:'100644',type:'blob',sha:bl.sha});
   }
+  if(vs.ver){const bl=await ghj('/git/blobs',{method:'POST',body:JSON.stringify({content:b64(JSON.stringify(vs.ver,null,1)),encoding:'base64'})});ents.push({path:VP,mode:'100644',type:'blob',sha:bl.sha})}
   items.forEach(([p,v])=>{if(v.d&&(tr.truncated||have.has(p)))ents.push({path:p,mode:'100644',type:'blob',sha:null})});
   if(!ents.length){done();return}
   const nt=await ghj('/git/trees',{method:'POST',body:JSON.stringify({base_tree:cm.tree.sha,tree:ents})});
@@ -397,13 +399,96 @@ const savePosts=()=>saveJSON('data/index.json',S.posts);
 const saveTags=()=>saveJSON('data/tags.json',S.tags);
 const saveMusic=()=>saveJSON('data/music.json',{albums:S.music.albums});
 const postPath=id=>`data/${id.slice(0,4)}/${id}.json`;
-// 관리자: GitHub API 로 최신본 직접 읽기(배포 지연 없음) / 방문자: 사이트 파일(?t= 로 캐시 회피). 실패하면 기본값 d
-const load=async(f,d)=>{
+// ── JSON 버전 관리 ──
+// data/ver.json = {index,tags,music,design,base}. 글 본문 버전은 index.json 항목의 v (없으면 base). 값은 yyyymmddhhmmss(UTC) 숫자
+const VP='data/ver.json',VK={'data/index.json':'index','data/tags.json':'tags','data/music.json':'music','data/design.json':'design'};
+const isPost=p=>/^data\/\d{4}\/[^/]+\.json$/.test(p);
+const vNow=()=>+new Date().toISOString().slice(0,19).replace(/\D/g,'');
+const vNext=prev=>Math.max(vNow(),(+prev||0)+1); // 항상 직전값보다 커서 같은 값이 다시 나오지 않음
+async function verRead(tr,shaOf){ // 커밋 직전의 최신 ver.json (두 기기 동시 저장 대비). 없으면 {}
+  const sh=shaOf[VP],dec=s=>JSON.parse(decodeURIComponent(escape(atob(s.replace(/\s/g,'')))));
+  try{
+    if(sh)return dec((await ghj('/git/blobs/'+sh)).content);
+    if(!tr.truncated)return {};
+    const r=await ghRaw(VP);if(r.ok)return JSON.parse(await r.text());
+    if(r.status==404)return {};throw new Error('HTTP '+r.status);
+  }catch(e){throw new Error('ver.json 을 읽지 못했어요: '+e.message)}
+}
+async function verStamp(items,tr,shaOf){ // 저장 대상에 새 버전을 정해 내부 v 로 넣고, 바뀐 항목만 ver.json 에 반영
+  const txt=new Map(),L=items.filter(([p,v])=>!v.d&&v.t!=null&&(VK[p]||isPost(p)));
+  if(!L.length)return {txt,ver:null};
+  let vj=await verRead(tr,shaOf);
+  if(!vj.base){const b=vNow();vj={index:b,tags:b,music:b,design:b,base:b}} // 최초 1회: 버전표 새로 만들기(마이그레이션, 기존 파일은 그대로)
+  const ie=L.find(([p])=>p=='data/index.json'),idx=ie?JSON.parse(ie[1].t):null;
+  for(const [p,v] of L){
+    const k=VK[p];if(k=='index')continue;
+    const o=JSON.parse(v.t);delete o.v;
+    if(k){const nv=vNext(vj[k]);vj[k]=nv;txt.set(p,JSON.stringify({v:nv,...o},null,1));continue}
+    const id=p.split('/').pop().slice(0,-5),it=idx&&idx.find(x=>x.id==id);
+    if(!it)throw new Error('index.json 에서 글 항목을 찾지 못했어요: '+id);
+    const nv=vNext(it.v!=null?it.v:vj.base);it.v=nv;txt.set(p,JSON.stringify({v:nv,...o},null,1));
+  }
+  if(ie){vj.index=vNext(vj.index);txt.set('data/index.json',JSON.stringify(idx,null,1))}
+  return {txt,ver:vj};
+}
+// 방문자: ver.json 을 no-cache 로 확인(변경 없으면 304). 3초 안에 못 받으면 직전 사본, 사본도 없으면 null(→ 예전 ?t= 방식)
+const DCN='data-v1',VL='verjson';
+async function verGet(){
+  let j=null;
+  try{
+    const ac=new AbortController(),t=setTimeout(()=>ac.abort(),3000);
+    try{
+      const r=await fetch(VP,{cache:'no-cache',signal:ac.signal});
+      if(r.status==404){try{delete localStorage[VL]}catch(e){}return null}
+      if(r.ok)j=await r.json();
+    }finally{clearTimeout(t)}
+  }catch(e){}
+  if(j&&typeof j=='object'){try{localStorage[VL]=JSON.stringify(j)}catch(e){}return j}
+  try{const s=JSON.parse(localStorage[VL]);if(s&&typeof s=='object')return s}catch(e){}
+  return null;
+}
+const vBad=(j,v)=>!!j&&typeof j=='object'&&!Array.isArray(j)&&j.v!=null&&String(j.v)!=String(v); // 내부 v 가 있는 파일만 자기 검증
+async function vfetch(u,o){try{const r=await fetch(u,o);if(r.status==404)return {nf:1};if(!r.ok)return null;return {j:await r.json()}}catch(e){return null}}
+async function dcPut(c,f,key,j){ // 저장하고, 같은 파일의 이전 버전은 지움
+  try{
+    await c.put(key,new Response(JSON.stringify(j),{headers:{'Content-Type':'application/json'}}));
+    const me=new URL(key,location.href).href;
+    for(const k of await c.keys(f,{ignoreSearch:true}))if(k.url!=me)await c.delete(k);
+  }catch(e){}
+}
+async function vload(f,v,d){ // 받아 둔 버전이면 요청 없이 Cache Storage 에서, 아니면 f?v=v 로 받기
+  const key=f+'?v='+v;let c=null;
+  try{c=await caches.open(DCN)}catch(e){}
+  if(c){try{const r=await c.match(key);if(r){const j=await r.json();if(!vBad(j,v))return j;await c.delete(key)}}catch(e){}}
+  let x=await vfetch(key);
+  if(!x||x.nf)return d;
+  if(vBad(x.j,v)){const y=await vfetch(key+'&t='+Date.now(),{cache:'no-store'});if(y&&y.j!==undefined)x=y} // CDN 지연: 한 번만 다시 받기
+  if(c&&!vBad(x.j,v))dcPut(c,f,key,x.j);
+  return x.j;
+}
+async function dcClean(){ // 삭제된 글과 이전 버전 정리 (목록을 못 읽었으면 건드리지 않음)
+  try{
+    if(!S.ver||!S.posts.length)return;
+    const keep=new Set(),add=(f,v)=>{if(v!=null)keep.add(new URL(f+'?v='+v,location.href).href)};
+    for(const f in VK)add(f,S.ver[VK[f]]);
+    S.posts.forEach(p=>add(postPath(p.id),p.v!=null?p.v:S.ver.base));
+    const c=await caches.open(DCN);
+    for(const k of await c.keys())if(!keep.has(k.url))await c.delete(k);
+  }catch(e){}
+}
+// 관리자: GitHub API 로 최신본 직접 읽기(배포 지연 없음) / 방문자: 버전 v 가 있으면 ?v= + Cache Storage, 없으면 ?t= 로 캐시 회피. 실패하면 기본값 d
+const load=async(f,d,v)=>{
   if(S.admin){try{const r=await ghRaw(f);if(r.ok)return JSON.parse(await r.text());if(r.status==404)return d}catch(e){}}
+  else if(v!=null)return vload(f,v,d);
   try{const r=await fetch(f+'?t='+Date.now());return r.ok?await r.json():d}catch(e){return d}
 };
 const loadIdx=()=>load('data/index.json',S.posts);
-const reload=async()=>{S.full={};[S.posts,S.tags,S.music,S.dz]=await Promise.all([load('data/index.json',[]),load('data/tags.json',{order:[],hidden:[]}),load('data/music.json',[]),load('data/design.json',{})]);dInit();S.music=mNorm(S.music,S.dz);mcClean().then(mPreTop)};
+const reload=async()=>{
+  S.full={};S.ver=S.admin?null:await verGet();
+  const V=f=>S.ver?S.ver[VK[f]]:undefined;
+  [S.posts,S.tags,S.music,S.dz]=await Promise.all([load('data/index.json',[],V('data/index.json')),load('data/tags.json',{order:[],hidden:[]},V('data/tags.json')),load('data/music.json',[],V('data/music.json')),load('data/design.json',{},V('data/design.json'))]);
+  dInit();S.music=mNorm(S.music,S.dz);mcClean().then(mPreTop);if(!S.admin)dcClean();
+};
 let toastT;const toast=(t,err)=>{const el=$('#toast');el.textContent=t;el.className='on'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>{el.className=''},err?6000:3000)};
 const busy=async fn=>{try{await fn()}catch(e){toast('저장 실패: '+e.message,1)}};
 const newest=(a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id);
@@ -552,7 +637,7 @@ function renderTags(){
   $('#tags').innerHTML=h;
 }
 S.blob={};S.up=[];S.full={};
-async function loadPost(id){if(S.full[id])return S.full[id];const p=await load(postPath(id),null);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
+async function loadPost(id){if(S.full[id])return S.full[id];const it=S.posts.find(x=>x.id==id),v=S.ver?(it&&it.v!=null?it.v:S.ver.base):undefined,p=await load(postPath(id),null,v);return S.full[id]=p||{body:'글 파일을 찾을 수 없습니다. 배포 중이면 잠시 후 새로고침해 주세요.',_x:1}}
 function imgFail(i){
   if(!i.isConnected)return;
   if(i.closest('#mbox')&&!i.classList.contains('big')){i.replaceWith('♬');return}
@@ -1165,11 +1250,11 @@ document.addEventListener('click',async e=>{
     if(!d.title||!d.date||!d.tags.length){toast('날짜, 제목, Tags는 필수입니다.',1);return}
     let base=null;
     if(!d.id){base=await loadIdx();const pre=d.date.replace(/-/g,''),n=Math.max(0,...base.filter(x=>x.id.startsWith(pre)).map(x=>+x.id.slice(8)))+1;d.id=pre+p2(n)}
-    const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'',pv=S.posts.find(x=>x.id==d.id),same=!!pv&&pv.date==m.date&&pv.title==m.title&&!!pv.hidden==m.hidden&&(pv.tags||[]).join(',')==m.tags.join(',');
+    const m={id:d.id,date:d.date,title:d.title,tags:d.tags,hidden:d.hidden},old=(S.full[d.id]||{}).body||'';
     let na=null;const q0=qSnap(),pf=S.full[d.id];
     try{
       await saveJSON(postPath(d.id),{...m,weather:d.weather||'',body:d.body});
-      if(!same){const arr=[...(base||await loadIdx())],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]=m;await saveJSON('data/index.json',arr);na=arr}
+      {const arr=[...(base||await loadIdx())],i=arr.findIndex(x=>x.id==d.id);i<0?arr.push(m):arr[i]={...m,...(arr[i].v!=null?{v:arr[i].v}:{})};await saveJSON('data/index.json',arr);na=arr} // 글 파일의 v 가 index 항목에 들어가므로 항상 갱신
       S.full[d.id]={...m,weather:d.weather||'',body:d.body};
       await purge([...imgsOf(old),...S.up],new Set(imgsOf(d.body)));
       toast('GitHub에 저장 중…');await flush('글 저장: '+d.title);if(na)S.posts=na;
