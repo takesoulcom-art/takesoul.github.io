@@ -1,11 +1,112 @@
 {
- "v": 20261020134316,
+ "v": 20261020135810,
  "albums": [
   {
    "year": 2013,
    "name": "2013 즐겨들은 노래",
    "cover": "music/cover/mvgqh7fzr8dq.jpg",
-   "tracks": []
+   "tracks": [
+    {
+     "name": "10cm - 그러니까...",
+     "file": "music/2b7ccbd530c662170709bafc.mp3",
+     "cover": "music/cover/mvgr0djoti6g.jpg"
+    },
+    {
+     "name": "Justin Timberake - Five Hundred Miles",
+     "file": "music/ba40ad0e11cec7316d64f01f.mp3",
+     "cover": "music/cover/mvgr0djtxf4x.jpg"
+    },
+    {
+     "name": "Mamas Gun - Baby I Love You",
+     "file": "music/80866e4fee31814edd8cd794.mp3",
+     "cover": "music/cover/mvgr0dkh8tdu.jpg"
+    },
+    {
+     "name": "Nell - Go",
+     "file": "music/b37895584cddfe7b09f5a722.mp3",
+     "cover": "music/cover/mvgr0dknmurv.jpg"
+    },
+    {
+     "name": "Sioen - Cruisin'",
+     "file": "music/40883ce53b2185bb6a30bad8.mp3",
+     "cover": "music/cover/mvgr0dksu81a.jpg"
+    },
+    {
+     "name": "tete - Romantico",
+     "file": "music/bfbe32930be75a73f4dfd751.m4a",
+     "cover": "music/cover/mvgr0dlboz20.jpg"
+    },
+    {
+     "name": "Yuya Wakai Trio - いつも何度でも",
+     "file": "music/8f79e95a89a0fed143c00223.m4a",
+     "cover": "music/cover/mvgr0dlf7zjs.jpg"
+    },
+    {
+     "name": "검정치마 - Love Shine",
+     "file": "music/5c27fb5b6c19f3f2e627ac50.mp3",
+     "cover": "music/cover/mvgr0dlpsieo.jpg"
+    },
+    {
+     "name": "김광석 - 너무 아픈 사랑은 사랑이 아니었음을",
+     "file": "music/0c89762c4a0169c639c57377.mp3",
+     "cover": "music/cover/mvgr0dmbgxrt.jpg"
+    },
+    {
+     "name": "김광석 - 잊어야 한다는 마음으로",
+     "file": "music/94c5b4998a092d3c2f90f047.mp3",
+     "cover": "music/cover/mvgr0dmkzlxw.jpg"
+    },
+    {
+     "name": "김연우 - 바람, 어디에서 부는지",
+     "file": "music/56a59bac19ae5dc07952ee56.mp3",
+     "cover": "music/cover/mvgr0dne8kzv.jpg"
+    },
+    {
+     "name": "성시경 - 거리에서",
+     "file": "music/86b0a18f8cd6586cdd8defb1.mp3",
+     "cover": "music/cover/mvgr0dnmqpi2.jpg"
+    },
+    {
+     "name": "성시경 - 태양계",
+     "file": "music/4ec356764597c6f0e0d59368.mp3",
+     "cover": "music/cover/mvgr0do6ywvg.jpg"
+    },
+    {
+     "name": "아이유 - 나만 몰랐던 이야기",
+     "file": "music/ddba5599b38f80b133732235.mp3",
+     "cover": "music/cover/mvgr0dobt14v.jpg"
+    },
+    {
+     "name": "윤건 - 홍대 앞에 눈이 내리면",
+     "file": "music/ada55a337f93f068d1efe609.mp3",
+     "cover": "music/cover/mvgr0douhckf.jpg"
+    },
+    {
+     "name": "이소라 - Tears",
+     "file": "music/b9c47d4cbb278925dc1e1d8d.mp3",
+     "cover": "music/cover/mvgr0dp4mhk8.jpg"
+    },
+    {
+     "name": "이소라 - 바람이 분다",
+     "file": "music/8f83da4d74d5576e1e554f90.mp3",
+     "cover": "music/cover/mvgr0dpkonw2.jpg"
+    },
+    {
+     "name": "이소라 - 시시콜콜한 이야기",
+     "file": "music/de4cdbf13d9d4c49fd4e0df8.mp3",
+     "cover": "music/cover/mvgr0dq1mbau.jpg"
+    },
+    {
+     "name": "이적 - 오래 전 그날",
+     "file": "music/76682958f05ef46ab38c007c.mp3",
+     "cover": "music/cover/mvgr0dqhrqks.jpg"
+    },
+    {
+     "name": "장재인 - 가로수 그늘 아래 서면",
+     "file": "music/a8036cac9a342db1fbd0e1e8.mp3",
+     "cover": "music/cover/mvgr0dqy1ugy.jpg"
+    }
+   ]
   },
   {
    "year": 2026,
