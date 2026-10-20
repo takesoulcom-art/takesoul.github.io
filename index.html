@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-uMG6O3M9ui/nMwGLzt5rgwuE0IiQELMkFds3l2jPAAk=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-vmB81mXffKa/Id8pSkmEFiJwBaWw5bRFV+IK23KvNbE=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -905,7 +905,7 @@ const mcKey=f=>new URL(encodeURI(f),location.href).href;
 const mcMeta=()=>{try{return JSON.parse(localStorage.getItem(MC.meta)||'{}')||{}}catch(e){return {}}};
 const mcSave=m=>{try{localStorage.setItem(MC.meta,JSON.stringify(m))}catch(e){}};
 const mcNet=()=>{const c=navigator.connection;return !(c&&(c.saveData||/^(slow-2g|2g|3g)$/.test(c.effectiveType||'')))}; // Safari 는 이 API 가 없어 항상 true
-let mcP=0,mTok=0,mArm=0,mUnl=0,mBusy=0;
+let mcP=0,mTok=0,mArm=0,mGo=0,mUnl=0,mBusy=0,mWant=0; // mArm: 10초 대기 중인 곡, mGo: 10초가 지나 받기가 허용된 곡, mWant: 받는 중에 들어온 재실행 요청
 const mDl=new Map(),mUrls=new Map(); // mDl: 진행 중 다운로드(파일 → AbortController), mUrls: 메모리에 올린 blob: 주소(파일 → 주소)
 async function mcGet(f){
   if(!mcOK())return null;
@@ -960,24 +960,28 @@ async function mDownload(f){ // 곡 전체를 낮은 우선순위로 받아 캐�
     const b=await r.blob();await mcPut(f,b);return b;
   }catch(e){return null}finally{mDl.delete(f)}
 }
-async function mDlRun(tok){ // 현재 곡 → 다음 곡 순서로 하나씩 받기
-  if(mBusy)return;mBusy=1;const tried=new Set();
+async function mDlRun(){ // 현재 곡 → 다음 곡 순서로 하나씩 받기 (동시에 두 곡을 받지 않음)
+  if(mBusy){mWant=1;return} // 이미 받는 중이면 버리지 않고 표시만 해 두었다가, 끝난 뒤 최신 곡 기준으로 다시 확인
+  mBusy=1;
   try{
-    while(tok==mTok&&mcNet()){
-      const al=albBy(S.pa),t=al&&al.tracks[S.cur];if(!t)break;
-      const n=al.tracks[(S.cur+1)%al.tracks.length],nf=n&&n.file,m=mcMeta();
-      const f=[t.file,nf].find(x=>x&&!tried.has(x)&&!S.blob[x]&&!m[x]);
-      if(!f)break;
-      tried.add(f);
-      const b=await mDownload(f);
-      if(!b)break; // 실패·취소 → 이번에는 더 시도하지 않음
-      if(f==nf&&tok==mTok&&!mUrls.has(f))mUrls.set(f,URL.createObjectURL(b)); // 다음 곡은 메모리에 올려 전환을 즉시로
-    }
+    do{
+      mWant=0;const tok=mTok,tried=new Set();
+      while(tok==mTok&&mGo==tok&&mcNet()){
+        const al=albBy(S.pa),t=al&&al.tracks[S.cur];if(!t)break;
+        const n=al.tracks[(S.cur+1)%al.tracks.length],nf=n&&n.file,m=mcMeta();
+        const f=[t.file,nf].find(x=>x&&!tried.has(x)&&!S.blob[x]&&!m[x]);
+        if(!f)break;
+        tried.add(f);
+        const b=await mDownload(f);
+        if(!b)break; // 실패·취소 → 이번 확인에서는 더 시도하지 않음
+        if(f==nf&&tok==mTok&&!mUrls.has(f))mUrls.set(f,URL.createObjectURL(b)); // 다음 곡은 메모리에 올려 전환을 즉시로
+      }
+    }while(mWant&&mGo==mTok); // 받는 동안 곡이 바뀌어 10초가 지난 경우 → 새 곡 기준으로 이어서
   }finally{mBusy=0}
 }
 const mRel=keep=>{for(const [f,u] of mUrls)if(!keep.includes(f)){URL.revokeObjectURL(u);mUrls.delete(f)}};
 const mCut=keep=>mDl.forEach((ac,f)=>{if(!keep.includes(f))ac.abort()});
-function mStop(){mTok++;mArm=0;mCut([]);au.pause();au.removeAttribute('src');mRel([])}
+function mStop(){mTok++;mArm=0;mGo=0;mCut([]);au.pause();au.removeAttribute('src');mRel([])}
 function mAfter(al,f){ // 곡이 시작된 뒤: 지난 곡 정리, 불필요한 다운로드 취소, 다음 곡이 캐시에 있으면 메모리로
   const n=al.tracks[(S.cur+1)%al.tracks.length],nf=n&&n.file;
   mRel([f,nf]);mCut([f,nf]);
@@ -992,12 +996,12 @@ async function mPreTop(){ // 접속 직후: 맨 위 앨범 1번 곡이 캐시에
   if(t&&!S.blob[t.file]&&mcMeta()[t.file])await mLoad(t.file);
 }
 au.addEventListener('playing',()=>{mUnl=1});
-au.addEventListener('timeupdate',()=>{if(mArm&&mArm==mTok&&au.currentTime>=MC.wait){mArm=0;if(mcOK()&&mcNet())mDlRun(mTok)}});
+au.addEventListener('timeupdate',()=>{if(mArm&&mArm==mTok&&au.currentTime>=MC.wait){mArm=0;if(mcOK()&&mcNet()){mGo=mTok;mDlRun()}}});
 function playIdx(i,y){
   const al=albBy(y==null?S.pa:y);if(!al||!al.tracks.length)return;
   S.pa=al.year;S.cur=(i+al.tracks.length)%al.tracks.length;
   const f=al.tracks[S.cur].file,tok=++mTok,ready=S.blob[f]||mUrls.get(f);
-  S.playing=true;mArm=0;
+  S.playing=true;mArm=0;mGo=0;
   const go=u=>{if(tok!=mTok)return;au.src=u;mPlay(tok);mArm=S.blob[f]?0:tok;mAfter(al,f);renderMusic()};
   if(ready)go(ready);
   else if(mUnl&&mcMeta()[f]){au.pause();renderMusic();mLoad(f).then(u=>go(u||encodeURI(f)))} // 캐시본(읽기 실패 시 스트리밍)
