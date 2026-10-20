@@ -1,6 +1,12 @@
 {
  "albums": [
   {
+   "year": 2025,
+   "name": "202522",
+   "cover": "",
+   "tracks": []
+  },
+  {
    "year": 2026,
    "name": "part of me",
    "cover": "music/cover/mvf9457nr12z.jpg",
