@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-SdwzQwl+mINSvYQ79VdvjXzjyzpJvOLOOzkjNb5dPMw=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-ujrzJ8DL0zvE9Wav9RFEEtlZTg2fTZYxLy/B6mEnPnE=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -288,6 +288,8 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 .ri span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ri.on{color:var(--ink);font-weight:600}
 .ri.e{cursor:default}
+.lh{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lh .meta:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
 .ptb{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:16px;font-size:calc(13px + var(--fs))}
 .ptb th{font-weight:400;text-align:left;color:var(--lo);font-size:calc(11px + var(--fs));padding:6px 8px 6px 0;border-bottom:1px solid var(--mid)}
 .ptb td{padding:9px 8px 9px 0;border-bottom:1px solid var(--line);color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -686,14 +688,14 @@ function body(t){
 const PS=15;
 // 글 목록(표): 작성일 · 숨김(관리자만) · tags · 제목. 페이지당 PS 건. S.lp = 현재 페이지(1부터)
 function pgNums(c,t){const w=5;let s=Math.max(1,c-2),e=Math.min(t,s+w-1);s=Math.max(1,e-w+1);const r=[];for(let i=s;i<=e;i++)r.push(i);return r}
-function listHTML(){
-  const L=list(),A=S.admin,tp=Math.max(1,Math.ceil(L.length/PS));
+function listHTML(L,tag){
+  const A=S.admin,tp=Math.max(1,Math.ceil(L.length/PS));
   S.lp=Math.min(Math.max(1,S.lp||1),tp);
-  const rows=L.slice((S.lp-1)*PS,S.lp*PS),nc=A?4:3;
+  const rows=L.slice((S.lp-1)*PS,S.lp*PS),nc=2+(A?1:0)+(tag?0:1);
   const acts=A?'<div class="act"><button data-a="new">[글쓰기]</button></div>':'';
-  let h=`<div class="meta">List · ${L.length}건</div>${acts}<table class="ptb"><colgroup><col class="c-d">${A?'<col class="c-h">':''}<col class="c-t"><col></colgroup>`
-    +`<thead><tr><th>작성일</th>${A?'<th>숨김</th>':''}<th>tags</th><th>제목</th></tr></thead><tbody>`
-    +(rows.map(p=>`<tr class="r ${p.id==S.pid?'on':''}" data-a="open" data-v="${esc(p.id)}"><td class="dt">${esc(p.date)}</td>${A?`<td class="${p.hidden?'hy':''}">${p.hidden?'y':'n'}</td>`:''}<td>${esc((p.tags||[]).join(', '))}</td><td>${esc(p.title||'(제목 없음)')}</td></tr>`).join('')||`<tr><td class="e" colspan="${nc}">아직 작성된 글이 없습니다.</td></tr>`)
+  let h=`<div class="lh"><span class="meta">List · ${L.length}건</span>${tag?`<span class="meta"># ${esc(tag)}</span>`:''}</div>${acts}<table class="ptb"><colgroup><col class="c-d">${A?'<col class="c-h">':''}${tag?'':'<col class="c-t">'}<col></colgroup>`
+    +`<thead><tr><th>작성일</th>${A?'<th>숨김</th>':''}${tag?'':'<th>tags</th>'}<th>제목</th></tr></thead><tbody>`
+    +(rows.map(p=>`<tr class="r ${p.id==S.pid?'on':''}" data-a="open" data-v="${esc(p.id)}"><td class="dt">${esc(p.date)}</td>${A?`<td class="${p.hidden?'hy':''}">${p.hidden?'y':'n'}</td>`:''}${tag?'':`<td>${esc((p.tags||[]).join(', '))}</td>`}<td>${esc(p.title||'(제목 없음)')}</td></tr>`).join('')||`<tr><td class="e" colspan="${nc}">${tag?'글이 없습니다.':'아직 작성된 글이 없습니다.'}</td></tr>`)
     +'</tbody></table>';
   if(tp>1){
     h+=`<div class="pgn"><button data-a="pg" data-v="${S.lp-1}" ${S.lp<=1?'disabled':''} aria-label="이전 페이지">‹</button>`
@@ -702,6 +704,8 @@ function listHTML(){
   }
   return h;
 }
+// 본문 영역이 글 목록(List / tags 목록 / 같은 날 여러 글 목록)을 보여 주는 중인가 — 이때 Recent 를 누르면 목록 대신 직전 본문(S.bp)으로 되돌려 목록이 두 곳에 뜨지 않게 함
+const artIsList=()=>S.mode=='view'&&(S.pl||(!S.pid&&(S.tag||(S.date&&list().filter(x=>x.date==S.date).length>1))));
 const WX=['☀️','🌞','☁️','🌤️','🌥️','🌦️','🌧️','🌩️','🌪️','🌨️','🌀','🌈','☔','❄️'];
 function renderArt(){
   const a=$('#art');
@@ -725,13 +729,9 @@ function renderArt(){
     renderThumbs();
     return;
   }
-  if(S.pl){a.innerHTML=listHTML();return}
+  if(S.pl){a.innerHTML=listHTML(list());return}
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
-  if(S.tag&&!S.pid){
-    a.innerHTML=`<div class="meta"># ${esc(S.tag)}</div>${acts}<div class="plist" style="margin-top:16px">`+
-      (posts.map(p=>`<div data-a="open" data-v="${esc(p.id)}"><small>${esc(p.date)}</small>${esc(p.title)}</div>`).join('')||'글이 없습니다.')+'</div>';
-    return;
-  }
+  if(S.tag&&!S.pid){a.innerHTML=listHTML(posts,S.tag);return}
   let p=S.posts.find(x=>x.id==S.pid);
   if(!p){
     const day=S.date?list().filter(x=>x.date==S.date):list();
@@ -741,7 +741,7 @@ function renderArt(){
     p=day[0];
   }
   if(!p){a.innerHTML='<div class="meta">아직 작성된 글이 없습니다.</div>'+acts;return}
-  S.pid=p.id;setHash(p.id);
+  S.pid=p.id;S.bp=p.id;setHash(p.id);
   const fp=S.full[p.id];
   if(!fp){a.innerHTML='<div class="meta">불러오는 중…</div>';loadPost(p.id).then(()=>{if(S.pid==p.id&&S.mode=='view')renderArt()});return}
   p={...p,body:fp.body,weather:fp.weather};track(p);
@@ -1290,9 +1290,9 @@ document.addEventListener('click',async e=>{
   else if(a=='next')go(S.y,S.m+1);
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
   // 최근 글 목록이 떠 있었다면 달력으로 되돌림(본문의 태그 글 목록과 중복 출력 방지)
-  else if(a=='tag'){pick({tag:v});S.lv=false;render();toTop()}
-  else if(a=='recent'){const w=S.pl;S.pl=false;S.lv=true;if(w){renderArt();toTop()}renderCal()}
-  else if(a=='plist'){S.mode='view';S.pl=true;S.lv=false;const ix=S.pid?list().findIndex(p=>p.id==S.pid):-1;S.lp=ix<0?1:Math.floor(ix/PS)+1;renderArt();renderCal();toTop()}
+  else if(a=='tag'){pick({tag:v});S.lv=false;S.lp=1;render();toTop()}
+  else if(a=='recent'){if(artIsList()){const p=S.posts.find(x=>x.id==S.bp&&(S.admin||!x.hidden));showPost(p||null);S.lv=true;renderArt();renderCal();toTop()}else{S.lv=true;renderCal()}}
+  else if(a=='plist'){S.mode='view';S.pl=true;S.lv=false;S.tag=null;const ix=S.pid?list().findIndex(p=>p.id==S.pid):-1;S.lp=ix<0?1:Math.floor(ix/PS)+1;renderArt();renderCal();toTop()}
   else if(a=='pg'){S.lp=+v;renderArt();toTop()}
   else if(a=='back'){S.lv=false;renderCal()}
   else if(a=='open'){S.pid=v;S.mode='view';S.pl=false;const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;setYMOf(p.date)}renderArt();renderCal();toTop()}
