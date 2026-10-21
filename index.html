@@ -274,9 +274,11 @@ article{order:1;padding:20px;overflow:visible}aside{overflow:visible;gap:44px}.t
 aside{order:2}#foot{padding-top:28px}
 header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;justify-content:flex-end;padding-bottom:4px}#music [data-a=mtoggle]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
-.cbar{display:flex;justify-content:flex-end;align-items:center;height:32px}
+.cbar{display:flex;justify-content:space-between;align-items:center;height:32px}
 .cbar:empty{display:none}
 .cbar .lb{font-size:calc(12px + var(--fs));line-height:1.2;color:var(--mid);padding:6px 0 6px 12px;white-space:nowrap}
+.cbar .lb:first-child{padding:6px 12px 6px 0}
+.cbar .lb.on{color:var(--ink);font-weight:600}
 .cal-h .ch{height:44px}
 .ch.lt>span{min-height:44px;font-size:calc(16px + var(--fs));letter-spacing:1px}
 .cal .w{height:20px;line-height:20px}
@@ -286,6 +288,19 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 .ri span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ri.on{color:var(--ink);font-weight:600}
 .ri.e{cursor:default}
+.ptb{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:16px;font-size:calc(13px + var(--fs))}
+.ptb th{font-weight:400;text-align:left;color:var(--lo);font-size:calc(11px + var(--fs));padding:6px 8px 6px 0;border-bottom:1px solid var(--mid)}
+.ptb td{padding:9px 8px 9px 0;border-bottom:1px solid var(--line);color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptb tr.r{cursor:pointer}
+.ptb tr.on td{color:var(--ink);font-weight:600}
+.ptb .c-d{width:6.6em}.ptb .c-h{width:3.2em}.ptb .c-t{width:24%}
+.ptb td.hy{color:var(--hid)}
+.ptb .e{text-align:center;color:var(--lo);cursor:default;padding:28px 0}
+.pgn{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:2px;margin-top:20px;color:var(--mid)}
+.pgn button{min-width:36px;min-height:36px;padding:0 6px;line-height:1}
+.pgn button.on{color:var(--ink);font-weight:600;background:var(--sel)}
+.pgn button:disabled{opacity:.3;cursor:default}
+@media(max-width:760px){.ptb .c-d{width:5.6em}.ptb .c-t{width:26%}.ptb td.dt{font-size:calc(12px + var(--fs))}}
 </style>
 </head>
 <body>
@@ -610,7 +625,7 @@ function designHTML(){
   return h+`<div class="ud"></div><div class="row2"><span>글자 크기</span>${op('ufs',D.fs,[['s','작게'],['n','기본'],['l','크게']])}</div>`
     +`<div class="row2"><span>해시 정렬</span>${op('uhs',D.hs,[['v','세로'],['h','가로']])}</div>`
     +`<div class="row2"><span>최근 글</span>${op('uln',D.ln,[[0,'끔'],[5,'5개'],[6,'6개'],[7,'7개']])}</div>`
-    +`<div class="uh">최근 글: 달력 오른쪽 위 List 버튼으로 달력 ↔ 최근 글 목록(날짜·제목)을 바꿔 봐요. 끔이면 버튼이 사라져요.</div></div>`;
+    +`<div class="uh">최근 글: 달력 오른쪽 위 Recent 버튼으로 달력 ↔ 최근 글 목록(날짜·제목)을 바꿔 봐요. 끔이면 Recent 버튼이 사라져요. (왼쪽 List 는 전체 글 목록이며 항상 표시돼요.)</div></div>`;
 }
 const footRow=()=>`<div class="row2"><span>하단 문구</span><input data-ui="ft" data-ik="t" value="${esc(dView().ft||'')}" maxlength="200" placeholder="예: © 2026 takesoul" autocomplete="off" aria-label="하단 문구"></div><div class="uh">홈페이지 우측 하단에 표시돼요. 비우면 표시하지 않아요.</div>`;
 function onDesignInput(t,k){if(k=='ft'){if(S.admin){dEdit().ft=t.value;renderFooter()}return}uiColor(k,t.value,t.dataset.ik)}
@@ -618,7 +633,8 @@ function onDesignChange(t,k){if(k=='name'){const o=toneT(curId());if(o&&!t.value
 try{const mq=matchMedia(uiQ),f=()=>{if(!S.em){dApplyAll();renderCal()}};if(mq.addEventListener)mq.addEventListener('change',f);else if(mq.addListener)mq.addListener(f)}catch(e){}
 function renderCal(){
   const n=dS().ln||0;if(!n)S.lv=false;
-  $('#calbar').innerHTML=n?`<button class="lb" data-a="${S.lv?'back':'list'}">${S.lv?'Back':'List'}</button>`:'';
+  // 좌측 List = 본문 영역에 글 목록(표) / 우측 Recent = 달력 자리를 최근 글 목록으로 교체(Back 으로 복귀)
+  $('#calbar').innerHTML=`<button class="lb ${S.pl?'on':''}" data-a="plist">List</button>`+(n?`<button class="lb" data-a="${S.lv?'back':'recent'}">${S.lv?'Back':'Recent'}</button>`:'');
   $('#cal').className='cal'+(S.lv?' rl':'');
   if(S.lv){
     $('#calh').innerHTML=`<div class="ch lt"><span>Recent</span></div>`;
@@ -667,6 +683,25 @@ function body(t){
     return x?`<div class="tx">${esc(x)}</div>`:'';
   }).join('');
 }
+const PS=15;
+// 글 목록(표): 작성일 · 숨김(관리자만) · tags · 제목. 페이지당 PS 건. S.lp = 현재 페이지(1부터)
+function pgNums(c,t){const w=5;let s=Math.max(1,c-2),e=Math.min(t,s+w-1);s=Math.max(1,e-w+1);const r=[];for(let i=s;i<=e;i++)r.push(i);return r}
+function listHTML(){
+  const L=list(),A=S.admin,tp=Math.max(1,Math.ceil(L.length/PS));
+  S.lp=Math.min(Math.max(1,S.lp||1),tp);
+  const rows=L.slice((S.lp-1)*PS,S.lp*PS),nc=A?4:3;
+  const acts=A?'<div class="act"><button data-a="new">[글쓰기]</button></div>':'';
+  let h=`<div class="meta">List · ${L.length}건</div>${acts}<table class="ptb"><colgroup><col class="c-d">${A?'<col class="c-h">':''}<col class="c-t"><col></colgroup>`
+    +`<thead><tr><th>작성일</th>${A?'<th>숨김</th>':''}<th>tags</th><th>제목</th></tr></thead><tbody>`
+    +(rows.map(p=>`<tr class="r ${p.id==S.pid?'on':''}" data-a="open" data-v="${esc(p.id)}"><td class="dt">${esc(p.date)}</td>${A?`<td class="${p.hidden?'hy':''}">${p.hidden?'y':'n'}</td>`:''}<td>${esc((p.tags||[]).join(', '))}</td><td>${esc(p.title||'(제목 없음)')}</td></tr>`).join('')||`<tr><td class="e" colspan="${nc}">아직 작성된 글이 없습니다.</td></tr>`)
+    +'</tbody></table>';
+  if(tp>1){
+    h+=`<div class="pgn"><button data-a="pg" data-v="${S.lp-1}" ${S.lp<=1?'disabled':''} aria-label="이전 페이지">‹</button>`
+      +pgNums(S.lp,tp).map(i=>`<button class="${i==S.lp?'on':''}" data-a="pg" data-v="${i}" ${i==S.lp?'aria-current="page"':''}>${i}</button>`).join('')
+      +`<button data-a="pg" data-v="${S.lp+1}" ${S.lp>=tp?'disabled':''} aria-label="다음 페이지">›</button></div>`;
+  }
+  return h;
+}
 const WX=['☀️','🌞','☁️','🌤️','🌥️','🌦️','🌧️','🌩️','🌪️','🌨️','🌀','🌈','☔','❄️'];
 function renderArt(){
   const a=$('#art');
@@ -690,6 +725,7 @@ function renderArt(){
     renderThumbs();
     return;
   }
+  if(S.pl){a.innerHTML=listHTML();return}
   let posts=S.tag?list().filter(p=>(p.tags||[]).includes(S.tag)):null;
   if(S.tag&&!S.pid){
     a.innerHTML=`<div class="meta"># ${esc(S.tag)}</div>${acts}<div class="plist" style="margin-top:16px">`+
@@ -1223,11 +1259,11 @@ const setYM=(y,m)=>{const d=new Date(y,m,1);S.y=d.getFullYear();S.m=d.getMonth()
 const setYMOf=ds=>{const d=ds?dOf(ds):new Date();setYM(d.getFullYear(),d.getMonth())};
 const postByHash=()=>S.posts.find(x=>x.id==location.hash.slice(1)&&(S.admin||!x.hidden));
 // 디자인(S.dw 임시본)은 [저장]을 눌러야 반영되고, 메뉴를 닫으면 임시본·미리보기는 버려짐(uiClose)
-function showPost(p){Object.assign(S,{tag:null,pid:p?p.id:null,date:p?p.date:null,mode:'view',modal:null});setYMOf(p&&p.date)}
+function showPost(p){Object.assign(S,{tag:null,pl:false,pid:p?p.id:null,date:p?p.date:null,mode:'view',modal:null});setYMOf(p&&p.date)}
 const closeModal=()=>{S.modal=null;renderModal()};
-const startEdit=d=>{S.up.forEach(p=>Q.set(p,{d:1}));S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';renderArt()};
+const startEdit=d=>{S.up.forEach(p=>Q.set(p,{d:1}));S.snap=fld(d);S.draft=d;S.up=[];S.mode='edit';S.pl=false;renderArt();renderCal()};
 const go=(y,m)=>{setYM(y,m);S.modal=null;renderCal();renderModal()};
-const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,mode:'view'},o);
+const pick=(o)=>Object.assign(S,{date:null,tag:null,pid:null,pl:false,mode:'view'},o);
 const mvt=(i,d)=>{const L=tagList(true).map(x=>x[0]);const j=i+d;if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];S.tags.order=L;renderModal()};
 const mvm=d=>{
   const ks=mChecked(),al=eA();if(!al)return;const W=(S.mw||al.tracks).slice(),on=W.map(x=>ks.includes(x.file));
@@ -1242,7 +1278,7 @@ document.addEventListener('click',async e=>{
   if(t.classList&&(t.classList.contains('mck')||t.classList.contains('ack')))return;
   const el=t.closest('[data-a]');if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
-  if(['day','tag','open','home'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
+  if(['day','tag','open','home','plist'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
   if(/^(tone|dmode|tnew|tdelc|ufs|uhs|uln|ulogo0?)$/.test(a)&&!S.admin)return;
   if(a=='menu'){S.modal='auth';renderModal()}
   else if(a=='logout'){keyClear();location.reload()}
@@ -1255,9 +1291,11 @@ document.addEventListener('click',async e=>{
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
   // 최근 글 목록이 떠 있었다면 달력으로 되돌림(본문의 태그 글 목록과 중복 출력 방지)
   else if(a=='tag'){pick({tag:v});S.lv=false;render();toTop()}
-  else if(a=='list'){S.lv=true;renderCal()}
+  else if(a=='recent'){S.lv=true;renderCal()}
+  else if(a=='plist'){S.mode='view';S.pl=true;S.lp=1;renderArt();renderCal();toTop()}
+  else if(a=='pg'){S.lp=+v;renderArt();toTop()}
   else if(a=='back'){S.lv=false;renderCal()}
-  else if(a=='open'){S.pid=v;S.mode='view';const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;setYMOf(p.date)}renderArt();renderCal();toTop()}
+  else if(a=='open'){S.pid=v;S.mode='view';S.pl=false;const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;setYMOf(p.date)}renderArt();renderCal();toTop()}
   else if(a=='new')startEdit({date:today(),title:'',body:'',tags:[],hidden:false});
   else if(a=='edit'){const f=S.full[S.pid];if(!f||f._x)return;startEdit({...f})}
   else if(a=='pick')clickEl('#e-img');
