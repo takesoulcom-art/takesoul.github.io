@@ -1,5 +1,5 @@
 {
- "v": 20261021043337,
+ "v": 20261021043852,
  "albums": [
   {
    "id": "y2013",
@@ -27,12 +27,14 @@
     {
      "name": "김광석 - 잊어야 한다는 마음으로",
      "file": "music/94c5b4998a092d3c2f90f047.mp3",
-     "cover": "music/cover/mvgr0dmkzlxw.jpg"
+     "cover": "music/cover/mvgr0dmkzlxw.jpg",
+     "lyric": "지나간 시간은 추억속에\n묻히면 그만인 것을"
     },
     {
      "name": "아이유 - 나만 몰랐던 이야기",
      "file": "music/ddba5599b38f80b133732235.mp3",
-     "cover": "music/cover/mvgr0dobt14v.jpg"
+     "cover": "music/cover/mvgr0dobt14v.jpg",
+     "lyric": "그때 이미 나라는 건 네겐 끝이었다는 건\n나만 몰랐었던 이야기"
     },
     {
      "name": "이적 - 오래 전 그날",
