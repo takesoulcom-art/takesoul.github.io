@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-WXx+Tfape2u6wGCUYvK4+ujg42S21S9Pw8KeP/8pfWE=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-xUxdDeK810F+YrKyl6R2AUmwDF8lqKNqu5J1w39WmmI=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -1292,7 +1292,7 @@ document.addEventListener('click',async e=>{
   // 최근 글 목록이 떠 있었다면 달력으로 되돌림(본문의 태그 글 목록과 중복 출력 방지)
   else if(a=='tag'){pick({tag:v});S.lv=false;render();toTop()}
   else if(a=='recent'){S.lv=true;renderCal()}
-  else if(a=='plist'){S.mode='view';S.pl=true;S.lp=1;renderArt();renderCal();toTop()}
+  else if(a=='plist'){S.mode='view';S.pl=true;const ix=S.pid?list().findIndex(p=>p.id==S.pid):-1;S.lp=ix<0?1:Math.floor(ix/PS)+1;renderArt();renderCal();toTop()}
   else if(a=='pg'){S.lp=+v;renderArt();toTop()}
   else if(a=='back'){S.lv=false;renderCal()}
   else if(a=='open'){S.pid=v;S.mode='view';S.pl=false;const p=S.posts.find(x=>x.id==S.pid);if(p){S.date=p.date;setYMOf(p.date)}renderArt();renderCal();toTop()}
