@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-zYtZ87koE+O2yJPuEk+kfdfVSqZ1zMpMJcriXYCAeSA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-st8LHdUQl1tRO4eklMmj/MDTcoOMzoptsM7lybuXV7s=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -223,7 +223,7 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .pl-r1{display:flex;align-items:center;gap:10px;min-height:40px}
 .pl-r1>.pl-sp{flex:1 1 0;min-width:0}
 .pl-r1 .pl-ed.lt{flex:0 1 auto;min-width:0}
-.pl-r2{display:flex;justify-content:flex-end;padding:0 28px 2px 0;margin-top:-4px}
+.pl-r2{display:flex;justify-content:flex-end;padding:0 45.5px 2px 0;margin-top:-4px} /* 45.5 = 닫기 28 + 간격 10 + 다음곡 아이콘 안쪽 여백 7.5 → 미니 컨트롤러 오른쪽 끝과 일치 */
 /* 글자 밑부분(g, p, y) 잘림 방지: 줄 높이·위아래 여유를 넉넉히 */
 .pl-h b,.pl-ht{line-height:1.7;padding:3px 0}
 .pl-rt{flex:1 1 0;min-width:0;text-align:right;font-size:calc(13px + var(--fs));font-weight:400}
@@ -365,7 +365,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 /* 재생 화면: 커버·제목(·가사)을 한 덩어리로 묶어 고정 높이 영역의 가운데에. 가사가 없으면 가사 칸을 숨겨 커버·제목이 가운데로 */
 .pl-top{display:flex;flex-direction:column;justify-content:center;min-height:calc(206px + var(--fs) * 8)}
 .pl-lyr:empty{display:none}
-.pl-np{flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;line-height:1.7;padding:1px 0;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:calc(11px + var(--fs))}
+.pl-np{flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;line-height:1.7;padding:1px 0;color:var(--ink);text-decoration:none;cursor:pointer;font-size:calc(12px + var(--fs))}
 /* 모달 안의 스크롤이 끝나도 뒤의 본문으로 번지지 않게 */
 #modal,#mbox{overscroll-behavior:contain}
 </style>
@@ -831,14 +831,11 @@ function mLive(){
   // 헤더 미니 컨트롤러·재생 중인 곡 (목록·관리·다른 앨범 화면)
   const mc=b.querySelector('.pl-mini');if(mc){const h=mMiniIn();if(mc.innerHTML!==h)mc.innerHTML=h}
   const np=b.querySelector('.pl-np'),t0=curT();if(np&&t0){const x=mNowTxt();if(np.textContent!==x)np.textContent=x}
-  if(list||reg)return;
+  if(list||reg||edit)return;
   $$('#mbox .pl-row').forEach((r,i)=>{
     const on=S.cur>=0&&S.pa==r.dataset.id&&+r.dataset.v==S.cur;
     r.classList.toggle('on',on);
     const n=r.querySelector('.pl-n');if(n)n.innerHTML=on&&S.playing?IC.eq:String(i+1);
-    const tt=r.querySelector('.pl-tt');
-    if(tt&&edit&&!r.classList.contains('ke')){let ly=tt.querySelector('.pl-ly');const al=albBy(r.dataset.id),x=al&&al.tracks[+r.dataset.v];
-      if(on&&x&&x.lyric){if(!ly){ly=document.createElement('span');ly.className='pl-ly';tt.appendChild(ly)}ly.textContent=x.lyric}else if(ly)ly.remove()}
   });
   if(!play)return;
   const t=document.createElement('div');t.innerHTML=mPlayHTML();
@@ -914,7 +911,7 @@ function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHT
 // 1열: [좌측] [우측: 앨범제목(년도) 또는 미니 컨트롤러] [닫기]   2열(재생 중인 곡이 있고 다른 화면일 때): 곡 번호. 제목 (오른쪽 정렬)
 const mMiniIn=()=>`<button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'일시정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button>`;
 const mMini=()=>curT()?`<span class="pl-mini">${mMiniIn()}</span>`:'';
-const mNowTxt=()=>{const t=curT();return t?`${S.cur+1}. ${t.name}`:''};
+const mNowTxt=()=>{const t=curT();return t?t.name:''};
 const mNow=()=>curT()?`<div class="pl-r2"><button class="pl-np" data-a="gonow" aria-label="재생 중인 앨범으로 이동">${esc(mNowTxt())}</button></div>`:'';
 const mHead=(left,right,o)=>{o=o||{};return `<div class="pl-h pl-hw"><div class="pl-r1">${left}${o.sp===false?'':'<span class="pl-sp"></span>'}${right||''}${mX}</div>${o.now?mNow():''}</div>`};
 // 화면 구성이 바뀌는 조건(mLive 가 부분 갱신 대신 전체를 다시 그릴지 판단)
@@ -945,9 +942,9 @@ function mPlayHTML(){
   return h;
 }
 function mListHTML(){
-  const A=S.admin,L=aList(),va=vAlb();
+  const A=S.admin,L=aList(),va=vAlb(),pa=curA(),hid=pa?pa.id:(va&&va.id); // 강조: 재생 곡이 있으면(일시정지 포함) 그 앨범, 없으면 직전에 보던 앨범
   let h=mHead(`<button class="pl-ed lt" data-a="mback" aria-label="뒤로"><span class="pl-ar">←</span><span class="pl-ht pl-lb">${S.lm?'앨범 관리':'앨범 목록'}</span></button>`,mMini(),{now:true});
-  const cell=a=>`<div class="al ${a.tracks.length?'':'em'} ${va&&va.id==a.id?'on':''}" data-a="goalb" data-v="${esc(a.id)}">${A?`<input type="checkbox" class="ack" data-id="${esc(a.id)}" aria-label="${esc(aLb(a))} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-n">${esc(aNm(a))}</span>${(a.year!=null||A)?`<span class="al-y">${a.year!=null?`(${a.year})`:''}${A?`<small>${a.tracks.length}곡</small>`:''}</span>`:''}</div>`;
+  const cell=a=>`<div class="al ${a.tracks.length?'':'em'} ${hid==a.id?'on':''}" data-a="goalb" data-v="${esc(a.id)}">${A?`<input type="checkbox" class="ack" data-id="${esc(a.id)}" aria-label="${esc(aLb(a))} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-n">${esc(aNm(a))}</span>${(a.year!=null||A)?`<span class="al-y">${a.year!=null?`(${a.year})`:''}${A?`<small>${a.tracks.length}곡</small>`:''}</span>`:''}</div>`;
   const LY=L.filter(a=>a.year!=null),LN=L.filter(a=>a.year==null); // 년도 없는 앨범은 다음 행(별도 그리드)부터
   h+='<div class="mbd">';
   if(L.length)h+=(LY.length?'<div class="al-g">'+LY.map(cell).join('')+'</div>':'')+(LN.length?'<div class="al-g">'+LN.map(cell).join('')+'</div>':'');
@@ -969,7 +966,7 @@ function mRegHTML(){
 function mEditHTML(){
   const al=albBy(S.alb);
   if(!al){S.mv='play';return mPlayHTML()}
-  const P=S.pend,W=S.mw||al.tracks,PI=P.items,N=W.length+PI.length,now=(S.cur>=0&&S.pa==al.id)?al.tracks[S.cur]:null;
+  const P=S.pend,W=S.mw||al.tracks,PI=P.items,N=W.length+PI.length;
   const nm=S.mt!=null?S.mt:aNm(al);
   // 수정9: 앨범 이름 수정 아이콘 삭제, 항상 input 열려있는 형태
   const titleInput=`<input id="m-title" class="pl-ti" value="${esc(nm)}" maxlength="30" autocomplete="off" aria-label="앨범 이름">`;
@@ -979,11 +976,11 @@ function mEditHTML(){
   // 수정10: 곡 수정 버튼 삭제 (곡 클릭 시 바로 수정 상태로 진입)
   if(W.length)h+=`<div class="mtl"><span><button data-a="mup" aria-label="위로">▲</button><button data-a="mdn" aria-label="아래로">▼</button></span><span><button data-a="mdel">[삭제]</button></span></div>`;
   if(W.length)h+='<div class="pl-list">'+W.map((x,i)=>{
-    const on=x===now,ed=S.ke==x.file,num=on&&S.playing?IC.eq:i+1,ck=`<input type="checkbox" class="mck" data-k="${esc(x.file)}" aria-label="${esc(x.name)} 선택">`;
+    const ed=S.ke==x.file,num=i+1,ck=`<input type="checkbox" class="mck" data-k="${esc(x.file)}" aria-label="${esc(x.name)} 선택">`;
     // 수정10: 관리 상태에서 곡 클릭 → 바로 곡 수정(kerow). data-a="kerow" 로 변경
-    if(!ed)return `<div class="pl-row ${on?'on':''}" data-a="kerow" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span>${lyH(x,on)}</span></div>`;
+    if(!ed)return `<div class="pl-row" data-a="kerow" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span></span></div>`;
     const q=S.tm[x.file]||{},ly=q.ly!==undefined?q.ly:(x.lyric||''),cvu=q.cv?`<img src="${esc(q.cv.url)}" alt="">`:q.cvx?mCov(al.cover):mCov(x.cover||al.cover);
-    return `<div class="pl-row ke ${on?'on':''}" data-a="kerow" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><button class="pl-th" data-a="kecover" aria-label="곡 커버 변경">${cvu}</button><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span><textarea class="pq-ly" id="ke-ly" rows="2" maxlength="250" placeholder="가사 (최대 2줄, 비우면 삭제)" aria-label="가사">${esc(ly)}</textarea><span class="ke-b"><button data-a="kecover">[커버 변경]</button><button data-a="kecvx">[커버 제거]</button><button data-a="keclose">[닫기]</button></span></span></div>`;
+    return `<div class="pl-row ke" data-a="kerow" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><button class="pl-th" data-a="kecover" aria-label="곡 커버 변경">${cvu}</button><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span><textarea class="pq-ly" id="ke-ly" rows="2" maxlength="250" placeholder="가사 (최대 2줄, 비우면 삭제)" aria-label="가사">${esc(ly)}</textarea><span class="ke-b"><button data-a="kecover">[커버 변경]</button><button data-a="kecvx">[커버 제거]</button><button data-a="keclose">[닫기]</button></span></span></div>`;
   }).join('')+'</div>';
   else if(!PI.length)h+='<p class="pl-empty">등록된 곡이 없습니다. 아래에서 음악 파일을 골라 [저장]하면 등록돼요.</p>';
   const sz=n=>n>=1e6?(n/1e6).toFixed(1)+'MB':Math.max(1,Math.round(n/1e3))+'KB';
