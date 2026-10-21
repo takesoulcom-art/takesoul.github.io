@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-zRcRcoZ80mhfitRC3rFCeHMfq4JDIL7N3PLEH/63xtk=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-Km5zyS0PzUjRXrG/WAkb47Vid32USO+32mRocTuT7A8=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -218,10 +218,20 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .pl-row .pq-ly{font-weight:400;color:var(--ink)}
 .ke-b{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px;color:var(--mid)}
 .ke-b button{padding:4px 0;color:var(--mid)}
-/* 재생 화면: 상태(#번째 곡 · 재생/일시정지)는 헤더 오른쪽, 가사는 곡 제목 아래 전체 너비 */
-.pl-h .pl-s{flex:none;text-align:right;white-space:nowrap}
-.pl-lyr{text-align:center;margin:4px 0 0}
+/* 재생 화면 헤더: 앨범명(년도)은 한 줄 전체 너비, #번째 곡 · 재생/일시정지는 그 밑의 얇은 줄 */
+.pl-hw{flex-wrap:wrap;row-gap:0;padding-bottom:8px}
+.pl-hw .pl-sp{display:none}
+.pl-hw .pl-ed.lt{flex:1 1 0}
+.pl-h .pl-s{order:3;flex:0 0 100%;text-align:left;margin:-2px 0 0;padding-left:25px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 가사: 제목·플레이바와 간격을 둠 (가사가 없으면 여백도 없음) */
+.pl-lyr{text-align:center}
+.pl-lyr:not(:empty){margin:12px 0 16px}
 .pl-lyr .pl-ly{margin-top:0;font-size:calc(12px + var(--fs))}
+/* 재생 화면: 상단(앨범명·커버·제목·가사·플레이바·컨트롤)과 하단 [관리]는 고정, 곡 목록만 스크롤 */
+#mbox.mpf{display:flex;flex-direction:column;overflow:hidden}
+#mbox.mpf>*{flex:none}
+#mbox.mpf>.pl-list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin-bottom:0;padding-bottom:12px}
+#mbox.mpf>.bar{border-top:1px solid var(--line)}
 /* 가사 효과(가로/세로 모드별 설정): 기울임 · 앞뒤 큰따옴표 를 각각 켜고 끔 */
 :root[data-li="1"] .pl-ly{font-style:italic}
 :root[data-lq="1"] .pl-ly::before,:root[data-lq="1"] .pl-ly::after{content:'"'}
@@ -797,6 +807,8 @@ function mLive(){
     if(a.innerHTML!==n.innerHTML)a.innerHTML=n.innerHTML;
     if(n.getAttribute('aria-label'))a.setAttribute('aria-label',n.getAttribute('aria-label'));
   }
+  const key=S.pa+':'+S.cur;
+  if(S.cur>=0&&S.sk!==key){S.sk=key;const on=b.querySelector('.pl-list .pl-row.on');if(on)on.scrollIntoView({block:'nearest'})}
   updProg();
 }
 // 데이터: S.music={albums:[{year,name,cover,tracks:[{name,file,cover}]}]} (년도 오름차순). 옛 형식(곡 배열)은 mNorm 이 2026 앨범으로 자동 변환
@@ -836,6 +848,7 @@ const vAlb=()=>{let a=albBy(S.alb);if(a&&!aVis(a))a=null;return a||(S.admin?aTop
 const curA=()=>S.cur>=0?albBy(S.pa):null;
 const curT=()=>{const a=curA();return a&&a.tracks[S.cur]};
 const mAct=()=>{const v=vAlb();return S.cur>=0&&!!v&&S.pa==v.id};
+const mIsPlay=()=>!(S.mv=='list'||(S.admin&&(S.mv=='reg'||S.mv=='edit')));
 const eA=()=>S.mv=='edit'?albBy(S.alb):null;
 const mnN=(s,a)=>String(s||'').replace(/[\r\n]+/g,' ').trim().slice(0,30)||aDef(a.year);
 const newPend=()=>({items:[]}); // items: [{f:File, title, lyric, cv:{file,url}|null}] — 곡마다 파일·제목·커버를 한 줄로 관리
@@ -859,7 +872,7 @@ function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const ci=mAct()?S.cur:-1,tr=ci>=0?T[ci]:null;
   const ttl=al?aTtl(al):'';
-  let h=`<div class="pl-h"><button class="pl-ed lt" data-a="mlist" aria-label="앨범 목록">${IC.list}${tr&&al?`<span class="pl-ht">${ttl}</span>`:'<span class="pl-ht pl-lb">앨범 목록</span>'}</button><span class="pl-sp"></span>${T.length?`<span class="pl-s">${tr?`${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}`:(A?T.length+'곡 수록':'')}</span>`:''}${mX}</div>`;
+  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mlist" aria-label="앨범 목록">${IC.list}${tr&&al?`<span class="pl-ht">${ttl}</span>`:'<span class="pl-ht pl-lb">앨범 목록</span>'}</button><span class="pl-sp"></span>${T.length?`<span class="pl-s">${tr?`${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}`:(A?T.length+'곡 수록':'')}</span>`:''}${mX}</div>`;
   if(T.length)h+=`<div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
     +(tr?`<div class="pl-t">${esc(tr.name)}</div>`:`<div class="pl-t">${ttl}</div>`)
     +`<div class="pl-lyr">${tr&&tr.lyric?`<span class="pl-ly">${esc(tr.lyric)}</span>`:''}</div>`
@@ -1280,8 +1293,8 @@ function renderModal(){
   else if(k=='imgview'){const v=S.view||{};h=`<div class="bar top"><button data-a="imgdel">[삭제]</button></div><img class="big" src="${esc(S.blob[v.p]||v.p)}" data-p="${esc(v.p)}" alt=""><div class="cap"><span>${esc(v.name)}</span><button data-a="mclose">[취소]</button></div>`}
   else if(k=='music')h=musicHTML();
   const ck=k=='music'?mChecked():[];
-  b.innerHTML=h;b.classList.toggle('wide',k=='imgview');
-  if(k=='music'){mCheck(ck);updProg()}
+  b.innerHTML=h;b.classList.toggle('wide',k=='imgview');b.classList.toggle('mpf',k=='music'&&mIsPlay());
+  if(k=='music'){mCheck(ck);updProg();if(b.classList.contains('mpf')){const on=b.querySelector('.pl-list .pl-row.on');if(on)on.scrollIntoView({block:'nearest'})}}
   const f=b.querySelector('input:not([type=checkbox]):not([type=file]):not([type=range]):not([data-ui]):not(#m-title):not(#m-year):not(#m-rtitle)');if(f)f.focus();
 }
 {const hd=$('header');if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',hd.offsetHeight+'px')).observe(hd)}
