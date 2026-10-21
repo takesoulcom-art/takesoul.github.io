@@ -1,5 +1,5 @@
 {
- "v": 20261021042430,
+ "v": 20261021043337,
  "albums": [
   {
    "id": "y2013",
@@ -21,7 +21,8 @@
     {
      "name": "이소라 - Tears",
      "file": "music/b9c47d4cbb278925dc1e1d8d.mp3",
-     "cover": "music/cover/mvgr0dp4mhk8.jpg"
+     "cover": "music/cover/mvgr0dp4mhk8.jpg",
+     "lyric": "좁고 어두운 방 거울 속에 나\n그늘진 얼굴 참 못생겼어"
     },
     {
      "name": "김광석 - 잊어야 한다는 마음으로",
