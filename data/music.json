@@ -1,5 +1,5 @@
 {
- "v": 20261021052534,
+ "v": 20261021141707,
  "albums": [
   {
    "id": "y2013",
@@ -22,95 +22,109 @@
      "name": "이소라 - Tears",
      "file": "music/b9c47d4cbb278925dc1e1d8d.mp3",
      "cover": "music/cover/mvgr0dp4mhk8.jpg",
-     "lyric": "좁고 어두운 방 거울 속에 나\n그늘진 얼굴 참 못생겼어"
+     "lyric": "좁고 어둔 방 거울 속에 나\n동굴 같은 방 먼지 같은 나"
     },
     {
      "name": "김광석 - 잊어야 한다는 마음으로",
      "file": "music/94c5b4998a092d3c2f90f047.mp3",
      "cover": "music/cover/mvgr0dmkzlxw.jpg",
-     "lyric": "지나간 시간은 추억속에 묻히면 그만인 것을\n나는 왜 이렇게 긴긴 밤을 또 잊지 못해 새울까"
+     "lyric": "지나간 시간은 추억 속에 묻히면 그만인 것을\n나는 왜 이렇게 긴긴 밤을 또 잊지 못해 새울까"
     },
     {
      "name": "아이유 - 나만 몰랐던 이야기",
      "file": "music/ddba5599b38f80b133732235.mp3",
      "cover": "music/cover/mvgr0dobt14v.jpg",
-     "lyric": "그때 이미 나라는 건 네겐 끝이었다는 걸\n나만 몰랐었던 이야기"
+     "lyric": "좋은 이별이란 거, 결국 세상엔 없는 일이라는 걸\n알았다면 그때 차라리 다 울어둘 걸"
     },
     {
      "name": "이적 - 오래 전 그날",
      "file": "music/76682958f05ef46ab38c007c.mp3",
-     "cover": "music/cover/mvgr0dqhrqks.jpg"
+     "cover": "music/cover/mvgr0dqhrqks.jpg",
+     "lyric": "그때가 너도 가끔 생각나니\n뭐가 그렇게도 좋았었는지, 우리들만 있으면"
     },
     {
      "name": "성시경 - 거리에서",
      "file": "music/86b0a18f8cd6586cdd8defb1.mp3",
      "cover": "music/cover/mvgr0dnmqpi2.jpg",
-     "lyric": "날 부르는 목소리에 돌아보면\n텅 빈 거리 어느새 수많은 네 모습만 가득해"
+     "lyric": "날 부르는 목소리에 돌아보면..\n텅 빈 거리 어느새 수많은 네 모습만 가득해"
     },
     {
      "name": "Nell - Go",
      "file": "music/b37895584cddfe7b09f5a722.mp3",
-     "cover": "music/cover/mvgr0dknmurv.jpg"
+     "cover": "music/cover/mvgr0dknmurv.jpg",
+     "lyric": "잊혀질 수 없는 건, 네가 아닌 나인걸\n넌 또 다른 나의 이름, 넌 또 다른 나의 겨울"
     },
     {
      "name": "김광석 - 너무 아픈 사랑은 사랑이 아니었음을",
      "file": "music/0c89762c4a0169c639c57377.mp3",
-     "cover": "music/cover/mvgr0dmbgxrt.jpg"
+     "cover": "music/cover/mvgr0dmbgxrt.jpg",
+     "lyric": "너무 아픈 사랑은\n사랑이 아니었음을"
     },
     {
      "name": "성시경 - 태양계",
      "file": "music/4ec356764597c6f0e0d59368.mp3",
-     "cover": "music/cover/mvgr0do6ywvg.jpg"
+     "cover": "music/cover/mvgr0do6ywvg.jpg",
+     "lyric": "머물지 못하는 내 두 눈에 고인\n눈물이 흐르네"
     },
     {
      "name": "10cm - 그러니까...",
      "file": "music/2b7ccbd530c662170709bafc.mp3",
-     "cover": "music/cover/mvgr0djoti6g.jpg"
+     "cover": "music/cover/mvgr0djoti6g.jpg",
+     "lyric": "환한 얼굴의 나와는 다른 슬픈 표정\n우리 둘은 행복하진 못할거야"
     },
     {
      "name": "이소라 - 바람이 분다",
      "file": "music/8f83da4d74d5576e1e554f90.mp3",
-     "cover": "music/cover/mvgr0dpkonw2.jpg"
+     "cover": "music/cover/mvgr0dpkonw2.jpg",
+     "lyric": "세상은 어제와 같고 시간은 흐르고 있고 나만 혼자 이렇게 달라져 있다\n바람에 흩어져버린 허무한 내 소원들은 애타게 사라져간다"
     },
     {
      "name": "Mamas Gun - Baby I Love You",
      "file": "music/80866e4fee31814edd8cd794.mp3",
-     "cover": "music/cover/mvgr0dkh8tdu.jpg"
+     "cover": "music/cover/mvgr0dkh8tdu.jpg",
+     "lyric": "you're the only one only one who does me right"
     },
     {
      "name": "검정치마 - Love Shine",
      "file": "music/5c27fb5b6c19f3f2e627ac50.mp3",
-     "cover": "music/cover/mvgr0dlpsieo.jpg"
+     "cover": "music/cover/mvgr0dlpsieo.jpg",
+     "lyric": "can you love me unconditionally\nand sing a million lullabies on a sleepy day"
     },
     {
      "name": "윤건 - 홍대 앞에 눈이 내리면",
      "file": "music/ada55a337f93f068d1efe609.mp3",
-     "cover": "music/cover/mvgr0douhckf.jpg"
+     "cover": "music/cover/mvgr0douhckf.jpg",
+     "lyric": "여기 홍대 앞에서 거리의 불빛보다 더 많은 눈이\n음악처럼 내리면 네게 전활걸꺼야"
     },
     {
      "name": "tete - Romantico",
      "file": "music/bfbe32930be75a73f4dfd751.m4a",
-     "cover": "music/cover/mvgr0dlboz20.jpg"
+     "cover": "music/cover/mvgr0dlboz20.jpg",
+     "lyric": "아름다운 너의 목소리는 내가 원하는 모든 것을 허락했지\n지금 우리는 춤을 추고 있어 비밀스러운 몸짓과 노래로"
     },
     {
      "name": "장재인 - 가로수 그늘 아래 서면",
      "file": "music/a8036cac9a342db1fbd0e1e8.mp3",
-     "cover": "music/cover/mvgr0dqy1ugy.jpg"
+     "cover": "music/cover/mvgr0dqy1ugy.jpg",
+     "lyric": "저 별이 지는 가로수 하늘 밑 그 향기 더하는데\n내가 사랑한 그대는 아나"
     },
     {
      "name": "이소라 - 시시콜콜한 이야기",
      "file": "music/de4cdbf13d9d4c49fd4e0df8.mp3",
-     "cover": "music/cover/mvgr0dq1mbau.jpg"
+     "cover": "music/cover/mvgr0dq1mbau.jpg",
+     "lyric": "이러고 있는거 나도 너무 싫어\n저울이 기울어 나만 사랑하는 거 같잖아"
     },
     {
      "name": "Sioen - Cruisin'",
      "file": "music/40883ce53b2185bb6a30bad8.mp3",
-     "cover": "music/cover/mvgr0dksu81a.jpg"
+     "cover": "music/cover/mvgr0dksu81a.jpg",
+     "lyric": "But you're waving me goodbye\nA sentimental forsaken"
     },
     {
      "name": "Justin Timberake - Five Hundred Miles",
      "file": "music/ba40ad0e11cec7316d64f01f.mp3",
-     "cover": "music/cover/mvgr0djtxf4x.jpg"
+     "cover": "music/cover/mvgr0djtxf4x.jpg",
+     "lyric": "Lord, I can't go back home this this ole way\nYou can hear the whistle blow a hundred miles"
     }
    ]
   },
