@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-qfzXfIDE+edNoeBXBFpU3W9x4xrbgsqj9rCDzo7pVg4=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-70msSDmKh837DssFIpcq4/ctxMp445v0pMl3AXJrk1U=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -222,7 +222,14 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .pl-hw{flex-wrap:wrap;row-gap:0;padding-bottom:8px}
 .pl-hw .pl-sp{display:none}
 .pl-hw .pl-ed.lt{flex:1 1 0}
-.pl-h .pl-s{order:3;flex:0 0 100%;text-align:left;margin:-2px 0 0;padding-left:25px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 수정1: 텍스트 밑잘림 방지 - 헤더 행 높이를 줄 간격 여유있게 */
+.pl-h{min-height:36px;line-height:1.5;overflow:visible}
+.pl-h b,.pl-ht{line-height:1.5;padding-bottom:1px}
+.pl-h .pl-s{order:3;flex:0 0 100%;text-align:right;margin:-2px 0 0;padding-right:36px;padding-left:0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 수정3/6: 헤더 우측 미니 컨트롤러 */
+.pl-mini{display:flex;align-items:center;gap:2px;flex:none}
+.pl-mini button{min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.pl-mini svg{width:16px;height:16px}
 /* 가사: 제목·플레이바와 간격을 둠 (가사가 없으면 여백도 없음) */
 .pl-lyr{text-align:center;margin:10px 0 12px;font-size:calc(12px + var(--fs));line-height:1.5;min-height:3em}
 .pl-lyr .pl-ly{margin-top:0;font-size:inherit}
@@ -357,10 +364,10 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 /* 재생 화면: 커버·제목(·가사)을 한 덩어리로 묶어 고정 높이 영역의 가운데에. 가사가 없으면 가사 칸을 숨겨 커버·제목이 가운데로 */
 .pl-top{display:flex;flex-direction:column;justify-content:center;min-height:calc(206px + var(--fs) * 8)}
 .pl-lyr:empty{display:none}
-/* 헤더 보조 줄: 다른 화면에서 '앨범제목(년도) - 3. 곡제목 재생 중' 을 오른쪽 정렬 링크로 (닫기 X 와 겹치지 않게 오른쪽 여백) */
-.pl-h .pl-s.pl-sl{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-right:12px;overflow:visible}
+/* 헤더 보조 줄: 다른 화면에서 현재 재생 곡명을 오른쪽 정렬 링크로 (닫기 X 와 겹치지 않게 오른쪽 여백) */
+.pl-h .pl-s.pl-sl{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-right:36px;overflow:visible}
 .pl-sk{flex:none}
-.pl-np{flex:0 1 auto;min-width:0;margin:-6px 0 -6px auto;padding:6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.pl-np{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:calc(11px + var(--fs))}
 /* 모달 안의 스크롤이 끝나도 뒤의 본문으로 번지지 않게 */
 #modal,#mbox{overscroll-behavior:contain}
 </style>
@@ -901,27 +908,46 @@ const mCheck=ks=>$$('.mck').forEach(c=>{c.checked=ks.includes(c.dataset.k)});
 const mCov=c=>c?`<img src="${esc(S.blob[c]||c)}" data-p="${esc(c)}" alt="" loading="lazy">`:'♬';
 const mX=`<button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button>`;
 function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHTML():S.mv=='edit'&&S.admin?mEditHTML():mPlayHTML()}
-// 재생 중인 곡이 지금 보는 화면의 앨범이 아닐 때, 헤더 보조 줄 오른쪽에 '앨범제목(년도) - 3. 곡제목 재생 중' 을 링크로 표시 (누르면 그 앨범 상세 화면으로)
-const mNowT=()=>{const al=curA(),t=curT();if(!al||!t)return '';return `${esc(aNm(al))}${al.year!=null?`(${al.year})`:''} - ${S.cur+1}. ${esc(t.name)} ${S.playing?'재생 중':'일시정지'}`};
-const mSub=left=>{const n=mNowT();return n?`<span class="pl-s pl-sl"><span class="pl-sk">${left}</span><button class="pl-np" data-a="gonow" aria-label="재생 중인 앨범으로 이동">${n}</button></span>`:`<span class="pl-s">${left}</span>`};
+// 재생 중인 곡이 있을 때 헤더 우측에 표시할 미니 컨트롤러 + 곡 정보 (list/edit/reg 화면용)
+// 수정2/6/7/8: 앨범 목록·다른 앨범·관리 화면에서 헤더 우측에 미니 컨트롤러 + 현재 재생 곡 표시
+const mMiniCtrl=()=>{
+  const al=curA(),t=curT();if(!al||!t)return '';
+  const trackInfo=`${S.cur+1}. ${esc(t.name)}`;
+  const mini=`<span class="pl-mini"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></span>`;
+  return `<span class="pl-s pl-sl">${mini}<button class="pl-np" data-a="gonow" aria-label="재생 중인 앨범으로 이동">${trackInfo}</button></span>`;
+};
+const mSub=()=>{const c=mMiniCtrl();return c||''};
 function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const ci=mAct()?S.cur:-1,tr=ci>=0?T[ci]:null;
   const ttl=al?aTtl(al):'';
-  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mlist" aria-label="앨범 목록">${IC.list}${tr&&al?`<span class="pl-ht">${ttl}</span>`:'<span class="pl-ht pl-lb">앨범 목록</span>'}</button><span class="pl-sp"></span>${tr?`<span class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}</span>`:(T.length||mNowT()?mSub(A&&T.length?T.length+'곡 수록':''):'')}${mX}</div>`;
-  if(T.length)h+=`<div class="pl-top"><div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
-    +(tr?`<div class="pl-t">${esc(tr.name)}</div>`:`<div class="pl-t">${ttl}</div>`)
-    +`<div class="pl-lyr">${tr&&tr.lyric?`<span class="pl-ly">${esc(tr.lyric)}</span>`:''}</div></div>`
-    +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
-    +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing&&ci>=0?'정지':'재생'}">${S.playing&&ci>=0?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
-    +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-id="${al.id}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span></span></div>`).join('')+'</div>';
+  // 수정3: 헤더 좌측 - "앨범 목록" 텍스트 추가. 우측 - 앨범제목(년도)만, 곡 번호/재생중 텍스트 삭제
+  // 수정4: 헤더 아래 곡수 표현 텍스트 삭제
+  const hdrRight=tr&&al
+    ? `<span class="pl-ht" style="font-size:calc(13px + var(--fs));font-weight:400;text-align:right">${ttl}</span>`
+    : '';
+  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mlist" aria-label="앨범 목록">${IC.list}<span class="pl-ht pl-lb" style="font-size:calc(12px + var(--fs))">앨범 목록</span></button><span class="pl-sp"></span>${hdrRight}${mX}</div>`;
+  if(T.length){
+    // 수정5: ci<0(미재생)이면 컨트롤 없이 앨범 이미지만, ci>=0이면(한 번이라도 재생) 컨트롤 표시
+    const hasPlayed=ci>=0;
+    h+=`<div class="pl-top"><div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
+      +(tr?`<div class="pl-t">${esc(tr.name)}</div><div class="pl-lyr">${tr.lyric?`<span class="pl-ly">${esc(tr.lyric)}</span>`:''}</div>`:`<div class="pl-t">${ttl}</div><div class="pl-lyr"></div>`)
+      +`</div>`;
+    if(hasPlayed){
+      h+=`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
+        +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`;
+    }
+    h+='<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-id="${al.id}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span></span></div>`).join('')+'</div>';
+  }
   else if(A)h+=`${al?`<div class="pl-t">${ttl}</div>`:''}<p class="pl-empty">${al?'등록된 곡이 없습니다. 아래 [관리]에서 이 년도를 선택해 곡을 추가하세요.':'등록된 앨범이 없습니다. 아래 [관리]에서 년도를 만들어 주세요.'}</p>`;
   if(A)h+='<div class="bar"><button data-a="mreg">[관리]</button></div>';
   return h;
 }
 function mListHTML(){
   const A=S.admin,L=aList(),va=vAlb();
-  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mback" aria-label="뒤로"><span class="pl-ar">←</span><span class="pl-ht pl-lb">${S.lm?'앨범 관리':'앨범 목록'}</span></button>${mX}${mSub(L.length+'개')}</div>`;
+  // 수정4: 앨범목록 헤더에 곡수 표현 삭제. 수정6: 재생 중이면 우측에 미니 컨트롤러 + 현재 곡
+  const mini=mMiniCtrl();
+  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mback" aria-label="뒤로"><span class="pl-ar">←</span><span class="pl-ht pl-lb">${S.lm?'앨범 관리':'앨범 목록'}</span></button>${mX}${mini}</div>`;
   const cell=a=>`<div class="al ${a.tracks.length?'':'em'} ${va&&va.id==a.id?'on':''}" data-a="goalb" data-v="${esc(a.id)}">${A?`<input type="checkbox" class="ack" data-id="${esc(a.id)}" aria-label="${esc(aLb(a))} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-n">${esc(aNm(a))}</span>${(a.year!=null||A)?`<span class="al-y">${a.year!=null?`(${a.year})`:''}${A?`<small>${a.tracks.length}곡</small>`:''}</span>`:''}</div>`;
   const LY=L.filter(a=>a.year!=null),LN=L.filter(a=>a.year==null); // 년도 없는 앨범은 다음 행(별도 그리드)부터
   h+='<div class="mbd">';
@@ -946,14 +972,20 @@ function mEditHTML(){
   if(!al){S.mv='play';return mPlayHTML()}
   const P=S.pend,W=S.mw||al.tracks,PI=P.items,N=W.length+PI.length,now=(S.cur>=0&&S.pa==al.id)?al.tracks[S.cur]:null;
   const nm=S.mt!=null?S.mt:aNm(al);
-  const ttl=S.mte?`<input id="m-title" class="pl-ti" value="${esc(nm)}" maxlength="30" autocomplete="off" aria-label="앨범 이름">`:`<b>${esc(mnN(nm,al))}</b>`;
-  let h=`<div class="pl-h pl-hw">${ttl}<button class="pl-ed" data-a="mtedit" aria-label="앨범 이름 수정">✏️</button>${mX}<span class="pl-s pn">${al.year!=null?al.year+'년 · ':''}${N}곡</span></div>`;
+  // 수정9: 앨범 이름 수정 아이콘 삭제, 항상 input 열려있는 형태
+  const titleInput=`<input id="m-title" class="pl-ti" value="${esc(nm)}" maxlength="30" autocomplete="off" aria-label="앨범 이름">`;
+  // 수정8: 관리 화면에서도 헤더에 미니 컨트롤러 + 현재 재생 곡
+  // 수정4: 헤더 아래 곡수 표현 삭제
+  const mini=mMiniCtrl();
+  let h=`<div class="pl-h pl-hw">${titleInput}${mX}${mini}</div>`;
   const acu=S.ac?S.ac.url:'';
   h+=`<div class="mbd"><div class="ac"><button class="pl-cover ac-b" data-a="pickacover" aria-label="앨범 커버 ${acu||al.cover?'변경':'업로드'}">${acu?`<img src="${esc(acu)}" alt="">`:al.cover?mCov(al.cover):'앨범 커버<br>업로드'}</button><div class="pl-s">${acu||al.cover?'앨범 커버 · 이미지를 누르면 변경':'앨범 커버 이미지를 올려 주세요'}${S.ac?' · [저장]을 눌러야 반영돼요':''}</div></div>`;
-  if(W.length)h+=`<div class="mtl"><span><button data-a="mup" aria-label="위로">▲</button><button data-a="mdn" aria-label="아래로">▼</button></span><span><button data-a="tkedit">[곡 수정]</button><button data-a="mdel">[삭제]</button></span></div>`;
+  // 수정10: 곡 수정 버튼 삭제 (곡 클릭 시 바로 수정 상태로 진입)
+  if(W.length)h+=`<div class="mtl"><span><button data-a="mup" aria-label="위로">▲</button><button data-a="mdn" aria-label="아래로">▼</button></span><span><button data-a="mdel">[삭제]</button></span></div>`;
   if(W.length)h+='<div class="pl-list">'+W.map((x,i)=>{
     const on=x===now,ed=S.ke==x.file,num=on&&S.playing?IC.eq:i+1,ck=`<input type="checkbox" class="mck" data-k="${esc(x.file)}" aria-label="${esc(x.name)} 선택">`;
-    if(!ed)return `<div class="pl-row ${on?'on':''}" data-a="song" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span>${lyH(x,on)}</span></div>`;
+    // 수정10: 관리 상태에서 곡 클릭 → 바로 곡 수정(kerow). data-a="kerow" 로 변경
+    if(!ed)return `<div class="pl-row ${on?'on':''}" data-a="kerow" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span>${lyH(x,on)}</span></div>`;
     const q=S.tm[x.file]||{},ly=q.ly!==undefined?q.ly:(x.lyric||''),cvu=q.cv?`<img src="${esc(q.cv.url)}" alt="">`:q.cvx?mCov(al.cover):mCov(x.cover||al.cover);
     return `<div class="pl-row ke ${on?'on':''}" data-a="kerow" data-v="${al.tracks.indexOf(x)}" data-id="${al.id}">${ck}<span class="pl-n">${num}</span><button class="pl-th" data-a="kecover" aria-label="곡 커버 변경">${cvu}</button><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span><textarea class="pq-ly" id="ke-ly" rows="2" maxlength="250" placeholder="가사 (최대 2줄, 비우면 삭제)" aria-label="가사">${esc(ly)}</textarea><span class="ke-b"><button data-a="kecover">[커버 변경]</button><button data-a="kecvx">[커버 제거]</button><button data-a="keclose">[닫기]</button></span></span></div>`;
   }).join('')+'</div>';
