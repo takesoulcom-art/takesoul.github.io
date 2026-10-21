@@ -1,5 +1,5 @@
 {
- "v": 20261021142343,
+ "v": 20261021143807,
  "albums": [
   {
    "id": "y2013",
@@ -137,47 +137,56 @@
     {
      "name": "백아 - 첫 사랑",
      "file": "music/d81ae6cb2cc6197fe3e06db2.mp3",
-     "cover": "music/cover/mvciu5r3felu.jpg"
+     "cover": "music/cover/mvciu5r3felu.jpg",
+     "lyric": "이 시간의 난, 너와의 시간을 물 들이고\n첫사랑이라는 이름으로 지어지나봐"
     },
     {
      "name": "Nerd Connection - 그대만 있다면",
      "file": "music/aadd1be6b77346ea9ae01cc2.m4a",
-     "cover": "music/cover/mv6j0nd6hdtu.jpg"
+     "cover": "music/cover/mv6j0nd6hdtu.jpg",
+     "lyric": "영원히 내 곁을 지켜주세요\n나를 떠나지 말아요"
     },
     {
      "name": "김나영 - 봄 내음보다 너를",
      "file": "music/9f1d69242e6f49c9ba8186df.m4a",
-     "cover": "music/cover/mv6j1fipnoxb.jpg"
+     "cover": "music/cover/mv6j1fipnoxb.jpg",
+     "lyric": "너와 걷던 길목을 지나갈 때면\n나는 고개를 떨구곤 해"
     },
     {
      "name": "10cm - 그러나",
      "file": "music/1273815e46349aa48561fe4c.mp3",
-     "cover": "music/cover/mv6jwcbrddff.jpg"
+     "cover": "music/cover/mv6jwcbrddff.jpg",
+     "lyric": "그러나 누구나 알고 있지 나는 괜찮지 않지\n매일 밤 매일 밤 눈 감으면 꿈 속의 널 죽도록 미워하지"
     },
     {
      "name": "윤건 - 홍대앞에 눈이 내리면",
      "file": "music/61e5eb0dc5f938820b584ea7.mp3",
-     "cover": "music/cover/mvckhy352suy.jpg"
+     "cover": "music/cover/mvckhy352suy.jpg",
+     "lyric": "여기 홍대앞에서 거리의 불빛보다 더 많은 눈이\n음악처럼 내리면 네게 전활걸꺼야"
     },
     {
      "name": "BIG Naughty - Hopeless Romantic",
      "file": "music/d12597c89e3002b2d34b0015.mp3",
-     "cover": "music/cover/mvckelaxlv0n.jpg"
+     "cover": "music/cover/mvckelaxlv0n.jpg",
+     "lyric": "사랑이라 믿었던 것들은 어린 날의 미련일 뿐\n미련이라 믿었던 것들은 피지 못한 필연일 뿐"
     },
     {
      "name": "Sioen - Cruisin",
      "file": "music/2b62b5b6778cb9dcc2029ec6.mp3",
-     "cover": "music/cover/mvckb8tmnz3y.jpg"
+     "cover": "music/cover/mvckb8tmnz3y.jpg",
+     "lyric": "you're waving me goodbye,\na sentimental forsaken"
     },
     {
      "name": "검정치마 - 기다린 만큼, 더",
      "file": "music/c44dca63b2ebf7ddb7694a45.mp3",
-     "cover": "music/cover/mvcklc4013kg.jpg"
+     "cover": "music/cover/mvcklc4013kg.jpg",
+     "lyric": "사실 난 지금 기다린 만큼 더 기다릴 수 있지만\n왠지 난 지금 이 순간이 우리의 마지막일 것 같아"
     },
     {
      "name": "Mac Miller - Good News",
      "file": "music/c3398435748f7bcfb128a85f.mp3",
-     "cover": "music/cover/mvcklzw0zgum.jpg"
+     "cover": "music/cover/mvcklzw0zgum.jpg",
+     "lyric": "I'm no liar, but sometimes the truth don't sound like the truth\nmaybe 'cause it ain't, I just love the way it sound when I say it"
     }
    ]
   }
