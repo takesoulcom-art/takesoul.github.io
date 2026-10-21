@@ -1,5 +1,5 @@
 {
- "v": 20261021141707,
+ "v": 20261021142225,
  "albums": [
   {
    "id": "y2013",
@@ -76,13 +76,13 @@
      "name": "이소라 - 바람이 분다",
      "file": "music/8f83da4d74d5576e1e554f90.mp3",
      "cover": "music/cover/mvgr0dpkonw2.jpg",
-     "lyric": "세상은 어제와 같고 시간은 흐르고 있고 나만 혼자 이렇게 달라져 있다\n바람에 흩어져버린 허무한 내 소원들은 애타게 사라져간다"
+     "lyric": "세상은 어제와 같고 시간은 흐르고있고 나만 혼자 이렇게 달라져있다\n바람에 흩어져버린 허무한 내 소원들은 애타게 사라져간다"
     },
     {
      "name": "Mamas Gun - Baby I Love You",
      "file": "music/80866e4fee31814edd8cd794.mp3",
      "cover": "music/cover/mvgr0dkh8tdu.jpg",
-     "lyric": "you're the only one only one who does me right"
+     "lyric": "you're the only one\nonly one who does me right"
     },
     {
      "name": "검정치마 - Love Shine",
@@ -112,19 +112,19 @@
      "name": "이소라 - 시시콜콜한 이야기",
      "file": "music/de4cdbf13d9d4c49fd4e0df8.mp3",
      "cover": "music/cover/mvgr0dq1mbau.jpg",
-     "lyric": "이러고 있는거 나도 너무 싫어\n저울이 기울어 나만 사랑하는 거 같잖아"
+     "lyric": "이러고 있는거 나도 너무 싫어..\n저울이 기울어 나만 사랑하는 거 같잖아.."
     },
     {
      "name": "Sioen - Cruisin'",
      "file": "music/40883ce53b2185bb6a30bad8.mp3",
      "cover": "music/cover/mvgr0dksu81a.jpg",
-     "lyric": "But you're waving me goodbye\nA sentimental forsaken"
+     "lyric": "but you're waving me goodbye,\na sentimental forsaken"
     },
     {
      "name": "Justin Timberake - Five Hundred Miles",
      "file": "music/ba40ad0e11cec7316d64f01f.mp3",
      "cover": "music/cover/mvgr0djtxf4x.jpg",
-     "lyric": "Lord, I can't go back home this this ole way\nYou can hear the whistle blow a hundred miles"
+     "lyric": "lord, I can't go back home this this ole way,\nyou can hear the whistle blow a hundred miles"
     }
    ]
   },
