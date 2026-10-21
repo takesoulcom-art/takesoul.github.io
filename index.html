@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-RoB4FQuFCL0QIuGsX+IA8pkarrMCvrErJAZOiVuj39M=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-qfzXfIDE+edNoeBXBFpU3W9x4xrbgsqj9rCDzo7pVg4=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -354,6 +354,15 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 .mbd .al-g{margin:0 0 16px}
 .mbd>.al-g:last-child{margin-bottom:0}
 .mbd>.ac:first-child .pl-cover{margin-top:0}
+/* 재생 화면: 커버·제목(·가사)을 한 덩어리로 묶어 고정 높이 영역의 가운데에. 가사가 없으면 가사 칸을 숨겨 커버·제목이 가운데로 */
+.pl-top{display:flex;flex-direction:column;justify-content:center;min-height:calc(206px + var(--fs) * 8)}
+.pl-lyr:empty{display:none}
+/* 헤더 보조 줄: 다른 화면에서 '앨범제목(년도) - 3. 곡제목 재생 중' 을 오른쪽 정렬 링크로 (닫기 X 와 겹치지 않게 오른쪽 여백) */
+.pl-h .pl-s.pl-sl{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-right:12px;overflow:visible}
+.pl-sk{flex:none}
+.pl-np{flex:0 1 auto;min-width:0;margin:-6px 0 -6px auto;padding:6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+/* 모달 안의 스크롤이 끝나도 뒤의 본문으로 번지지 않게 */
+#modal,#mbox{overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -803,6 +812,7 @@ function renderArt(){
     `<h2>${esc(p.title)}</h2><div class="body">${body(p.body)}</div>`;
 }
 function renderMusic(full){
+  msSync();
   const m=$('#music'),ct=curT(),top=aTop(),t=ct||(top&&top.tracks[0]);
   if(!t)m.innerHTML=S.admin?'<button data-a="mtoggle">음악 관리</button>':'';
   else m.innerHTML=`<button data-a="mtoggle">♬ ${esc(t.name)}</button><button data-a="play" aria-label="${S.playing?'정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button>`;
@@ -826,6 +836,7 @@ function mLive(){
   for(const q of ['.pl-h .pl-ed','.pl-cover','.pl-t','.pl-s','.pl-lyr','.pl-c [data-a="play"]']){
     const a=b.querySelector(q),n=t.querySelector(q);
     if(!a||!n){renderModal();return}
+    if(a.className!==n.className)a.className=n.className;
     if(a.innerHTML!==n.innerHTML)a.innerHTML=n.innerHTML;
     if(n.getAttribute('aria-label'))a.setAttribute('aria-label',n.getAttribute('aria-label'));
   }
@@ -890,24 +901,27 @@ const mCheck=ks=>$$('.mck').forEach(c=>{c.checked=ks.includes(c.dataset.k)});
 const mCov=c=>c?`<img src="${esc(S.blob[c]||c)}" data-p="${esc(c)}" alt="" loading="lazy">`:'♬';
 const mX=`<button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button>`;
 function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHTML():S.mv=='edit'&&S.admin?mEditHTML():mPlayHTML()}
+// 재생 중인 곡이 지금 보는 화면의 앨범이 아닐 때, 헤더 보조 줄 오른쪽에 '앨범제목(년도) - 3. 곡제목 재생 중' 을 링크로 표시 (누르면 그 앨범 상세 화면으로)
+const mNowT=()=>{const al=curA(),t=curT();if(!al||!t)return '';return `${esc(aNm(al))}${al.year!=null?`(${al.year})`:''} - ${S.cur+1}. ${esc(t.name)} ${S.playing?'재생 중':'일시정지'}`};
+const mSub=left=>{const n=mNowT();return n?`<span class="pl-s pl-sl"><span class="pl-sk">${left}</span><button class="pl-np" data-a="gonow" aria-label="재생 중인 앨범으로 이동">${n}</button></span>`:`<span class="pl-s">${left}</span>`};
 function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const ci=mAct()?S.cur:-1,tr=ci>=0?T[ci]:null;
   const ttl=al?aTtl(al):'';
-  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mlist" aria-label="앨범 목록">${IC.list}${tr&&al?`<span class="pl-ht">${ttl}</span>`:'<span class="pl-ht pl-lb">앨범 목록</span>'}</button><span class="pl-sp"></span>${T.length?`<span class="pl-s">${tr?`${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}`:(A?T.length+'곡 수록':'')}</span>`:''}${mX}</div>`;
-  if(T.length)h+=`<div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
+  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mlist" aria-label="앨범 목록">${IC.list}${tr&&al?`<span class="pl-ht">${ttl}</span>`:'<span class="pl-ht pl-lb">앨범 목록</span>'}</button><span class="pl-sp"></span>${tr?`<span class="pl-s">${ci+1}번째 곡 · ${S.playing?'재생 중':'일시정지'}</span>`:(T.length||mNowT()?mSub(A&&T.length?T.length+'곡 수록':''):'')}${mX}</div>`;
+  if(T.length)h+=`<div class="pl-top"><div class="pl-cover">${mCov(tr?(tr.cover||al.cover):al.cover)}</div>`
     +(tr?`<div class="pl-t">${esc(tr.name)}</div>`:`<div class="pl-t">${ttl}</div>`)
-    +`<div class="pl-lyr">${tr&&tr.lyric?`<span class="pl-ly">${esc(tr.lyric)}</span>`:''}</div>`
+    +`<div class="pl-lyr">${tr&&tr.lyric?`<span class="pl-ly">${esc(tr.lyric)}</span>`:''}</div></div>`
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
     +`<div class="pl-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing&&ci>=0?'정지':'재생'}">${S.playing&&ci>=0?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div>`
-    +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-id="${al.id}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span></div>`).join('')+'</div>';
+    +'<div class="pl-list">'+T.map((x,i)=>`<div class="pl-row ${i==ci?'on':''}" data-a="song" data-v="${i}" data-id="${al.id}"><span class="pl-n">${i==ci&&S.playing?IC.eq:i+1}</span><span class="pl-th">${mCov(x.cover||al.cover)}</span><span class="pl-tt"><span class="pl-nm">${esc(x.name)}</span></span></div>`).join('')+'</div>';
   else if(A)h+=`${al?`<div class="pl-t">${ttl}</div>`:''}<p class="pl-empty">${al?'등록된 곡이 없습니다. 아래 [관리]에서 이 년도를 선택해 곡을 추가하세요.':'등록된 앨범이 없습니다. 아래 [관리]에서 년도를 만들어 주세요.'}</p>`;
   if(A)h+='<div class="bar"><button data-a="mreg">[관리]</button></div>';
   return h;
 }
 function mListHTML(){
   const A=S.admin,L=aList(),va=vAlb();
-  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mback" aria-label="뒤로"><span class="pl-ar">←</span><span class="pl-ht pl-lb">${S.lm?'앨범 관리':'앨범 목록'}</span></button>${mX}<span class="pl-s">${L.length}개</span></div>`;
+  let h=`<div class="pl-h pl-hw"><button class="pl-ed lt" data-a="mback" aria-label="뒤로"><span class="pl-ar">←</span><span class="pl-ht pl-lb">${S.lm?'앨범 관리':'앨범 목록'}</span></button>${mX}${mSub(L.length+'개')}</div>`;
   const cell=a=>`<div class="al ${a.tracks.length?'':'em'} ${va&&va.id==a.id?'on':''}" data-a="goalb" data-v="${esc(a.id)}">${A?`<input type="checkbox" class="ack" data-id="${esc(a.id)}" aria-label="${esc(aLb(a))} 선택">`:''}<span class="al-c">${mCov(a.cover)}</span><span class="al-n">${esc(aNm(a))}</span>${(a.year!=null||A)?`<span class="al-y">${a.year!=null?`(${a.year})`:''}${A?`<small>${a.tracks.length}곡</small>`:''}</span>`:''}</div>`;
   const LY=L.filter(a=>a.year!=null),LN=L.filter(a=>a.year==null); // 년도 없는 앨범은 다음 행(별도 그리드)부터
   h+='<div class="mbd">';
@@ -1201,7 +1215,7 @@ async function mDlRun(){ // 현재 곡 → 다음 곡 순서로 하나씩 받기
 }
 const mRel=keep=>{for(const [f,u] of mUrls)if(!keep.includes(f)){URL.revokeObjectURL(u);mUrls.delete(f)}};
 const mCut=keep=>mDl.forEach((ac,f)=>{if(!keep.includes(f))ac.abort()});
-function mStop(){mTok++;mArm=0;mGo=0;mCut([]);au.pause();au.removeAttribute('src');mRel([])}
+function mStop(){mSwT=Date.now();mTok++;mArm=0;mGo=0;mCut([]);au.pause();au.removeAttribute('src');mRel([])}
 function mAfter(al,f){ // 곡이 시작된 뒤: 지난 곡 정리, 불필요한 다운로드 취소, 다음 곡이 캐시에 있으면 메모리로
   const n=al.tracks[(S.cur+1)%al.tracks.length],nf=n&&n.file;
   mRel([f,nf]);mCut([f,nf]);
@@ -1221,10 +1235,10 @@ function playIdx(i,y){
   const al=albBy(y==null?S.pa:y);if(!al||!al.tracks.length)return;
   S.pa=al.id;S.cur=(i+al.tracks.length)%al.tracks.length;
   const f=al.tracks[S.cur].file,tok=++mTok,ready=S.blob[f]||mUrls.get(f);
-  S.playing=true;mArm=0;mGo=0;
-  const go=u=>{if(tok!=mTok)return;au.src=u;mPlay(tok);mArm=S.blob[f]?0:tok;mAfter(al,f);renderMusic()};
+  S.playing=true;mArm=0;mGo=0;mSwT=Date.now();
+  const go=u=>{if(tok!=mTok)return;au.src=u;mPlay(tok);mArm=S.blob[f]?0:tok;mAfter(al,f);msMeta();renderMusic()};
   if(ready)go(ready);
-  else if(mUnl&&mcMeta()[f]){au.pause();renderMusic();mLoad(f).then(u=>go(u||encodeURI(f)))} // 캐시본(읽기 실패 시 스트리밍)
+  else if(mUnl&&mcMeta()[f]){mSwT=Date.now();au.pause();renderMusic();mLoad(f).then(u=>go(u||encodeURI(f)))} // 캐시본(읽기 실패 시 스트리밍)
   else go(encodeURI(f)); // 클릭 안에서 바로 스트리밍 → iOS 도 허용
 }
 au.onended=()=>playIdx(S.cur+1);
@@ -1233,6 +1247,61 @@ au.onerror=async()=>{const t=curT(),f=t&&t.file;
     URL.revokeObjectURL(mUrls.get(f));mUrls.delete(f);mcDel(f);au.src=encodeURI(f);mPlay(mTok);return}
   if(S.admin&&f&&!S.blob[f]){const u=await ghBlob(f);if(u){au.src=u;mPlay(mTok);return}}
   S.playing=false;renderMusic()};
+// ── Media Session API: 블루투스 이어폰·차량·잠금화면·알림창 컨트롤 ──────────────────────────
+// ① 재생/일시정지/이전곡/다음곡/seekto 핸들러  ② 곡이 시작될 때(playIdx 의 go) 제목·앨범·커버 표시  ③ playbackState·positionState 동기화
+// ④ <audio> 의 pause/play 이벤트(이어폰 분리·통화 인터럽트·블루투스 키 등 앱 밖에서 일어난 변화)를 받아 S.playing 을 실제 상태에 맞춤
+// seekbackward/seekforward 는 등록하지 않음: 등록하면 iOS·일부 기기가 이전곡/다음곡 대신 10초 건너뛰기 버튼을 보여 줌
+const MSN_OK='mediaSession' in navigator&&typeof MediaMetadata!='undefined';
+let MSK='',mSwT=0; // MSK: 마지막으로 설정한 메타데이터 키 / mSwT: 곡 전환·정지처럼 코드가 직접 일으킨 pause 시각(그 직후 pause 이벤트는 무시)
+function msMeta(){
+  if(!MSN_OK)return;
+  const a=curA(),t=curT();if(!a||!t)return;
+  const cv=t.cover||a.cover||'',key=[a.id,t.file,t.name,cv,a.name].join('|');
+  if(key==MSK)return;MSK=key;
+  const abs=p=>/^(blob:|https?:)/.test(p)?p:new URL(encodeURI(p),location.href).href;
+  const art=cv?[{src:abs(S.blob[cv]||cv),sizes:'320x320',type:'image/jpeg'}]:[{src:abs('apple-touch-icon.png'),sizes:'180x180',type:'image/png'}];
+  try{navigator.mediaSession.metadata=new MediaMetadata({title:t.name,artist:document.title||'',album:aNm(a),artwork:art})}catch(e){}
+}
+function msSync(){
+  if(!MSN_OK)return;
+  const t=curT();
+  if(!t){if(MSK){MSK='';try{navigator.mediaSession.metadata=null}catch(e){}}try{navigator.mediaSession.playbackState='none'}catch(e){}return}
+  msMeta();
+  try{navigator.mediaSession.playbackState=S.playing?'playing':'paused'}catch(e){}
+}
+function msPos(){
+  if(!MSN_OK||!navigator.mediaSession.setPositionState)return;
+  const d=au.duration;
+  try{
+    if(!(isFinite(d)&&d>0)){navigator.mediaSession.setPositionState();return}
+    navigator.mediaSession.setPositionState({duration:d,playbackRate:au.playbackRate||1,position:Math.min(Math.max(au.currentTime||0,0),d)});
+  }catch(e){}
+}
+function msTop(){const tp=aTop();if(tp)playIdx(0,tp.id)}
+function msInit(){
+  if(!MSN_OK)return;
+  const on=(n,f)=>{try{navigator.mediaSession.setActionHandler(n,f)}catch(e){}};
+  on('play',()=>{if(curT()){if(!au.getAttribute('src'))playIdx(S.cur);else{S.playing=true;mPlay(mTok);renderMusic()}}else msTop()});
+  on('pause',()=>{if(!curT())return;au.pause();S.playing=false;renderMusic()});
+  on('previoustrack',()=>{if(!curT()){msTop();return}if(au.currentTime>3)au.currentTime=0;else playIdx(S.cur-1)});
+  on('nexttrack',()=>{if(curT())playIdx(S.cur+1);else msTop()});
+  on('seekto',d=>{
+    const dur=au.duration;if(!curT()||!(isFinite(dur)&&dur>0))return;
+    const t=Math.min(Math.max(+d.seekTime||0,0),dur);
+    if(d.fastSeek&&au.fastSeek)au.fastSeek(t);else au.currentTime=t;
+    msPos();updProg();
+  });
+}
+msInit();
+['loadedmetadata','durationchange','seeked','play','pause','ratechange','emptied'].forEach(ev=>au.addEventListener(ev,msPos));
+au.addEventListener('pause',()=>{ // 앱 밖(이어폰 분리·통화·블루투스 키)에서 멈춘 경우 UI 의 재생 상태를 맞춤
+  if(au.ended||Date.now()-mSwT<400||!au.getAttribute('src')||!curT())return;
+  if(S.playing){S.playing=false;renderMusic()}
+});
+au.addEventListener('play',()=>{ // 앱 밖에서 다시 재생된 경우
+  if(!curT()||!au.getAttribute('src'))return;
+  if(!S.playing){S.playing=true;renderMusic()}
+});
 const mkCanvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
 const toBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
 const b64blob=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
@@ -1424,6 +1493,7 @@ document.addEventListener('click',async e=>{
   else if(a=='mclose')closeModal();
   else if(a=='mcancel'){const d=mReset();renderModal();if(d)toast('저장하지 않은 변경을 취소했습니다.')}
   else if(a=='mback'){S.mv='play';S.lm=false;renderModal()}
+  else if(a=='gonow'){const al=albBy(S.pa);if(al){S.alb=al.id;S.mv='play';S.lm=false;renderModal()}}
   else if(a=='mlist'){S.mv='list';S.lm=false;renderModal()}
   else if(a=='mreg'&&S.admin){const va=vAlb();if(va){S.alb=va.id;mClear();S.mt=null;S.mte=false;S.ef='play';S.mv='edit'}else{S.mv='reg';S.ry='';S.rt='';S.rn=false;mClear()}renderModal()}
   else if(a=='malbum'&&S.admin){if(mDirty()&&!confirm('저장하지 않은 변경이 사라집니다. 앨범 관리로 이동할까요?'))return;mReset();S.mv='list';S.lm=true;renderModal()}
@@ -1517,6 +1587,18 @@ document.addEventListener('input',e=>{
   else if(t.id=='e-body')renderThumbs();
   else if(k&&t.type!='file'&&k!='logo')onDesignInput(t,k);
 });
+// 모달이 떠 있을 때, 스크롤할 내용이 없는 곳(커버·헤더·빈 배경)을 드래그해도 뒤의 본문이 따라 스크롤되지 않게 막음.
+// 스크롤할 내용이 있는 영역(곡 목록·앨범 목록·긴 설정창)은 그대로 스크롤되고, 입력창·재생 위치 슬라이더는 건드리지 않음
+document.addEventListener('touchmove',e=>{
+  if(!S.modal||!e.cancelable)return;
+  const t=e.target;if(!t||!t.closest||!t.closest('#modal'))return;
+  if(t.closest('input[type=range],textarea,select'))return;
+  for(let n=t;n&&n.id!='modal';n=n.parentElement){
+    const o=getComputedStyle(n).overflowY;
+    if((o=='auto'||o=='scroll')&&n.scrollHeight>n.clientHeight+1)return;
+  }
+  e.preventDefault();
+},{passive:false});
 const msg=t=>{let m=$('#amsg');if(!m){m=document.createElement('span');m.id='amsg';m.style.color='var(--logo)';$('#mbox').appendChild(m)}m.textContent=t};
 const keyRow=(id,ph)=>{$('#krow').innerHTML=`<span>관리자 모드</span><input id="${id}" type="password" placeholder="${ph}" autocomplete="off"><button data-a="authok">[확인]</button>`;$('#'+id).focus()};
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
