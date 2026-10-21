@@ -1,5 +1,5 @@
 {
- "v": 20261021044159,
+ "v": 20261021052534,
  "albums": [
   {
    "id": "y2013",
@@ -44,7 +44,8 @@
     {
      "name": "성시경 - 거리에서",
      "file": "music/86b0a18f8cd6586cdd8defb1.mp3",
-     "cover": "music/cover/mvgr0dnmqpi2.jpg"
+     "cover": "music/cover/mvgr0dnmqpi2.jpg",
+     "lyric": "날 부르는 목소리에 돌아보면\n텅 빈 거리 어느새 수많은 네 모습만 가득해"
     },
     {
      "name": "Nell - Go",
