@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-XgqgXe6XFFzYLNAyMBz7HBUk11t6XDwW/rCXrFdAa5A=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-st8LHdUQl1tRO4eklMmj/MDTcoOMzoptsM7lybuXV7s=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-0Q+JgnYj5sKJsM7XoaW2cna1725rl5AE+zn/chPNXO4=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -43,7 +43,7 @@ r.setAttribute('data-tone',c?'custom':id);
 set('--bg',bg);set('--paper',pb);set('--ink',fc);set('--mid',fc);
 set('--lo',c&&mix?'color-mix(in srgb,'+fc+' 72%,var(--bg))':fc);
 set('--sel',c&&mix?'color-mix(in srgb,var(--ink) 16%,var(--bg))':'');
-set('--line',c&&mix?'color-mix(in srgb,var(--ink) 24%,var(--bg))':'');
+set('--line',c&&mix?'color-mix(in srgb,var(--ink) 24%,var(--bg))':'');set('--edge',c&&mix?'color-mix(in srgb,var(--ink) 50%,var(--bg))':'');
 if(pb)r.setAttribute('data-ubody','');else r.removeAttribute('data-ubody');
 var cs='';if(bg){var h=hex6(bg).slice(1);cs=(parseInt(h.slice(0,2),16)*299+parseInt(h.slice(2,4),16)*587+parseInt(h.slice(4,6),16)*114)/1000<128?'dark':'light'}
 set('color-scheme',cs);
@@ -59,10 +59,10 @@ uiApply(uiSet(uiDesign()));
   gtag('config', GA);
 </script>
 <style>
-:root{--bg:#fafbfb;--ink:#222;--mid:#595959;--lo:#6b6b6b;--line:#b0b0b0;--dot:#3a74d4;--hid:#b85c0a;--sel:#d3e2fb;--logo:#a00014;
+:root{--bg:#fafbfb;--ink:#222;--mid:#595959;--lo:#6b6b6b;--line:#b0b0b0;--dot:#3a74d4;--hid:#b85c0a;--sel:#d3e2fb;--edge:#8f8f8f;--logo:#a00014;
 --sans:"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;}
-:root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c8c6bc;--lo:#a3a199;--line:#55534e;--dot:#6fa3f2;--hid:#e0a04a;--sel:#3b4a63;--logo:#ff6a52}
-:root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#615640;--lo:#6b5f49;--line:#bfb28c;--rule:#e8dfc0;--dot:#654321;--hid:#1f7a47;--sel:#ecd99a}
+:root[data-tone=dark]{color-scheme:dark;--bg:#262624;--ink:#faf9f5;--mid:#c8c6bc;--lo:#a3a199;--line:#55534e;--dot:#6fa3f2;--hid:#e0a04a;--sel:#3b4a63;--logo:#ff6a52;--edge:#7a7870}
+:root[data-tone=note]{--bg:#f3ebd4;--paper:#fbf6e3;--ink:#3b3226;--mid:#615640;--lo:#6b5f49;--line:#bfb28c;--rule:#e8dfc0;--dot:#654321;--hid:#8a5a00;--sel:#ecd99a;--edge:#8f8157}
 :root[data-tone=note] article,:root[data-tone=note] .act,:root[data-tone=note] #mbox{background:var(--paper)}
 /* 줄 간격 26px 은 아래 줄무늬 배경(26px)과 반드시 같이 바꿀 것 */
 :root[data-tone=note] .tx{line-height:26px;background-image:repeating-linear-gradient(transparent 0,transparent 25px,var(--rule) 25px,var(--rule) 26px)}
@@ -75,9 +75,9 @@ uiApply(uiSet(uiDesign()));
 .tl{display:block}
 .row2.tn{flex-wrap:wrap;row-gap:2px}
 :root[data-hs=h] .tl{display:flex;flex-wrap:wrap}
-:root[data-hs=h] .tag{display:block;padding:2px 0;margin-right:.45em}
+:root[data-hs=h] .tag{display:block;padding:8px 0;margin-right:.45em}
 :root[data-hs=h] .tag:not(:last-child)::after{content:",";font-weight:400}
-.row2 input[type=color]{flex:none;width:34px;height:28px;padding:0;border:1px solid var(--line);background:none;cursor:pointer}
+.row2 input[type=color]{flex:none;width:34px;height:28px;padding:0;border:1px solid var(--edge);background:none;cursor:pointer}
 .ud{border-top:1px solid var(--line);margin:12px 0 6px}
 .uh,.uw{margin:2px 0 6px;font-size:calc(11px + var(--fs));line-height:1.5}
 .uh{color:var(--lo)}.uw{color:var(--logo)}.uw:empty{display:none}
@@ -88,10 +88,10 @@ uiApply(uiSet(uiDesign()));
 .row2 button.on{color:var(--ink);font-weight:600}
 #mbox.st{width:min(400px,92vw)}
 .dtab{display:flex}
-.dtab button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 6px;border:1px solid var(--line);background:var(--sel);color:var(--lo);font-size:calc(14px + var(--fs));line-height:1.35}
+.dtab button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 6px;border:1px solid var(--edge);background:var(--sel);color:var(--mid);font-size:calc(14px + var(--fs));line-height:1.35}
 .dtab button+button{border-left:0}
 .dtab button.on{background:transparent;color:var(--ink);font-weight:600;border-bottom-color:transparent}
-.dtab small{font-size:calc(10px + var(--fs));font-weight:400;color:var(--lo)}
+.dtab small{font-size:calc(10px + var(--fs));font-weight:400;color:var(--mid)}
 .dpan{border:1px solid var(--line);border-top:0;padding:8px 14px 12px}
 .dh2{margin:12px 0 4px;font-size:calc(15px + var(--fs));color:var(--ink)}
 .dsub{margin:4px 0 6px}
@@ -104,8 +104,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;font-size:calc(13px + var(--fs));height:100dvh;overflow:hidden}
 button,input,textarea{font:inherit;color:inherit;background:none;border:0;padding:0}
 button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 input[type=checkbox]{width:12px;height:12px;margin:0 4px 0 0;padding:0;vertical-align:middle;accent-color:var(--mid)}
-input,textarea{border:1px solid var(--line);padding:4px 8px;width:100%}
+input,textarea{border:1px solid var(--edge);padding:4px 8px;width:100%}
 .wrap{max-width:1100px;height:100dvh;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column}
 header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
 #logo{flex:1;color:var(--logo);font-size:calc(20px + var(--fs));letter-spacing:.5px}
@@ -144,16 +145,16 @@ aside{display:flex;flex-direction:column;gap:24px;overflow-y:auto;min-height:0}
 .d{height:30px;line-height:24px;position:relative;color:var(--mid)}
 .d.has{cursor:pointer;color:var(--ink)}
 .d.has::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dot)}
-.d.has.hid::after{background:var(--hid)}
-.d.sel span{background:var(--sel);display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%}
+.d.has.hid::after{width:6px;height:6px;margin-left:-3px;background:transparent;border:1.5px solid var(--hid)}
+.d.sel span{background:var(--sel);display:inline-block;width:26px;height:26px;line-height:24px;border:1px solid var(--dot);border-radius:50%}
 .tags{border-top:1px solid var(--line);padding-top:16px}
 .tags h4{margin:0 0 8px;font-weight:400;display:flex;justify-content:space-between}
-.tag{display:flex;gap:6px;color:var(--mid);padding:2px 0;cursor:pointer}
+.tag{display:flex;gap:6px;color:var(--mid);padding:8px 0;cursor:pointer}
 .tag.on{color:var(--ink);font-weight:600}
 article{border:1px solid var(--line);padding:36px 40px;overflow-y:auto;min-height:0;position:relative}
 .meta{color:var(--lo);font-size:calc(12px + var(--fs));letter-spacing:1px}
 h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
-.body{white-space:pre-wrap;line-height:1.95;color:var(--mid)}
+.body{white-space:pre-wrap;font-size:calc(15px + var(--fs));line-height:1.95;color:var(--mid)}
 .body img{display:block;max-width:100%;margin:16px 0}
 .act{position:sticky;top:6px;width:fit-content;margin:6px 0 0 auto;padding:2px 0 2px 8px;display:flex;gap:10px;color:var(--mid);background:var(--bg);z-index:2}
 .plist div{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
@@ -294,7 +295,7 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .al-y small{color:var(--lo);margin-left:3px;font-size:calc(10.5px + var(--fs))}
 .al input[type=checkbox]{position:absolute;top:3px;left:3px;margin:0;z-index:1}
 .rg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
-.rg button{padding:4px 14px;border:1px solid var(--line);color:var(--mid)}
+.rg button{padding:4px 14px;border:1px solid var(--edge);color:var(--mid)}
 .rg button:hover{background:var(--sel);color:var(--ink)}
 .rg-y{display:flex;align-items:center;gap:12px}
 .rg-y #m-year{flex:1;min-width:0;width:auto}
@@ -309,7 +310,7 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 #foot:empty{display:none}
 .hide{display:none!important}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:90vw;padding:8px 16px;background:var(--ink);color:var(--bg);z-index:20;display:none;pointer-events:none;text-align:center}
-#toast.on{display:block}#toast.err{background:var(--logo);color:#fff}
+#toast.on{display:block}#toast.err{background:var(--logo);color:var(--bg)}
 @media(max-width:760px){
 body{height:auto;overflow:auto}.wrap{height:auto;display:block;padding:8px 14px 48px}header{position:sticky;top:0;background:var(--bg);z-index:5}.act{top:calc(var(--hh,0px) + 4px)}
 main{display:grid;grid-template-columns:1fr;grid-template-rows:none;gap:44px}
@@ -373,6 +374,9 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 .pl-np{flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;line-height:1.45;padding:0;color:var(--ink);text-decoration:none;cursor:pointer;font-size:calc(12px + var(--fs))}
 /* 모달 안의 스크롤이 끝나도 뒤의 본문으로 번지지 않게 */
 #modal,#mbox{overscroll-behavior:contain}
+.pl-row.on .pl-n,.pl-row.ke .pl-n{color:var(--mid)}
+#totop{display:none;position:fixed;right:14px;bottom:20px;z-index:8;min-width:44px;min-height:44px;padding:0 12px;align-items:center;justify-content:center;border:1px solid var(--edge);background:var(--bg);color:var(--ink);font-size:calc(13px + var(--fs))}
+@media(max-width:760px){#totop.on{display:flex}input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea{font-size:max(16px,calc(13px + var(--fs)))!important}}
 </style>
 </head>
 <body>
@@ -383,7 +387,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
-<div id="modal"><div id="mbox"></div></div>
+<div id="modal" role="dialog" aria-modal="true" aria-label="팝업"><div id="mbox"></div></div>
 <main>
   <aside>
     <section><div class="cbar" id="calbar"></div><div class="cal-h" id="calh"></div><div class="cal" id="cal"></div></section>
@@ -394,6 +398,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 <footer id="foot"></footer>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
+<button id="totop" type="button" data-a="totop" aria-label="맨 위로">↑ 위로</button>
 <audio id="au"></audio>
 <script>
 // gate = 관리자 코드의 SHA-256 해시(코드 자체는 저장하지 않음). 코드를 바꾸면 이 값 교체
@@ -1422,6 +1427,7 @@ function renderModal(){
 }
 {const hd=$('header');if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',hd.offsetHeight+'px')).observe(hd)}
 const toTop=()=>{$('#art').scrollTop=0;window.scrollTo(0,0)};
+window.addEventListener('scroll',()=>{const b=$('#totop');if(b)b.classList.toggle('on',(window.scrollY||document.documentElement.scrollTop)>300)},{passive:true});
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())};
 const fld=d=>JSON.stringify([d.date,d.weather||'',d.title,d.body,(d.tags||[]).join(','),!!d.hidden]);
 try{localStorage.removeItem('draft')}catch(e){}
@@ -1462,7 +1468,7 @@ document.addEventListener('click',async e=>{
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
   else if(a=='sy')go(+v,S.m);
   else if(a=='sm')go(S.y,+v);
-  else if(a=='home'){e.preventDefault();showPost(vis()[0]);render();toTop()}
+  else if(a=='home'){e.preventDefault();showPost(vis()[0]);render();toTop()}else if(a=='totop')toTop();
   else if(a=='prev')go(S.y,S.m-1);
   else if(a=='next')go(S.y,S.m+1);
   else if(a=='day'){pick({date:v});S.pid=null;render();toTop()}
