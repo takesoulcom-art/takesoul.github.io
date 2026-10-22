@@ -1,5 +1,5 @@
 {
- "v": 20261021142424,
+ "v": 20261022054822,
  "desk": {
   "tone": "note",
   "tones": [],
@@ -10,7 +10,7 @@
   "lq": 0
  },
  "mob": {
-  "tone": "cmv8qe8t0",
+  "tone": "note",
   "tones": [
    {
     "id": "cmv8qe8t0",
