@@ -219,18 +219,23 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .ke-b{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px;color:var(--mid)}
 .ke-b button{padding:4px 0;color:var(--mid)}
 /* 음악 모달 헤더: 1열(좌: 앨범 목록 / 우: 앨범제목(년도) 또는 미니 컨트롤러 / 닫기) + 2열(재생 중인 곡, 오른쪽 정렬) */
-.pl-hw{display:block;padding-bottom:6px}
-.pl-r1{display:flex;align-items:center;gap:10px;min-height:40px}
-.pl-r1>.pl-sp{flex:1 1 0;min-width:0}
-.pl-r1 .pl-ed.lt{flex:0 1 auto;min-width:0}
-.pl-r2{display:flex;justify-content:flex-end;padding:0 45.5px 2px 0;margin-top:-4px} /* 45.5 = 닫기 28 + 간격 10 + 다음곡 아이콘 안쪽 여백 7.5 → 미니 컨트롤러 오른쪽 끝과 일치 */
+.pl-hw{display:grid;grid-template-columns:minmax(0,1fr) fit-content(58%) 28px;grid-template-rows:28px calc((12px + var(--fs)) * 1.45);gap:0 10px;align-items:center;padding-bottom:6px}
+.pl-r1{display:contents}
+.pl-r1>.pl-sp{display:none}
+.pl-r1>:first-child{grid-column:1;grid-row:1 / span 2;align-self:center;justify-self:start;min-width:0;max-width:100%}
+.pl-r1>.pl-ed.lt{align-self:stretch}
+.pl-r1>.pl-ti{justify-self:stretch;width:100%}
+.pl-r1>.pl-mini{grid-column:2;grid-row:1;justify-self:end}
+.pl-r1>.pl-rt{grid-column:2;grid-row:1 / span 2;justify-self:end;max-width:100%}
+.pl-r1>.pl-x{grid-column:3;grid-row:1 / span 2;align-self:stretch;justify-self:end}
+.pl-r2{grid-column:2;grid-row:2;justify-self:end;min-width:0;max-width:100%;display:flex;justify-content:flex-end;align-items:center;padding:0 7.5px 0 0} /* 7.5 = 다음곡 아이콘 안쪽 여백 → 곡 제목 오른쪽 끝이 미니 컨트롤러 아이콘 오른쪽 끝과 일치 */
 /* 글자 밑부분(g, p, y) 잘림 방지: 줄 높이·위아래 여유를 넉넉히 */
 .pl-h b,.pl-ht{line-height:1.7;padding:3px 0}
 .pl-rt{flex:1 1 0;min-width:0;text-align:right;font-size:calc(13px + var(--fs));font-weight:400}
 .pl-lb{font-size:calc(12px + var(--fs))}
 /* 헤더 우측 미니 컨트롤러 */
 .pl-mini{display:flex;align-items:center;gap:0;flex:none}
-.pl-mini button{min-width:30px;min-height:30px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.pl-mini button{min-width:30px;min-height:28px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .pl-mini svg{width:15px;height:15px}
 /* 가사: 제목·플레이바와 간격을 둠 (가사가 없으면 여백도 없음) */
 .pl-lyr{text-align:center;margin:10px 0 12px;font-size:calc(12px + var(--fs));line-height:1.5;min-height:3em}
@@ -365,7 +370,7 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 /* 재생 화면: 커버·제목(·가사)을 한 덩어리로 묶어 고정 높이 영역의 가운데에. 가사가 없으면 가사 칸을 숨겨 커버·제목이 가운데로 */
 .pl-top{display:flex;flex-direction:column;justify-content:center;min-height:calc(206px + var(--fs) * 8)}
 .pl-lyr:empty{display:none}
-.pl-np{flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;line-height:1.7;padding:1px 0;color:var(--ink);text-decoration:none;cursor:pointer;font-size:calc(12px + var(--fs))}
+.pl-np{flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;line-height:1.45;padding:0;color:var(--ink);text-decoration:none;cursor:pointer;font-size:calc(12px + var(--fs))}
 /* 모달 안의 스크롤이 끝나도 뒤의 본문으로 번지지 않게 */
 #modal,#mbox{overscroll-behavior:contain}
 </style>
