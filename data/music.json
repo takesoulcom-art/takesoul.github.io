@@ -1,5 +1,5 @@
 {
- "v": 20261022083854,
+ "v": 20261022150255,
  "albums": [
   {
    "id": "y2013",
@@ -22,7 +22,7 @@
      "name": "이소라 - Tears",
      "file": "music/b9c47d4cbb278925dc1e1d8d.mp3",
      "cover": "music/cover/mvgr0dp4mhk8.jpg",
-     "lyric": "좁고 어둔 방 거울 속에 나\n동굴 같은 방 먼지 같은 나"
+     "lyric": "좁고 어두운 방 거울 속에 나\n동굴 같은 방 먼지 같은 나"
     },
     {
      "name": "김광석 - 잊어야 한다는 마음으로",
@@ -46,7 +46,7 @@
      "name": "성시경 - 거리에서",
      "file": "music/86b0a18f8cd6586cdd8defb1.mp3",
      "cover": "music/cover/mvgr0dnmqpi2.jpg",
-     "lyric": "날 부르는 목소리에 돌아보면..\n텅 빈 거리 어느새 수많은 네 모습만 가득해"
+     "lyric": "날 부르는 목소리에 돌아보면\n텅 빈 거리 어느새 수많은 네 모습만 가득해"
     },
     {
      "name": "Nell - Go",
@@ -112,7 +112,7 @@
      "name": "이소라 - 시시콜콜한 이야기",
      "file": "music/de4cdbf13d9d4c49fd4e0df8.mp3",
      "cover": "music/cover/mvgr0dq1mbau.jpg",
-     "lyric": "이러고 있는거 나도 너무 싫어..\n저울이 기울어 나만 사랑하는 거 같잖아.."
+     "lyric": "이러고 있는거.. 나도 너무 싫어\n저울이 기울어.. 나만 사랑하는 거 같잖아"
     },
     {
      "name": "Sioen - Cruisin'",
