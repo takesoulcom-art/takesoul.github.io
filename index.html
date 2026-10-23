@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-lw0qJxWSnQE+PIoAlgKalr2Me0MAYV3YvtqMsMEe0fc=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-zaWxVmO+NrgVzaOS9bIBBxPQu4cYlkHlHeYdbC8ACsY=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-lw0qJxWSnQE+PIoAlgKalr2Me0MAYV3YvtqMsMEe0fc=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-7In2CRLPBw3a2moDuxQqzJOGt8T7i6sXT6yuPV6HOGc=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -122,10 +122,11 @@ header{flex:none;display:flex;align-items:center;gap:16px;padding:12px 0 8px;bor
 #menu{font-size:calc(20px + var(--fs));color:var(--mid)}
 /* 설정(≡) 버튼 위치 (관리자 설정 mp: tr 우상 / tl 좌상 / br 우하 / bl 좌하) — 상단은 헤더 안에서 순서만 바꾸고, 하단은 화면 모서리에 띄움. 음악 컨트롤은 로고(flex:1) 덕분에 항상 오른쪽 끝에 붙음 */
 html[data-mp=tl] #menu{order:-1}
-html[data-mp=br] #menu,html[data-mp=bl] #menu{position:absolute;bottom:0;z-index:6;width:44px;height:38px;padding:0;display:flex;align-items:center;justify-content:center}
-html[data-mp=br] #menu{right:14px}html[data-mp=bl] #menu{left:14px}
+html[data-mp=br] #menu,html[data-mp=bl] #menu{position:absolute;z-index:6;width:44px;height:38px;padding:0;display:flex;align-items:center}
+html[data-mp=bl] #menu{left:20px;bottom:24px;justify-content:flex-start} /* 좌하단: 본문(main) 맨 아래 왼쪽 모서리 = tags 칸 안에 고정 */
+html[data-mp=br] #menu{right:20px;bottom:0;justify-content:flex-end}
 html[data-mp=br] .wrap,html[data-mp=bl] .wrap{position:relative}
-html[data-mp=bl] aside{padding-bottom:38px} /* 좌하단: 버튼만큼 tags 영역만 줄임(글 본문 상자 높이는 그대로) */
+html[data-mp=bl] aside{margin-bottom:44px} /* 좌하단: 버튼 자리만큼 왼쪽 열(tags)만 줄임 — 글 본문 상자는 그대로 */
 html[data-mp=br] #foot{padding-right:44px} /* 우하단: 푸터 글자만 왼쪽으로 비켜 줌 */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9;height:100vh;height:100dvh}
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;max-height:80dvh;overflow:auto}
@@ -421,10 +422,11 @@ header{flex-wrap:wrap}#menu{order:2}#music{order:3;flex-basis:100%;min-width:0;j
 .pl-row.on .pl-n,.pl-row.ke .pl-n{color:var(--mid)}
 @media(max-width:760px){input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),textarea{font-size:max(16px,calc(13px + var(--fs)))!important}}
 @media(max-width:760px){
-html[data-mp=br] #menu,html[data-mp=bl] #menu{position:fixed;bottom:max(16px,env(safe-area-inset-bottom))}
+/* 모바일 하단: 화면에 고정하지 않고 페이지 맨 끝에 두어, 스크롤을 끝까지 내렸을 때만 보임(방문자에게 상시 노출 안 함) */
+html[data-mp=br] #menu,html[data-mp=bl] #menu{bottom:18px}
 html[data-mp=br] #menu{right:14px}html[data-mp=bl] #menu{left:14px}
 html[data-mp=br] .wrap,html[data-mp=bl] .wrap{padding-bottom:76px}
-html[data-mp=bl] aside{padding-bottom:0}html[data-mp=br] #foot{padding-right:0}
+html[data-mp=bl] aside{margin-bottom:0}html[data-mp=br] #foot{padding-right:0}
 /* 세로(모바일) 모드: 터치하기 쉽게 재생 컨트롤 버튼 간격 확대 */
 #music .mdk-c,.dks-c{gap:6px}
 #music .mdk-c button,.dks-c button{min-width:42px;min-height:42px}
@@ -680,7 +682,8 @@ const dS=()=>dView()[curMode()];
 const dES=()=>dEdit()[curMode()];
 const curId=()=>uiPick(dS());
 const toneT=id=>dS().tones.find(t=>t.id==id);
-const dApply=()=>{uiApply(dS(),curId());renderFooter();const r=document.documentElement,D=dS();r.setAttribute('data-li',D.li?'1':'0');r.setAttribute('data-lq',D.lq?'1':'0')};
+const mvMenu=()=>{const m=$('#menu'),w=$('.wrap'),h=$('header');if(!m||!w||!h)return;if(/^b/.test(dS().mp||'')){if(m.parentNode!==w)w.appendChild(m)}else if(m.parentNode!==h)h.appendChild(m)};
+const dApply=()=>{uiApply(dS(),curId());mvMenu();renderFooter();const r=document.documentElement,D=dS();r.setAttribute('data-li',D.li?'1':'0');r.setAttribute('data-lq',D.lq?'1':'0')};
 const dApplyAll=()=>{dApply();setLogo()};
 const toneE=(id=curId())=>dES().tones.find(t=>t.id==id);
 const dropPend=t=>{if(t.pend){revoke(t.pend.url);delete t.pend}};
