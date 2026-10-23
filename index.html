@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-oXaCzCRHjephMRtGg2vzE37gn73k/AhXPhRFoWbP92E=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-QlnZd+4AgpKFj8xVB9kxDh0WM0ksPApBn+rX/AudIvQ=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -240,6 +240,16 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .dk-c{display:flex;justify-content:space-around;margin-top:8px}
 .dk-c button{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .dk-c svg{width:22px;height:22px}
+.pl-dk.pb{padding-bottom:0;padding-top:14px;border-bottom:0;border-top:1px solid var(--line);margin-bottom:0;margin-top:8px}
+/* 작은 도크: [작은 커버][제목][이전·재생·다음] 한 줄 */
+.pl-dks{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);margin-bottom:6px}
+.pl-dks.pb{border-bottom:0;border-top:1px solid var(--line);margin-bottom:0;margin-top:6px;padding-top:8px}
+.dks-cv{flex:none;width:40px;height:40px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(16px + var(--fs));line-height:1}
+.dks-cv img{width:100%;height:100%;object-fit:cover;display:block}
+.dks-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-size:calc(13px + var(--fs));color:var(--ink)}
+.dks-c{flex:none;display:flex}
+.dks-c button{min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.dks-c svg{width:16px;height:16px}
 .pl-top.na{min-height:0;justify-content:flex-start}
 .pl-top.na .pl-t{margin-top:10px}
 /* 관리 화면: 제목·커버·툴바는 고정, 곡 목록만 스크롤 */
@@ -624,9 +634,9 @@ const uiEff=k=>{const r=document.documentElement;return k=='bg'?uiCS('--bg'):k==
 const setNorm=(o,dl,lg)=>{o=o&&typeof o=='object'?o:{};
   const tones=(Array.isArray(o.tones)?o.tones:[]).filter(t=>t&&typeof t.id=='string'&&/^[\w-]+$/.test(t.id)&&!BI.test(t.id)&&typeof t.name=='string'&&HX.test(t.bg)&&HX.test(t.pbg)&&HX.test(t.fc)).slice(0,5)
     .map(t=>({id:t.id,name:t.name.slice(0,12),bg:hex6(t.bg),pbg:hex6(t.pbg),fc:hex6(t.fc),logo:typeof t.logo=='string'&&/^img\/logo\/[\w.\-]+$/.test(t.logo)?t.logo:''}));
-  const want=o.tone||o.default;return {tone:BI.test(want)||tones.some(t=>t.id==want)?want:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v',ln:[0,5,6,7].includes(o.ln)?o.ln:dl,li:o.li!==undefined?(o.li?1:0):(lg?1:0),lq:o.lq!==undefined?(o.lq?1:0):(lg?1:0)}};
+  const want=o.tone||o.default;return {tone:BI.test(want)||tones.some(t=>t.id==want)?want:'note',tones,fs:/^[ls]$/.test(o.fs)?o.fs:'n',hs:o.hs=='h'?'h':'v',ln:[0,5,6,7].includes(o.ln)?o.ln:dl,li:o.li!==undefined?(o.li?1:0):(lg?1:0),lq:o.lq!==undefined?(o.lq?1:0):(lg?1:0),dp:o.dp=='b'?'b':'t',ds:o.ds=='s'?'s':'b'}};
 const dNorm=o=>{o=o&&typeof o=='object'?o:{};const lg=o.ly===1||o.ly===true;return {desk:setNorm(o.desk||o,7,lg),mob:setNorm(o.mob||o.desk||o,5,lg),ft:typeof o.ft=='string'?o.ft.replace(/[\r\n]+/g,' ').slice(0,200):'',mt:typeof o.mt=='string'?o.mt.replace(/[\r\n]+/g,' ').trim().slice(0,30):''}};
-const serSet=D=>({tone:D.tone,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs,ln:D.ln,li:D.li?1:0,lq:D.lq?1:0});
+const serSet=D=>({tone:D.tone,tones:D.tones.map(t=>({id:t.id,name:t.name,bg:t.bg,pbg:t.pbg,fc:t.fc,logo:t.logo||''})),fs:D.fs,hs:D.hs,ln:D.ln,li:D.li?1:0,lq:D.lq?1:0,dp:D.dp,ds:D.ds});
 const dSer=D=>({desk:serSet(D.desk),mob:serSet(D.mob),ft:String(D.ft||'').trim(),mt:String(D.mt||'').trim()});
 S.dz=dNorm(uiDesign());S.dw=null;S.em=null;S.lv=false;
 const dView=()=>S.dw||S.dz;
@@ -713,6 +723,9 @@ function designHTML(){
   else h+=`<div class="uh">White · Dark · Note는 고정이라 수정·삭제할 수 없어요. [+ 새 톤]을 누르면 지금 톤을 복사해 나만의 톤을 만들 수 있어요. (화면별 최대 5개)</div>`;
   return h+`<div class="ud"></div><div class="row2"><span>글자 크기</span>${op('ufs',D.fs,[['s','작게'],['n','기본'],['l','크게']])}</div>`
     +`<div class="row2"><span>해시 정렬</span>${op('uhs',D.hs,[['v','세로'],['h','가로']])}</div>`
+    +`<div class="row2"><span>재생 위치</span>${op('udp',D.dp,[['t','상단'],['b','하단']])}</div>`
+    +`<div class="row2"><span>재생 크기</span>${op('uds',D.ds,[['b','큰'],['s','작은']])}</div>`
+    +`<div class="uh">재생 위치·크기: 음악 재생 중 다른 화면(앨범 목록 등)으로 이동했을 때 보이는 작은 재생 영역의 위치와 크기예요.</div>`
     +`<div class="row2"><span>가사 효과</span><label class="lyc"><input type="checkbox" data-a="uli" ${D.li?'checked':''}>기울임</label><label class="lyc"><input type="checkbox" data-a="ulq" ${D.lq?'checked':''}>따옴표(")</label></div>`
     +`<div class="row2"><span>최근 글</span>${op('uln',D.ln,[[0,'끔'],[5,'5개'],[6,'6개'],[7,'7개']])}</div>`
     +`<div class="uh">최근 글: 달력 오른쪽 위 Recent 버튼으로 달력 ↔ 최근 글 목록(날짜·제목)을 바꿔 봐요. 끔이면 Recent 버튼이 사라져요. (왼쪽 List 는 전체 글 목록이며 항상 표시돼요.)</div></div>`;
@@ -860,9 +873,10 @@ function mLive(){
     }
     return true;
   };
-  const dk=b.querySelector('.pl-dk');
+  const dk=b.querySelector('.pl-dk,.pl-dks');
   if(dk){const t=document.createElement('div');t.innerHTML=mDock();
-    if(!sync(dk,t,['.dk-al','.dk-cv','.dk-t','.dk-c [data-a="play"]'])){renderModal();return}
+    const dsel=dk.classList.contains('pl-dks')?['.dks-cv','.dks-t','.dks-c [data-a="play"]']:['.dk-al','.dk-cv','.dk-t','.dk-c [data-a="play"]'];
+    if(!sync(dk,t,dsel)){renderModal();return}
     updProg()}
   if(list||reg||edit)return;
   $$('#mbox .pl-row').forEach((r,i)=>{
@@ -934,21 +948,30 @@ const mChecked=()=>$$('.mck:checked').map(c=>c.dataset.k);
 const mCheck=ks=>$$('.mck').forEach(c=>{c.checked=ks.includes(c.dataset.k)});
 const mCov=c=>c?`<img src="${esc(S.blob[c]||c)}" data-p="${esc(c)}" alt="" loading="lazy">`:'♬';
 const mX=`<button class="pl-x" data-a="mclose" aria-label="닫기">${IC.x}</button>`;
-function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHTML():S.mv=='edit'&&S.admin?mEditHTML():mPlayHTML()}
+function musicHTML(){const h=S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHTML():S.mv=='edit'&&S.admin?mEditHTML():mPlayHTML();return dS().dp=='b'?h+mDock():h}
 // ── 헤더 + 도크 ─────────────────────────────────────────────────────────
-// 헤더는 항상 한 줄([좌측] [닫기]). 재생 중인 곡이 있고 "재생 중인 앨범 상세 화면"이 아니면 헤더 아래에 도크(작은 재생 영역)를 붙임
+// 헤더는 항상 한 줄([좌측] [닫기]). 재생 중인 곡이 있고 "재생 중인 앨범 상세 화면"이 아니면 도크(작은 재생 영역)를 붙임
+// 도크 위치(상단/하단)·크기(큰/작은)는 관리자 설정(dS().dp / dS().ds)에 따름: 상단이면 헤더 바로 아래, 하단이면 화면 맨 끝(musicHTML)
 const mDock=()=>{
   const al=curA(),t=curT();
   if(S.pv||!al||!t||(S.mv=='play'&&mAct()))return '';
-  const go='data-a="gonow" aria-label="재생 중인 앨범으로 이동"';
-  return `<div class="pl-dk"><button class="dk-al" ${go}>${aTtl(al)}</button><div class="dk-m"><button class="dk-l" ${go}><span class="dk-cv">${mCov(t.cover||al.cover)}</span></button>`
+  return (dS().ds=='s'?mDockS:mDockB)(al,t);
+};
+const mDockB=(al,t)=>{
+  const go='data-a="gonow" aria-label="재생 중인 앨범으로 이동"',pb=dS().dp=='b'?' pb':'';
+  return `<div class="pl-dk${pb}"><button class="dk-al" ${go}>${aTtl(al)}</button><div class="dk-m"><button class="dk-l" ${go}><span class="dk-cv">${mCov(t.cover||al.cover)}</span></button>`
     +`<div class="dk-r"><button class="dk-t" ${go}>${esc(t.name)}</button>`
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
-    +`<div class="dk-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'일시정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div></div></div></div>`;
+    +`<div class="dk-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'일시정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div></div></div>`;
 };
-const mHead=left=>`<div class="pl-h pl-hw">${left}${mX}</div>${mDock()}`;
+const mDockS=(al,t)=>{
+  const go='data-a="gonow" aria-label="재생 중인 앨범으로 이동"',pb=dS().dp=='b'?' pb':'';
+  return `<div class="pl-dks${pb}"><button class="dks-cv" ${go}>${mCov(t.cover||al.cover)}</button><button class="dks-t" ${go}>${esc(t.name)}</button>`
+    +`<div class="dks-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'일시정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div></div>`;
+};
+const mHead=left=>`<div class="pl-h pl-hw">${left}${mX}</div>${dS().dp=='b'?'':mDock()}`;
 // 화면 구성이 바뀌는 조건(mLive 가 부분 갱신 대신 전체를 다시 그릴지 판단)
-const mSig=()=>{const v=vAlb();return [S.mv,v&&v.id,S.pa,S.cur>=0?1:0,mAct()?1:0,S.admin?1:0,S.ke||'',S.pv?1:0].join('|')};
+const mSig=()=>{const v=vAlb();return [S.mv,v&&v.id,S.pa,S.cur>=0?1:0,mAct()?1:0,S.admin?1:0,S.ke||'',S.pv?1:0,dS().dp,dS().ds].join('|')};
 function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const act=mAct(),ci=act?S.cur:-1,tr=ci>=0?T[ci]:null;
@@ -1497,7 +1520,7 @@ document.addEventListener('click',async e=>{
   const el=t.closest('[data-a]');if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
   if(['day','tag','open','home','plist'].includes(a)&&S.mode=='edit'&&!leave()){e.preventDefault();return}
-  if(/^(tone|dmode|tnew|tdelc|ufs|uhs|uln|uli|ulq|ulogo0?)$/.test(a)&&!S.admin)return;
+  if(/^(tone|dmode|tnew|tdelc|ufs|uhs|udp|uds|uln|uli|ulq|ulogo0?)$/.test(a)&&!S.admin)return;
   if(a=='menu'){S.modal='auth';renderModal()}
   else if(a=='logout'){keyClear();location.reload()}
   else if(a=='py'||a=='pm'){S.modal=a[1];renderModal()}
@@ -1556,6 +1579,7 @@ document.addEventListener('click',async e=>{
     dropPend(t);D.tones=D.tones.filter(x=>x.id!=t.id);if(D.tone==t.id)D.tone='note';dApplyAll();renderModal()}
   else if(a=='uli'||a=='ulq'){dES()[a=='uli'?'li':'lq']=el.checked?1:0;dApply();renderModal()}
   else if(a=='ufs'||a=='uhs'){dES()[a=='ufs'?'fs':'hs']=v;dApply();renderModal()}
+  else if(a=='udp'||a=='uds'){dES()[a=='udp'?'dp':'ds']=v;renderModal()}
   else if(a=='uln'){dES().ln=+v;renderCal();renderModal()}
   else if(a=='ulogo')clickEl('#u-logo');
   else if(a=='ulogo0'){const t=toneE();if(t){dropPend(t);t.logo='';setLogo();renderModal()}}
