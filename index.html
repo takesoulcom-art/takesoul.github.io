@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-joL5ecZ3OiBLy86dWr42OBmH4KEPNE5RD1kWF5kWL4k=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-GTxK6IBfjbtuLObE/K1HwcAt+vUxB2e7T8R4q1lWG90=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -228,16 +228,16 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 /* 재생 중인 앨범 제목(좌측 정렬) */
 .pl-al,.dk-al{display:block;width:100%;padding:8px 0 2px;text-align:left;font-size:calc(14px + var(--fs));font-weight:600;line-height:1.6;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* 도크: 다른 화면(앨범 목록·다른 앨범·관리)에서 보이는 작은 재생 영역 */
-.pl-dk{padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px}
-.dk-m{display:flex;gap:14px;align-items:flex-start}
-.dk-l{flex:none;width:104px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;color:var(--ink)}
+.pl-dk{padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.dk-al{padding:12px 0 12px}
+.dk-m{display:flex;gap:18px;align-items:center}
+.dk-l{flex:none;width:104px;display:block;padding:0;color:var(--ink)}
 .dk-cv{width:104px;height:104px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(36px + var(--fs));line-height:1}
 .dk-cv img{width:100%;height:100%;object-fit:cover;display:block}
-.dk-t{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-weight:600;font-size:calc(14px + var(--fs));line-height:1.6}
-.dk-r{flex:1;min-width:0;display:flex;flex-direction:column}
-.dk-ly{text-align:center;font-size:calc(11px + var(--fs));line-height:1.5;height:3em;overflow:hidden;margin:2px 0 4px}
+.dk-r{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.dk-t{display:block;width:100%;margin:0 0 10px;padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-weight:400;font-size:calc(14px + var(--fs));line-height:1.6;color:var(--ink)}
 .dk-r .pl-bar{margin:0}
-.dk-c{display:flex;justify-content:space-around;margin-top:4px}
+.dk-c{display:flex;justify-content:space-around;margin-top:8px}
 .dk-c button{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .dk-c svg{width:22px;height:22px}
 .pl-top.na{min-height:0;justify-content:flex-start}
@@ -858,7 +858,7 @@ function mLive(){
   };
   const dk=b.querySelector('.pl-dk');
   if(dk){const t=document.createElement('div');t.innerHTML=mDock();
-    if(!sync(dk,t,['.dk-al','.dk-cv','.dk-t','.dk-ly','.dk-c [data-a="play"]'])){renderModal();return}
+    if(!sync(dk,t,['.dk-al','.dk-cv','.dk-t','.dk-c [data-a="play"]'])){renderModal();return}
     updProg()}
   if(list||reg||edit)return;
   $$('#mbox .pl-row').forEach((r,i)=>{
@@ -937,8 +937,8 @@ const mDock=()=>{
   const al=curA(),t=curT();
   if(!al||!t||(S.mv=='play'&&mAct()))return '';
   const go='data-a="gonow" aria-label="재생 중인 앨범으로 이동"';
-  return `<div class="pl-dk"><button class="dk-al" ${go}>${aTtl(al)}</button><div class="dk-m"><button class="dk-l" ${go}><span class="dk-cv">${mCov(t.cover||al.cover)}</span><span class="dk-t">${esc(t.name)}</span></button>`
-    +`<div class="dk-r"><div class="dk-ly">${t.lyric?`<span class="pl-ly">${esc(t.lyric)}</span>`:''}</div>`
+  return `<div class="pl-dk"><button class="dk-al" ${go}>${aTtl(al)}</button><div class="dk-m"><button class="dk-l" ${go}><span class="dk-cv">${mCov(t.cover||al.cover)}</span></button>`
+    +`<div class="dk-r"><button class="dk-t" ${go}>${esc(t.name)}</button>`
     +`<div class="pl-bar"><input type="range" id="pl-seek" class="seek" min="0" max="1000" step="1" value="0" aria-label="재생 위치"><span class="pl-time" id="pl-time">0:00 / 0:00</span></div>`
     +`<div class="dk-c"><button data-a="prevm" aria-label="이전곡">${IC.prev}</button><button data-a="play" aria-label="${S.playing?'일시정지':'재생'}">${S.playing?IC.pause:IC.play}</button><button data-a="nextm" aria-label="다음곡">${IC.next}</button></div></div></div></div>`;
 };
