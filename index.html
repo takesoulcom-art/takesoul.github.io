@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-GTxK6IBfjbtuLObE/K1HwcAt+vUxB2e7T8R4q1lWG90=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-e+puwYR2O7HVCXwKMbfTOCIQteroVWqn20th1auYtyE=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-oXaCzCRHjephMRtGg2vzE37gn73k/AhXPhRFoWbP92E=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -246,7 +246,10 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 #mbox.mp>.mbd.me{display:flex;flex-direction:column;overflow-y:auto}
 .mbd.me>.me-top{flex:none}
 .mbd.me>.me-sc{flex:1 1 auto;min-height:140px;overflow-y:auto;overscroll-behavior:contain}
-.mbd.me .pl-ti{display:block;width:100%;margin:8px 0 0;text-align:center;font-weight:600;font-size:calc(14px + var(--fs))}
+.mbd.me .pl-ti{display:block;width:100%;margin:8px 0 0;padding:4px 0;border:0;background:transparent;outline:none;text-align:center;font-weight:600;font-size:calc(14px + var(--fs));caret-color:var(--ink);cursor:text}
+.mbd.me .pl-ti:focus{box-shadow:0 1px 0 var(--edge)}
+.mbd.pv{display:flex;flex-direction:column}
+.pv-off{pointer-events:none}
 /* 가사: 제목·플레이바와 간격을 둠 (가사가 없으면 여백도 없음) */
 .pl-lyr{text-align:center;margin:10px 0 12px;font-size:calc(12px + var(--fs));line-height:1.5;min-height:3em}
 .pl-lyr .pl-ly{margin-top:0;font-size:inherit}
@@ -453,6 +456,7 @@ function hSync(){
   else{H.skip=1;history.go(t-c);setTimeout(()=>{H.skip=0},700)}
 }
 function modalBack(){
+  if(S.pv){S.pv=false;renderModal();return}
   if(S.modal!='music'||S.mv=='play'){closeModal();return}
   if(S.mv=='edit'){
     if(mDirty()&&!confirm('저장하지 않은 변경이 사라집니다. 이전 단계로 돌아갈까요?')){renderModal();return}
@@ -923,7 +927,7 @@ const mMusicDirty=()=>{const a=eA();return !!S.pend.items.length||!!(a&&S.mw&&(S
 const mNameDirty=()=>{const a=eA();return !!a&&S.mt!=null&&mnN(S.mt,a)!==aNm(a)};
 const mCovDirty=()=>!!S.ac;
 const mDirty=()=>mMusicDirty()||mNameDirty()||mCovDirty()||mTkDirty();
-function mClear(){Object.values(S.tm).forEach(q=>{if(q.cv)revoke(q.cv.url)});S.tm={};S.ke=null;S.mw=null;pqFree();S.pend=newPend();if(S.ac)revoke(S.ac.url);S.ac=null}
+function mClear(){S.pv=false;Object.values(S.tm).forEach(q=>{if(q.cv)revoke(q.cv.url)});S.tm={};S.ke=null;S.mw=null;pqFree();S.pend=newPend();if(S.ac)revoke(S.ac.url);S.ac=null}
 function mReset(){const d=mDirty();mClear();S.mt=null;S.mte=false;S.mv='play';return d}
 function mOpen(){const pa=curA(),top=S.admin?aTopAdm():aTop(),a=pa||top;S.alb=a?a.id:null;S.mv='play';S.lm=false;S.modal='music';renderModal()}
 const mChecked=()=>$$('.mck:checked').map(c=>c.dataset.k);
@@ -935,7 +939,7 @@ function musicHTML(){return S.mv=='list'?mListHTML():S.mv=='reg'&&S.admin?mRegHT
 // 헤더는 항상 한 줄([좌측] [닫기]). 재생 중인 곡이 있고 "재생 중인 앨범 상세 화면"이 아니면 헤더 아래에 도크(작은 재생 영역)를 붙임
 const mDock=()=>{
   const al=curA(),t=curT();
-  if(!al||!t||(S.mv=='play'&&mAct()))return '';
+  if(S.pv||!al||!t||(S.mv=='play'&&mAct()))return '';
   const go='data-a="gonow" aria-label="재생 중인 앨범으로 이동"';
   return `<div class="pl-dk"><button class="dk-al" ${go}>${aTtl(al)}</button><div class="dk-m"><button class="dk-l" ${go}><span class="dk-cv">${mCov(t.cover||al.cover)}</span></button>`
     +`<div class="dk-r"><button class="dk-t" ${go}>${esc(t.name)}</button>`
@@ -944,7 +948,7 @@ const mDock=()=>{
 };
 const mHead=left=>`<div class="pl-h pl-hw">${left}${mX}</div>${mDock()}`;
 // 화면 구성이 바뀌는 조건(mLive 가 부분 갱신 대신 전체를 다시 그릴지 판단)
-const mSig=()=>{const v=vAlb();return [S.mv,v&&v.id,S.pa,S.cur>=0?1:0,mAct()?1:0,S.admin?1:0,S.ke||''].join('|')};
+const mSig=()=>{const v=vAlb();return [S.mv,v&&v.id,S.pa,S.cur>=0?1:0,mAct()?1:0,S.admin?1:0,S.ke||'',S.pv?1:0].join('|')};
 function mPlayHTML(){
   const A=S.admin,al=vAlb(),T=al?al.tracks:[];
   const act=mAct(),ci=act?S.cur:-1,tr=ci>=0?T[ci]:null;
@@ -987,13 +991,29 @@ function mRegHTML(){
     +`</div><div class="bar"><button data-a="rgadd">[생성]</button><button data-a="rgcancel">[취소]</button></div>`
     +`<input type="file" id="m-acover" accept="image/*" class="hide">`;
 }
+// 곡 수정 미리보기: 저장 전 입력값(앨범 제목·커버·가사)으로 재생 화면이 어떻게 보일지 보여줌
+function mPreviewHTML(){
+  const al=albBy(S.alb),x=al&&al.tracks.find(t=>t.file==S.ke);
+  if(!al||!x){S.pv=false;return mEditHTML()}
+  const q=S.tm[x.file]||{};
+  const nm=mnN(S.mt!=null?S.mt:aNm(al),al),ttl=esc(nm)+(al.year!=null?`<span class="yr">(${al.year})</span>`:'');
+  const alc=S.ac?`<img src="${esc(S.ac.url)}" alt="">`:mCov(al.cover);
+  const cv=q.cv?`<img src="${esc(q.cv.url)}" alt="">`:q.cvx?alc:(x.cover?mCov(x.cover):alc);
+  const ly=String(q.ly!==undefined?q.ly:(x.lyric||'')).trim();
+  return `<div class="pl-h pl-hw"><b class="pl-ht pl-lb">미리 보기</b>${mX}</div>`
+    +`<div class="mbd pv"><div class="pl-al">${ttl}</div><div class="pl-top"><div class="pl-cover">${cv}</div><div class="pl-t">${esc(x.name)}</div><div class="pl-lyr">${ly?`<span class="pl-ly">${esc(ly)}</span>`:''}</div></div>`
+    +`<div class="pl-bar pv-off" aria-hidden="true"><input type="range" class="seek" min="0" max="1000" value="0" tabindex="-1" disabled><span class="pl-time">0:00 / 0:00</span></div>`
+    +`<div class="pl-c pv-off" aria-hidden="true"><button tabindex="-1">${IC.prev}</button><button tabindex="-1">${IC.play}</button><button tabindex="-1">${IC.next}</button></div></div>`
+    +`<div class="bar"><button data-a="pvclose">[미리보기 닫기]</button></div>`;
+}
 function mEditHTML(){
+  if(S.pv)return mPreviewHTML();
   const al=albBy(S.alb);
   if(!al){S.mv='play';return mPlayHTML()}
   const P=S.pend,W=S.mw||al.tracks,PI=P.items,N=W.length+PI.length;
   const nm=S.mt!=null?S.mt:aNm(al);
   // 수정9: 앨범 이름 수정 아이콘 삭제, 항상 input 열려있는 형태
-  const titleInput=`<input id="m-title" class="pl-ti" value="${esc(nm)}" maxlength="30" autocomplete="off" aria-label="앨범 이름">`;
+  const titleInput=`<input id="m-title" class="pl-ti" value="${esc(nm)}" maxlength="30" autocomplete="off" aria-label="앨범 이름" placeholder="앨범 제목">`;
   let h=mHead(`<button class="pl-ed lt" data-a="medback" aria-label="앨범 목록"><span class="pl-ar">←</span><span class="pl-ht pl-lb">앨범 목록</span></button>`);
   const acu=S.ac?S.ac.url:'';
   h+=`<div class="mbd me"><div class="me-top">${titleInput}<div class="ac"><button class="pl-cover ac-b" data-a="pickacover" aria-label="앨범 커버 ${acu||al.cover?'변경':'업로드'}">${acu?`<img src="${esc(acu)}" alt="">`:al.cover?mCov(al.cover):'앨범 커버<br>업로드'}</button><div class="pl-s">${acu||al.cover?'앨범 커버 · 이미지를 누르면 변경':'앨범 커버 이미지를 올려 주세요'}${S.ac?' · [저장]을 눌러야 반영돼요':''}</div></div>`;
@@ -1012,7 +1032,7 @@ function mEditHTML(){
   h+=`<div class="pl-add pq"><div class="pq-t">곡 추가${PI.length?` · ${PI.length}곡 대기 중`:''}</div>`
     +PI.map((it,i)=>`<div class="pq-r"><button class="pl-cv" data-a="pqcover" data-v="${i}" aria-label="곡 커버 변경">${it.cv?`<img src="${esc(it.cv.url)}" alt="">`:'커버<br>(선택)'}</button><div class="pq-b"><input class="pq-in" data-pq="${i}" value="${esc(it.title)}" maxlength="60" autocomplete="off" aria-label="곡 제목"><div class="pl-hint">${esc(it.f.name)} · ${sz(it.f.size)}</div><textarea class="pq-ly" data-pql="${i}" rows="2" maxlength="250" placeholder="가사 (선택, 최대 2줄)" aria-label="가사">${esc(it.lyric||'')}</textarea></div><button class="pq-x" data-a="pqdel" data-v="${i}" aria-label="제거">×</button></div>`).join('')
     +`<button class="pl-pick" data-a="pickmusic">[+ 음악 파일 선택]</button><div class="pl-hint">${PI.length?'제목과 커버를 곡마다 바꿀 수 있어요. [저장]을 누르면 한 번에 등록돼요.':'mp3 · m4a · ogg 파일을 여러 개 한꺼번에 고를 수 있어요. mp3에 들어 있는 커버는 자동으로 채워져요. 곡당 '+MUSIC_MAX/1e6+'MB까지 올릴 수 있어요.'}</div></div>`
-    +`</div></div><div class="bar bl"><button data-a="malbum">[앨범 관리]</button><span><button data-a="msave">[저장${mDirty()?' ●':''}]</button><button data-a="mcancel">[취소]</button></span></div>`
+    +`</div></div><div class="bar bl"><span><button data-a="malbum">[앨범 관리]</button>${S.ke?'<button data-a="mpreview">[미리 보기]</button>':''}</span><span><button data-a="msave">[저장${mDirty()?' ●':''}]</button><button data-a="mcancel">[취소]</button></span></div>`
     +`<input type="file" id="m-kcover" accept="image/*" class="hide"><input type="file" id="m-up" accept=".mp3,.m4a,.ogg,audio/mpeg,audio/mp4,audio/ogg" multiple class="hide"><input type="file" id="m-cover" accept="image/*" class="hide"><input type="file" id="m-acover" accept="image/*" class="hide">`;
   return h;
 }
@@ -1547,6 +1567,8 @@ document.addEventListener('click',async e=>{
   else if(a=='gonow'){const al=albBy(S.pa);if(!al)return;
     if((S.mv=='edit'||S.mv=='reg')&&!confirm('저장하지 않은 변경이 있으면 사라집니다. 재생 중인 앨범으로 이동할까요?'))return;
     if(S.mv=='edit'||S.mv=='reg')mReset();S.alb=al.id;S.mv='play';S.lm=false;renderModal()}
+  else if(a=='mpreview'){if(S.mv=='edit'&&S.ke){S.pv=true;renderModal()}}
+  else if(a=='pvclose'){S.pv=false;renderModal()}
   else if(a=='medback'){const tl=S.ef=='list';if(mDirty()&&!confirm('저장하지 않은 변경이 사라집니다. 앨범 목록으로 이동할까요?'))return;mReset();S.mv='list';S.lm=tl;renderModal()}
   else if(a=='mlist'){S.mv='list';S.lm=false;renderModal()}
   else if(a=='mreg'&&S.admin){const va=vAlb();if(va){S.alb=va.id;mClear();S.mt=null;S.mte=false;S.ef='play';S.mv='edit'}else{S.mv='reg';S.ry='';S.rt='';S.rn=false;mClear()}renderModal()}
