@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP script-src 의 sha256 = 인라인 script 3개(톤 결정 / gtag / 메인)의 내용 해시. 한 글자라도 고치면 해시를 다시 계산해야 실행됨. 계산법: 각 script 태그 사이의 내용을 줄바꿈 CRLF→LF 로 바꾼 뒤 SHA-256 → base64 → 'sha256-…' 로 교체 (script 수정 후 반드시 갱신) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-lw0qJxWSnQE+PIoAlgKalr2Me0MAYV3YvtqMsMEe0fc=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-7In2CRLPBw3a2moDuxQqzJOGt8T7i6sXT6yuPV6HOGc=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-lw0qJxWSnQE+PIoAlgKalr2Me0MAYV3YvtqMsMEe0fc=' 'sha256-n/Rwa3SpXuy4+VRDWOgy1P0WlRn/q1vGCTvPsom+T4w=' 'sha256-LFtNRHOMTTXHfwZ/EPJQTExoXYAuq/97ZfaF+Ywjuog=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self' blob:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.googletagmanager.com https://*.analytics.google.com https://*.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>takesoul</title>
 <meta name="description" content="변재신, takesoul, janners">
 <meta name="keywords" content="변재신, takesoul, janners">
@@ -129,6 +129,9 @@ html[data-mp=br] .wrap,html[data-mp=bl] .wrap{position:relative}
 html[data-mp=bl] aside{margin-bottom:44px} /* 좌하단: 버튼 자리만큼 왼쪽 열(tags)만 줄임 — 글 본문 상자는 그대로 */
 html[data-mp=br] #foot{padding-right:44px} /* 우하단: 푸터 글자만 왼쪽으로 비켜 줌 */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);align-items:center;justify-content:center;z-index:9;height:100vh;height:100dvh}
+/* 커스텀 톤 미리보기 중 화면 아래 가운데에 뜨는 닫기 버튼. 미리 보는 톤 색과 상관없이 항상 보이도록 고정 색을 씀 */
+#tpvbar{display:none;position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;padding:11px 20px;background:rgba(0,0,0,.82);color:#fff;border:1px solid rgba(255,255,255,.5);font:inherit;font-size:14px;line-height:1;white-space:nowrap;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.35)}
+#tpvbar.on{display:block}
 #mbox{background:var(--bg);border:1px solid var(--line);padding:20px 24px;width:min(340px,90vw);max-height:80vh;max-height:80dvh;overflow:auto}
 #mbox .row{display:flex;gap:8px;padding:2px 0;color:var(--mid);cursor:pointer;align-items:center}
 .pd{text-align:right}
@@ -223,11 +226,11 @@ h2{font-weight:400;font-size:calc(20px + var(--fs));margin:12px 0 28px}
 .trk-a{font-size:.84em;font-weight:400;line-height:1.35;opacity:.72}
 .pl-row{min-height:40px}
 /* 메인 화면 음악 바: 작은 재생 독 형태(커버·2줄 제목·이전/재생/다음). 색은 기존 메인 톤 그대로 */
-#music .mdk{display:flex;align-items:center;gap:8px;min-width:0;width:300px;max-width:340px}
-#music .mdk-cv{flex:none;width:35px;height:35px;padding:0;border:1px solid var(--line);justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(16px + var(--fs));line-height:1}
+#music .mdk{display:flex;align-items:center;gap:10px;min-width:0;width:340px;max-width:340px}
+#music .mdk-cv{flex:none;width:40px;height:40px;padding:0;border:1px solid var(--line);justify-content:center;overflow:hidden;color:var(--lo);font-size:calc(16px + var(--fs));line-height:1}
 #music .mdk-cv img{width:100%;height:100%;object-fit:cover;display:block}
 #music .mdk-t{flex:1;min-width:0;flex-direction:column;align-items:stretch;justify-content:center;padding:0;text-align:left;font-size:calc(13px + var(--fs));color:var(--mid)}
-#music .mdk-c{flex:none;display:flex;gap:10px}
+#music .mdk-c{flex:none;display:flex;gap:6px}
 #music .mdk-c button{min-width:32px;min-height:32px;padding:0;justify-content:center}
 #music .mdk-c svg{width:16px;height:16px}
 /* 가사: 재생 중인 곡 제목 아래. 행(.on)이 bold 라서 400 으로 되돌려 제목과 구분 */
@@ -442,7 +445,7 @@ html[data-mp=bl] aside{margin-bottom:0}html[data-mp=br] #foot{padding-right:0}
   <div id="music"></div>
   <button id="menu" data-a="menu" aria-label="menu">≡</button>
 </header>
-<div id="modal" role="dialog" aria-modal="true" aria-label="팝업"><div id="mbox"></div></div>
+<div id="modal" role="dialog" aria-modal="true" aria-label="팝업"><div id="mbox"></div></div><button id="tpvbar" type="button" data-a="tpvoff">[미리보기 닫기]</button>
 <main>
   <aside>
     <section><div class="cbar" id="calbar"></div><div class="cal-h" id="calh"></div><div class="cal" id="cal"></div></section>
@@ -502,6 +505,7 @@ function hSync(){
   else{H.skip=1;history.go(t-c);setTimeout(()=>{H.skip=0},700)}
 }
 function modalBack(){
+  if(S.tpv){tPv(0);hSync();return}
   if(S.pv){S.pv=false;renderModal();return}
   if(S.modal!='music'||S.mv=='play'){closeModal();return}
   if(S.mv=='edit'){
@@ -691,6 +695,8 @@ const dropPend=t=>{if(t.pend){revoke(t.pend.url);delete t.pend}};
 const dCache=()=>{try{localStorage.uidesign=JSON.stringify(dSer(S.dz))}catch(e){}};
 function dInit(){S.dz=dNorm(S.dz);S.dw=null;dCache();dApplyAll()}
 const toneBad=t=>uiCR(t.fc,t.bg)<2||uiCR(t.fc,t.pbg)<2;
+// 커스텀 톤 미리보기: 설정 모달만 잠시 숨김(S.modal·S.dw 는 그대로라 입력 중인 색·스크롤 위치가 유지됨). [미리보기 닫기]·Esc·뒤로가기로 모달 복귀. 다른 클릭은 설정을 버리게 되므로 미리보기 중엔 막음
+function tPv(on){S.tpv=!!on;const w=$('#modal'),b=$('#tpvbar');if(b)b.classList.toggle('on',!!on);if(w)w.style.display=on?'none':(S.modal?'flex':'none')}
 const dEdit=()=>{if(!S.dw)S.dw=dNorm(dSer(S.dz));return S.dw};
 const dPend=D=>MK.some(m=>D[m].tones.some(t=>t.pend));
 const dDirty=()=>!!S.dw&&(JSON.stringify(dSer(S.dw))!=JSON.stringify(dSer(S.dz))||dPend(S.dw));
@@ -756,7 +762,7 @@ function designHTML(){
   if(t)h+=`<div class="dsub"><div class="row2"><span>이름</span><input data-ui="name" data-ik="t" value="${esc(t.name)}" maxlength="12" autocomplete="off" aria-label="톤 이름"></div>`
     +rw('bg','배경 색')+rw('pbg','본문 배경')+rw('fc','글자 색')
     +`<div class="uh">색 코드는 #ffffff 형식으로 입력하거나 오른쪽 색상 선택기를 쓰세요.</div><div class="uw" id="uwarn" role="status">${toneBad(t)?'글자색과 배경색이 너무 비슷해 저장할 수 없어요. 색을 더 다르게 해 주세요.':''}</div>`
-    +`<div class="row2"><span>로고</span><button data-a="ulogo">[변경]</button>${t.logo||t.pend?'<button data-a="ulogo0">[기본]</button>':''}<input type="file" id="u-logo" data-ui="logo" accept="image/*" class="hide"></div></div>`;
+    +`<div class="row2"><span>로고</span><button data-a="ulogo">[변경]</button>${t.logo||t.pend?'<button data-a="ulogo0">[기본]</button>':''}<input type="file" id="u-logo" data-ui="logo" accept="image/*" class="hide"></div><div class="row2"><span>미리보기</span><button data-a="tpv">[미리보기]</button></div></div>`;
   else h+=`<div class="uh">White · Dark · Note는 고정이라 수정·삭제할 수 없어요. [+ 새 톤]을 누르면 지금 톤을 복사해 나만의 톤을 만들 수 있어요. (화면별 최대 5개)</div>`;
   return h+`<div class="ud"></div><div class="row2"><span>글자 크기</span>${op('ufs',D.fs,[['s','작게'],['n','기본'],['l','크게']])}</div>`
     +`<div class="row2"><span>해시 정렬</span>${op('uhs',D.hs,[['v','세로'],['h','가로']])}</div>`
@@ -1541,6 +1547,7 @@ const readForm=()=>{const g=i=>$('#'+i);return {date:g('e-date').value,title:g('
 const syncDraft=()=>Object.assign(S.draft,readForm());
 function renderModal(){
   hSync();
+  if(S.tpv){S.tpv=false;$('#tpvbar').classList.remove('on')}
   const w=$('#modal'),b=$('#mbox'),k=S.modal;
   w.style.display=k?'flex':'none';if(!k){uiClose();if(mReset())toast('저장하지 않은 음악 변경을 취소했습니다.');return}
   b.className=k=='music'?'mp':k=='auth'?'st':'';
@@ -1589,6 +1596,7 @@ const mvm=d=>{
   S.mw=W;renderModal()};
 document.addEventListener('click',async e=>{
   const t=e.target;
+  if(S.tpv){if(t.closest('#tpvbar'))tPv(0);else e.preventDefault();return}
   if(t.id=='modal'){closeModal();return}
   const wx=t.closest('[data-w]');if(wx){toggleWx(wx);return}
   if(t.classList&&(t.classList.contains('mck')||t.classList.contains('ack')))return;
@@ -1645,6 +1653,7 @@ document.addEventListener('click',async e=>{
   else if(a=='tedit'){S.modal='tags';renderModal()}
   else if(a=='tcancel'){S.tags=await load('data/tags.json',{order:[],hidden:[]});S.modal=null;render()}
   else if(a=='tdone'){const q0=qSnap();try{await saveTags();await flush('태그 저장')}catch(e){qRestore(q0);toast('저장 실패: '+e.message,1);return}S.modal=null;render()}
+  else if(a=='tpv'){if(S.admin&&S.modal=='auth')tPv(1)}
   else if(a=='tone'){if(!uiHas(dS(),v))return;dES().tone=v;dApplyAll();renderModal()}
   else if(a=='dmode'){if(v!='desk'&&v!='mob')return;S.em=v;dApplyAll();renderCal();renderModal()}
   else if(a=='tnew'){const D=dES();if(D.tones.length>=5){toast('톤은 화면별로 최대 5개까지 만들 수 있습니다.',1);return}
@@ -1798,7 +1807,7 @@ async function authStep(){
 document.addEventListener('keydown',e=>{
   const t=e.target;
   if((e.key=='Enter'||e.key==' ')&&t.id=='dz'){e.preventDefault();clickEl('#e-img')}
-  if(e.key=='Escape'&&S.modal)closeModal();
+  if(e.key=='Escape'&&S.modal){if(S.tpv)tPv(0);else closeModal()}
   if(e.key=='Enter'&&t.tagName=='INPUT'&&!['checkbox','radio','range','file','button'].includes(t.type)&&t.closest('#mbox')){e.preventDefault();if(t.id=='m-title'){t.blur()}else if(t.id=='m-year'||t.id=='m-rtitle')rgAdd();else authStep()}
 });
 function setLogo(opt){
